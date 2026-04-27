@@ -30,6 +30,22 @@
   .stat-num { font-size: 28px; font-weight: 800; }
   .stat-label { font-size: 12px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
 
+  /* Filter bar */
+  .filter-bar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 18px 0; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 4px rgba(0,0,0,.04); }
+  .filter-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .filter-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .filter-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink-soft); white-space: nowrap; }
+  .filter-chip { padding: 5px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid #e2e8f0; background: #fff; color: var(--ink-soft); transition: all 0.15s ease; user-select: none; }
+  .filter-chip:hover { border-color: var(--accent-soft); background: var(--accent-soft); color: var(--accent); }
+  .filter-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .search-box { flex: 1; min-width: 180px; max-width: 280px; position: relative; }
+  .search-box input { width: 100%; padding: 7px 14px 7px 32px; border-radius: 20px; border: 1.5px solid #e2e8f0; font-family: 'Inter', sans-serif; font-size: 13px; outline: none; transition: border-color 0.15s; }
+  .search-box input:focus { border-color: var(--accent); }
+  .search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: #94a3b8; pointer-events: none; }
+  .clear-btn { font-size: 12px; color: var(--accent); font-weight: 600; cursor: pointer; background: none; border: none; padding: 4px 8px; }
+  .clear-btn:hover { text-decoration: underline; }
+  .results-count { font-size: 12px; color: var(--ink-soft); margin-left: auto; }
+
   /* Topic sections */
   .section { margin: 36px 0; }
   .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
@@ -64,6 +80,10 @@
   .card-arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-soft); opacity: 0.4; font-size: 18px; transition: opacity 0.15s; }
   .topic-card:hover .card-arrow { opacity: 0.8; }
 
+  /* Empty state */
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--ink-soft); }
+  .empty-state h3 { font-size: 18px; margin-bottom: 8px; }
+
   /* Footer */
   footer { text-align: center; padding: 40px 0; font-size: 12px; color: var(--ink-soft); margin-top: 20px; }
 
@@ -73,6 +93,9 @@
     .card-grid { grid-template-columns: 1fr; }
     .container { padding: 0 12px; }
     .section { margin: 24px 0; }
+    .filter-row { gap: 8px; }
+    .filter-group { gap: 4px; }
+    .results-count { width: 100%; margin-left: 0; margin-top: 4px; }
   }
 </style>
 </head>
@@ -90,16 +113,55 @@
   </div>
 </div>
 
+<div class="filter-bar">
+  <div class="container">
+    <div class="filter-row">
+      <div class="search-box">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" id="search-input" placeholder="Search topics...">
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Level</span>
+        <button class="filter-chip active" data-filter="level" data-value="all">All</button>
+        <button class="filter-chip" data-filter="level" data-value="p5">P5</button>
+        <button class="filter-chip" data-filter="level" data-value="p6">P6</button>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Priority</span>
+        <button class="filter-chip active" data-filter="priority" data-value="all">All</button>
+        <button class="filter-chip" data-filter="priority" data-value="high">High prep</button>
+        <button class="filter-chip" data-filter="priority" data-value="psle">PSLE</button>
+        <button class="filter-chip" data-filter="priority" data-value="p6">P6 Adv</button>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Topic</span>
+        <button class="filter-chip active" data-filter="topic" data-value="all">All</button>
+        <button class="filter-chip" data-filter="topic" data-value="fractions">Fractions</button>
+        <button class="filter-chip" data-filter="topic" data-value="wn">Whole No.</button>
+        <button class="filter-chip" data-filter="topic" data-value="geometry">Geometry</button>
+        <button class="filter-chip" data-filter="topic" data-value="ratio">Ratios</button>
+      </div>
+
+      <button class="clear-btn" id="clear-btn">Clear</button>
+      <span class="results-count" id="results-count">Showing 20 topics</span>
+    </div>
+  </div>
+</div>
+
 <div class="container">
 
   <!-- P5 Fractions -->
-  <div class="section">
+  <div class="section" data-section="fractions" data-level="p5">
     <div class="section-header">
       <span class="section-badge badge-frac">P5 Fractions</span>
       <span class="section-title">Ratio, proportion & fraction heuristics</span>
     </div>
     <div class="card-grid">
-      <a href="branching_direct.html" class="topic-card border-frac">
+      <a href="branching_direct.html" class="topic-card border-frac"
+         data-level="p5" data-topic="fractions" data-priority="high psle" data-title="branching direct remainder fraction">
         <div class="card-title">Branching (Direct)</div>
         <div class="card-desc">Read from left to right: &ldquo;of the remainder&rdquo; means multiply fractions in sequence.</div>
         <div class="card-meta">
@@ -109,7 +171,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="branching_additional.html" class="topic-card border-frac">
+      <a href="branching_additional.html" class="topic-card border-frac"
+         data-level="p5" data-topic="fractions" data-priority="high psle" data-title="branching additional amount extra">
         <div class="card-title">Branching (With Additional)</div>
         <div class="card-desc">A fixed extra amount is added at a branch. Model the extra, then branch normally.</div>
         <div class="card-meta">
@@ -119,7 +182,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="numerators_same.html" class="topic-card border-frac">
+      <a href="numerators_same.html" class="topic-card border-frac"
+         data-level="p5" data-topic="fractions" data-priority="high fund" data-title="numerators same compare denominator">
         <div class="card-title">Numerators the Same</div>
         <div class="card-desc">When numerators match, compare denominators directly. Bigger denominator = smaller value.</div>
         <div class="card-meta">
@@ -129,7 +193,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="one_item_unchanged_frac.html" class="topic-card border-frac">
+      <a href="one_item_unchanged_frac.html" class="topic-card border-frac"
+         data-level="p5" data-topic="fractions" data-priority="high psle" data-title="one item unchanged fractional anchor">
         <div class="card-title">One Item Unchanged (Fractional)</div>
         <div class="card-desc">Only one quantity changes &mdash; use the unchanged item as your anchor unit.</div>
         <div class="card-meta">
@@ -139,7 +204,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="total_unchanged_frac.html" class="topic-card border-frac">
+      <a href="total_unchanged_frac.html" class="topic-card border-frac"
+         data-level="p5" data-topic="fractions" data-priority="high psle" data-title="total unchanged fractional internal transfer">
         <div class="card-title">Total Unchanged (Fractional)</div>
         <div class="card-desc">Internal transfer &mdash; total stays the same. Express both before/after in units.</div>
         <div class="card-meta">
@@ -149,7 +215,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="difference_unchanged_frac.html" class="topic-card border-frac">
+      <a href="difference_unchanged_frac.html" class="topic-card border-frac"
+         data-level="p5" data-topic="fractions" data-priority="high psle" data-title="difference unchanged fractional gap scales">
         <div class="card-title">Difference Unchanged (Fractional)</div>
         <div class="card-desc">Both change by same fraction &mdash; the gap scales proportionally with the kept fraction.</div>
         <div class="card-meta">
@@ -159,7 +226,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="repeated_items_frac.html" class="topic-card border-frac">
+      <a href="repeated_items_frac.html" class="topic-card border-frac"
+         data-level="p5" data-topic="fractions" data-priority="high psle" data-title="repeated items fractional grouping sets">
         <div class="card-title">Repeated Items (Fractional)</div>
         <div class="card-desc">Apply the fraction first, then use per-group difference to find number of sets.</div>
         <div class="card-meta">
@@ -169,7 +237,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="more_than_less_than.html" class="topic-card border-frac">
+      <a href="more_than_less_than.html" class="topic-card border-frac"
+         data-level="p5" data-topic="fractions" data-priority="high psle" data-title="more than less than language translate">
         <div class="card-title">More Than / Less Than</div>
         <div class="card-desc">Translate fractional comparison language: &ldquo;$15 more than&rdquo; means left = right + 15.</div>
         <div class="card-meta">
@@ -179,7 +248,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="quantity_value_frac.html" class="topic-card border-frac">
+      <a href="quantity_value_frac.html" class="topic-card border-frac"
+         data-level="p5" data-topic="fractions" data-priority="high psle" data-title="quantity value fractional coins money">
         <div class="card-title">Quantity &times; Value (Fractional)</div>
         <div class="card-desc">Coin problems: fraction of each type, total value given. Build a value equation.</div>
         <div class="card-meta">
@@ -193,13 +263,14 @@
   </div>
 
   <!-- P5 Whole Numbers -->
-  <div class="section">
+  <div class="section" data-section="wn" data-level="p5">
     <div class="section-header">
       <span class="section-badge badge-wn">P5 Whole Numbers</span>
       <span class="section-title">Grouping, transfer & comparison</span>
     </div>
     <div class="card-grid">
-      <a href="gap_difference.html" class="topic-card border-wn">
+      <a href="gap_difference.html" class="topic-card border-wn"
+         data-level="p5" data-topic="wn" data-priority="high fund" data-title="gap difference sum total formula">
         <div class="card-title">Gap &amp; Difference</div>
         <div class="card-desc">Total and difference both known. Bigger = (Total+Gap)/2, Smaller = (Total&minus;Gap)/2.</div>
         <div class="card-meta">
@@ -209,7 +280,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="repeated_items_wn.html" class="topic-card border-wn">
+      <a href="repeated_items_wn.html" class="topic-card border-wn"
+         data-level="p5" data-topic="wn" data-priority="high psle" data-title="repeated items whole number grouping sets">
         <div class="card-title">Repeated Items (Whole Number)</div>
         <div class="card-desc">Identical groups with a fixed difference. Divide total gap by per-group gap.</div>
         <div class="card-meta">
@@ -219,7 +291,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="difference_unchanged_wn.html" class="topic-card border-wn">
+      <a href="difference_unchanged_wn.html" class="topic-card border-wn"
+         data-level="p5" data-topic="wn" data-priority="high psle" data-title="difference unchanged whole number gap constant">
         <div class="card-title">Difference Unchanged (Whole Number)</div>
         <div class="card-desc">Both change by same amount &mdash; the gap stays constant. Use it as anchor.</div>
         <div class="card-meta">
@@ -229,7 +302,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="equal_stage_wn.html" class="topic-card border-wn">
+      <a href="equal_stage_wn.html" class="topic-card border-wn"
+         data-level="p5" data-topic="wn" data-priority="high psle" data-title="equal stage whole number end up same">
         <div class="card-title">Equal Stage (Whole Number)</div>
         <div class="card-desc">Both end up equal after different changes. Use the equal-state as your anchor.</div>
         <div class="card-meta">
@@ -239,7 +313,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="internal_transfer.html" class="topic-card border-wn">
+      <a href="internal_transfer.html" class="topic-card border-wn"
+         data-level="p5" data-topic="wn" data-priority="high psle" data-title="internal transfer total unchanged backwards">
         <div class="card-title">Internal Transfer</div>
         <div class="card-desc">Items move within a group &mdash; total unchanged. Work backwards from the equal state.</div>
         <div class="card-meta">
@@ -253,13 +328,14 @@
   </div>
 
   <!-- P5 Geometry -->
-  <div class="section">
+  <div class="section" data-section="geometry" data-level="p5">
     <div class="section-header">
       <span class="section-badge badge-geo">P5 Geometry</span>
       <span class="section-title">Area and model drawing</span>
     </div>
     <div class="card-grid">
-      <a href="area_triangle.html" class="topic-card border-geo">
+      <a href="area_triangle.html" class="topic-card border-geo"
+         data-level="p5" data-topic="geometry" data-priority="high psle" data-title="area triangles shared base height">
         <div class="card-title">Area of Triangles</div>
         <div class="card-desc">Shared base or height relationships. Area ratio equals the ratio of the non-shared dimension.</div>
         <div class="card-meta">
@@ -269,7 +345,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="advanced_model_drawing.html" class="topic-card border-geo">
+      <a href="advanced_model_drawing.html" class="topic-card border-geo"
+         data-level="p5" data-topic="geometry" data-priority="high psle" data-title="advanced model drawing complex bar">
         <div class="card-title">Advanced Model Drawing</div>
         <div class="card-desc">Complex bar models with multiple conditions and transfers. Break into stages.</div>
         <div class="card-meta">
@@ -283,13 +360,14 @@
   </div>
 
   <!-- P6 Ratios -->
-  <div class="section">
+  <div class="section" data-section="ratio" data-level="p6">
     <div class="section-header">
       <span class="section-badge badge-ratio">P6 Ratios</span>
       <span class="section-title">Advanced ratio & speed problems</span>
     </div>
     <div class="card-grid">
-      <a href="all_items_changed.html" class="topic-card border-ratio">
+      <a href="all_items_changed.html" class="topic-card border-ratio"
+         data-level="p6" data-topic="ratio" data-priority="p6 psle" data-title="all items changed ratio equation units">
         <div class="card-title">All Items Changed</div>
         <div class="card-desc">Both quantities change by different amounts. Set up a ratio equation and solve for u.</div>
         <div class="card-meta">
@@ -299,7 +377,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="speed_ratio.html" class="topic-card border-ratio">
+      <a href="speed_ratio.html" class="topic-card border-ratio"
+         data-level="p6" data-topic="ratio" data-priority="p6 psle" data-title="speed ratio inverse time table">
         <div class="card-title">Speed Ratio</div>
         <div class="card-desc">Inverse ratio of speed to time. Same distance means speed ratio flips the time ratio.</div>
         <div class="card-meta">
@@ -313,13 +392,14 @@
   </div>
 
   <!-- P6 Geometry -->
-  <div class="section">
+  <div class="section" data-section="geometry" data-level="p6">
     <div class="section-header">
       <span class="section-badge badge-geo6">P6 Geometry</span>
       <span class="section-title">Circles, volume & cross-sections</span>
     </div>
     <div class="card-grid">
-      <a href="circles_p6.html" class="topic-card border-geo6">
+      <a href="circles_p6.html" class="topic-card border-geo6"
+         data-level="p6" data-topic="geometry" data-priority="p6 psle" data-title="circles composite shape boomerang rugby">
         <div class="card-title">Circles (P6)</div>
         <div class="card-desc">Composite shapes: boomerang, rugby, overlapping circles. Find the shaded area.</div>
         <div class="card-meta">
@@ -329,7 +409,8 @@
         </div>
         <span class="card-arrow">&rarr;</span>
       </a>
-      <a href="volume_of_liquids.html" class="topic-card border-geo6">
+      <a href="volume_of_liquids.html" class="topic-card border-geo6"
+         data-level="p6" data-topic="geometry" data-priority="p6 psle" data-title="volume liquids water displacement height">
         <div class="card-title">Volume of Liquids</div>
         <div class="card-desc">Water displacement and height changes. Cross-section method for irregular containers.</div>
         <div class="card-meta">
@@ -342,6 +423,11 @@
     </div>
   </div>
 
+  <div class="empty-state" id="empty-state" style="display:none;">
+    <h3>No topics match your filters</h3>
+    <p>Try clearing the filters or searching with different keywords.</p>
+  </div>
+
 </div>
 
 <footer>
@@ -349,6 +435,100 @@
     Built for tutor cross-training &middot; Static HTML, no backend needed &middot; Works offline
   </div>
 </footer>
+
+<script>
+(function() {
+  const cards = document.querySelectorAll('.topic-card');
+  const sections = document.querySelectorAll('.section');
+  const chips = document.querySelectorAll('.filter-chip');
+  const searchInput = document.getElementById('search-input');
+  const clearBtn = document.getElementById('clear-btn');
+  const resultsCount = document.getElementById('results-count');
+  const emptyState = document.getElementById('empty-state');
+
+  const state = { level: 'all', priority: 'all', topic: 'all', search: '' };
+
+  function update() {
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const level = card.dataset.level;
+      const topic = card.dataset.topic;
+      const priority = card.dataset.priority;
+      const title = card.dataset.title;
+      const text = (card.querySelector('.card-title').textContent + ' ' + card.querySelector('.card-desc').textContent).toLowerCase();
+
+      const matchLevel = state.level === 'all' || level === state.level;
+      const matchTopic = state.topic === 'all' || topic === state.topic;
+      const matchPriority = state.priority === 'all' || priority.includes(state.priority);
+      const matchSearch = !state.search || text.includes(state.search.toLowerCase()) || title.includes(state.search.toLowerCase());
+
+      const visible = matchLevel && matchTopic && matchPriority && matchSearch;
+      card.style.display = visible ? '' : 'none';
+      if (visible) visibleCount++;
+    });
+
+    sections.forEach(section => {
+      const visibleCards = section.querySelectorAll('.topic-card:not([style*="display: none"])');
+      section.style.display = visibleCards.length > 0 ? '' : 'none';
+    });
+
+    emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+    resultsCount.textContent = visibleCount === cards.length ? `Showing all ${cards.length} topics` : `Showing ${visibleCount} topic${visibleCount !== 1 ? 's' : ''}`;
+  }
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const filter = chip.dataset.filter;
+      const value = chip.dataset.value;
+
+      // Toggle off if already active (except 'all')
+      if (value !== 'all' && state[filter] === value) {
+        state[filter] = 'all';
+      } else {
+        state[filter] = value;
+      }
+
+      // Update chip visuals
+      document.querySelectorAll(`.filter-chip[data-filter="${filter}"]`).forEach(c => c.classList.remove('active'));
+      document.querySelector(`.filter-chip[data-filter="${filter}"][data-value="${state[filter]}"]`).classList.add('active');
+
+      update();
+    });
+  });
+
+  searchInput.addEventListener('input', (e) => {
+    state.search = e.target.value.trim();
+    update();
+  });
+
+  clearBtn.addEventListener('click', () => {
+    state.level = 'all';
+    state.priority = 'all';
+    state.topic = 'all';
+    state.search = '';
+    searchInput.value = '';
+
+    ['level', 'priority', 'topic'].forEach(f => {
+      document.querySelectorAll(`.filter-chip[data-filter="${f}"]`).forEach(c => c.classList.remove('active'));
+      document.querySelector(`.filter-chip[data-filter="${f}"][data-value="all"]`).classList.add('active');
+    });
+
+    update();
+  });
+
+  // Keyboard shortcut: / to focus search
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+    }
+    if (e.key === 'Escape') {
+      searchInput.blur();
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
