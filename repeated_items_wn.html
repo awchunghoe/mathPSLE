@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Repeated Items (Whole Number) — P5 Heuristic</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a2332; --ink-soft: #4a5568; --bg: #fafaf7; --card: #ffffff;
+    --accent: #2f5496; --accent-soft: #e1e8f5; --pencil: #2d3142; --pencil-soft: #5a6478;
+    --paper: #fffdf5; --ink-red: #c1272d; --ink-blue: #1f5fa8; --ink-green: #2e7d32;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+    --fill-choc: #fee2e2; --fill-blue: #dbeafe; --fill-green: #dcfce7; --fill-amber: #fef3c7; --fill-ink: #1f3864;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; padding: 24px 16px 64px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  header { background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%); color: white; padding: 24px 28px; border-radius: 12px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .breadcrumb { font-size: 12px; opacity: .75; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; opacity: .85; }
+  .priority-row { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.18); }
+  .chip.priority-high { background: #9a3412; }
+  .topic-map { background: var(--card); border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .topic-map-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .topic-map-row:last-child { margin-bottom: 0; }
+  .topic-map-label { font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.5px; padding-top: 5px; flex-shrink: 0; width: 100px; }
+  .topic-map-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .map-chip { padding: 4px 11px; border-radius: 14px; font-size: 12px; font-weight: 500; background: #f1f5f9; color: var(--ink-soft); border: 1px solid #e2e8f0; text-decoration: none; cursor: default; }
+  .map-chip.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: 700; }
+  .map-chip.heuristic-chip { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+  .map-chip.heuristic-chip.active { background: #d97706; color: white; }
+  .card { background: var(--card); border-radius: 10px; padding: 18px 22px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .card-label { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; margin-bottom: 8px; }
+  .label-tip { background: #eff7ec; color: #2e7d32; }
+  h2.section-heading { font-size: 18px; font-weight: 700; margin: 22px 0 10px; display: flex; align-items: center; gap: 8px; }
+  h2.section-heading::before { content: ''; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
+  .signal-list { list-style: none; }
+  .signal-list li { padding: 5px 0 5px 22px; position: relative; font-size: 14px; color: var(--ink-soft); }
+  .signal-list li::before { content: '💬'; position: absolute; left: 0; top: 5px; font-size: 13px; }
+  .question-box { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 14px 16px; border-radius: 6px; margin-bottom: 18px; font-size: 14px; }
+  .question-box strong { color: var(--accent); }
+  .working-pad { background: var(--paper); border: 1px solid #e0d8c2; border-radius: 8px; padding: 24px 28px; margin: 12px 0; min-height: 480px; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+  .pad-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .step-counter { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-left: auto; }
+  .btn { padding: 8px 16px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
+  .btn-primary { background: var(--accent); color: white; } .btn-primary:hover { background: #224075; } .btn-primary:disabled { background: #b0b9cc; cursor: not-allowed; }
+  .btn-secondary { background: white; color: var(--ink); border: 1px solid #cbd5e1; } .btn-secondary:hover { background: #f1f5f9; }
+  .step-narration { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; font-size: 15px; color: var(--ink-soft); min-height: 50px; }
+  .step-narration strong { color: var(--accent); }
+  .pencil-text { font-family: 'Kalam', cursive; fill: var(--pencil); }
+  .hw-blue { fill: var(--ink-blue); } .hw-red { fill: var(--ink-red); } .hw-green { fill: var(--ink-green); }
+  .pencil-stroke { stroke: var(--pencil); stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-width: 2; }
+  .red-stroke { stroke: var(--ink-red); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .blue-stroke { stroke: var(--ink-blue); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .green-stroke { stroke: var(--ink-green); stroke-linecap: round; fill: none; stroke-width: 2; }
+  rect[fill]:not([fill="none"]) { rx: 4; }
+  rect.bar-fill, rect.node-fill { filter: drop-shadow(0 1px 2px rgba(0,0,0,.08)); transition: opacity 0.4s ease; }
+  rect.answer-box { fill: #f0fdf4; rx: 6; }
+  .bar-fill.ghost, .node-fill.ghost { opacity: 0.3; }
+  .step-elem { opacity: 0; transition: opacity 0.5s ease; } .step-elem.visible { opacity: 1; }
+  .draw-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+  .step-elem.visible .draw-path { animation: drawIn 0.8s ease forwards; }
+  @keyframes drawIn { to { stroke-dashoffset: 0; } }
+  .strike-line { stroke-dasharray: 200; stroke-dashoffset: 200; }
+  .step-elem.visible .strike-line { animation: strike 0.5s ease forwards; }
+  @keyframes strike { to { stroke-dashoffset: 0; } }
+  .alert-box { border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .alert-trap { background: #fdf4e3; border-left: 4px solid #d97706; } .alert-tip { background: #eff7ec; border-left: 4px solid #2e7d32; }
+  .alert-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; } .alert-trap h4 { color: #d97706; } .alert-tip h4 { color: #2e7d32; }
+  .alert-box p { font-size: 13.5px; color: var(--ink); margin-bottom: 6px; } .alert-box p:last-child { margin-bottom: 0; }
+  details summary { font-weight: 600; color: var(--accent); padding: 8px 0; cursor: pointer; font-size: 14px; }
+  .nav-hint { margin-top: 28px; padding: 14px 18px; background: #f0f0e8; border-radius: 8px; font-size: 12px; color: var(--ink-soft); text-align: center; font-style: italic; }
+  @media (max-width: 640px) {
+    body { padding: 12px 0 40px; } .container { padding: 0 12px; }
+    header { border-radius: 0; margin: 0 -12px 12px; padding: 20px 16px; } h1 { font-size: 22px; }
+    .topic-map { border-radius: 8px; padding: 12px 14px; } .topic-map-label { width: auto; min-width: 80px; }
+    .card { padding: 14px 0; border-radius: 8px; margin: 0 -12px 12px; padding-left: 12px; padding-right: 12px; }
+    .working-pad { margin: 10px -12px; padding: 16px 12px; border-radius: 0; border-left: none; border-right: none; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .working-pad > svg { min-width: 520px; max-width: none; width: 100%; }
+    .pad-controls { gap: 6px; } .btn { padding: 7px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P5 Whole Numbers › Heuristic 1.5</div>
+    <h1>Repeated Items (Whole Number)</h1>
+    <div class="subtitle">Identical groups with a fixed difference — find the number of groups from the total gap</div>
+    <div class="priority-row">
+      <span class="chip priority-high">🟠 HIGH PREP</span>
+      <span class="chip">⭐ Common exam pattern</span>
+      <span class="chip">Grouping method</span>
+    </div>
+  </header>
+
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <span class="topic-map-label">Subtopics in P5</span>
+      <div class="topic-map-chips">
+        <span class="map-chip">Branching (Direct)</span>
+        <span class="map-chip">Branching (Working Backwards)</span>
+        <span class="map-chip">Branching (With Additional)</span>
+        <span class="map-chip active">Repeated Items</span>
+        <span class="map-chip">One Item Unchanged</span>
+        <span class="map-chip">Total Unchanged</span>
+        <span class="map-chip">Gap & Difference</span>
+        <span class="map-chip">Quantity x Value</span>
+      </div>
+    </div>
+    <div class="topic-map-row">
+      <span class="topic-map-label">Heuristics used</span>
+      <div class="topic-map-chips">
+        <span class="map-chip heuristic-chip active">Grouping</span>
+        <span class="map-chip heuristic-chip active">Per-group difference</span>
+        <span class="map-chip heuristic-chip">Division</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label label-tip">What it is</span>
+    <p style="font-size:14.5px;">Items come in <strong>identical groups/sets</strong> (e.g., 3 pens and 5 pencils per set). The problem gives a <strong>total difference</strong> between the two item types across all groups. Students find the <strong>per-group difference</strong>, then divide total difference by per-group difference to get the number of groups.</p>
+  </div>
+
+  <h2 class="section-heading">Signal phrases — train students to spot</h2>
+  <div class="card">
+    <ul class="signal-list">
+      <li>"Each box contains <em>4 apples and 7 oranges</em>"</li>
+      <li>"Every set has <em>3 red and 5 blue</em> marbles"</li>
+      <li>"There were <strong>24 more</strong> pencils than pens"</li>
+      <li>Identical groups with a <strong>total difference</strong> given</li>
+    </ul>
+  </div>
+
+  <h2 class="section-heading">Worked example — click through each step</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Question:</strong> A teacher bought some stationery sets. Each set contains <strong>3 pens</strong> and <strong>5 pencils</strong>. She bought <strong>24 more pencils</strong> than pens. How many <strong>sets</strong> did she buy?
+    </div>
+
+    <div class="pad-controls">
+      <button class="btn btn-primary" id="prev-btn" disabled>&#8592; Previous</button>
+      <button class="btn btn-primary" id="next-btn">Next step &#8594;</button>
+      <button class="btn btn-secondary" id="reset-btn">Reset</button>
+      <span class="step-counter" id="step-counter">Step 0 / 6</span>
+    </div>
+
+    <div class="step-narration" id="narration">
+      Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.
+    </div>
+
+    <div class="working-pad">
+      <svg id="svg" viewBox="0 0 920 780" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+
+        <!-- ===== ZONE 1: One set diagram y=30-280 ===== -->
+
+        <!-- Step 1: Show one set -->
+        <g class="step-elem" data-step="1">
+          <text x="20" y="45" class="pencil-text" font-size="22" font-weight="700">1 set = 3 pens + 5 pencils</text>
+          <!-- Pens -->
+          <rect x="80" y="70" width="50" height="50" fill="var(--fill-green)" opacity="0.7" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
+          <rect x="135" y="70" width="50" height="50" fill="var(--fill-green)" opacity="0.7" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
+          <rect x="190" y="70" width="50" height="50" fill="var(--fill-green)" opacity="0.7" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
+          <text x="60" y="100" class="pencil-text" font-size="16" font-weight="700">Pens:</text>
+          <text x="105" y="100" class="pencil-text hw-green" font-size="14" font-weight="700" text-anchor="middle">1</text>
+          <text x="160" y="100" class="pencil-text hw-green" font-size="14" font-weight="700" text-anchor="middle">2</text>
+          <text x="215" y="100" class="pencil-text hw-green" font-size="14" font-weight="700" text-anchor="middle">3</text>
+          <!-- Pencils -->
+          <rect x="80" y="140" width="50" height="50" fill="var(--fill-blue)" opacity="0.6" stroke="var(--ink-blue)" stroke-width="2" class="bar-fill"/>
+          <rect x="135" y="140" width="50" height="50" fill="var(--fill-blue)" opacity="0.6" stroke="var(--ink-blue)" stroke-width="2" class="bar-fill"/>
+          <rect x="190" y="140" width="50" height="50" fill="var(--fill-blue)" opacity="0.6" stroke="var(--ink-blue)" stroke-width="2" class="bar-fill"/>
+          <rect x="245" y="140" width="50" height="50" fill="var(--fill-blue)" opacity="0.6" stroke="var(--ink-blue)" stroke-width="2" class="bar-fill"/>
+          <rect x="300" y="140" width="50" height="50" fill="var(--fill-blue)" opacity="0.6" stroke="var(--ink-blue)" stroke-width="2" class="bar-fill"/>
+          <text x="40" y="170" class="pencil-text" font-size="16" font-weight="700">Pencils:</text>
+          <text x="105" y="170" class="pencil-text hw-blue" font-size="14" font-weight="700" text-anchor="middle">1</text>
+          <text x="160" y="170" class="pencil-text hw-blue" font-size="14" font-weight="700" text-anchor="middle">2</text>
+          <text x="215" y="170" class="pencil-text hw-blue" font-size="14" font-weight="700" text-anchor="middle">3</text>
+          <text x="270" y="170" class="pencil-text hw-blue" font-size="14" font-weight="700" text-anchor="middle">4</text>
+          <text x="325" y="170" class="pencil-text hw-blue" font-size="14" font-weight="700" text-anchor="middle">5</text>
+        </g>
+
+        <!-- Step 2: Per-set difference -->
+        <g class="step-elem" data-step="2">
+          <text x="20" y="230" class="pencil-text hw-red" font-size="20" font-weight="700">Per set: 5 - 3 = 2 more pencils than pens</text>
+          <!-- Bracket showing difference -->
+          <path d="M 370 75 Q 375 75 375 80 L 375 160 Q 375 165 380 165" class="red-stroke draw-path"/>
+          <line x1="375" y1="120" x2="420" y2="120" class="red-stroke draw-path"/>
+          <path d="M 415 165 Q 420 165 420 160 L 420 80 Q 420 75 425 75" class="red-stroke draw-path"/>
+          <text x="435" y="125" class="pencil-text hw-red" font-size="16" font-weight="700">+2</text>
+        </g>
+
+        <!-- ===== ZONE 2: Total gap y=290-480 ===== -->
+
+        <!-- Step 3: Total difference given -->
+        <g class="step-elem" data-step="3">
+          <text x="20" y="300" class="pencil-text" font-size="22" font-weight="700">Total: 24 more pencils than pens</text>
+          <text x="40" y="340" class="pencil-text" fill="var(--pencil-soft)" font-size="16">Every set contributes +2 to the pencil excess.</text>
+          <text x="40" y="375" class="pencil-text" fill="var(--pencil-soft)" font-size="16">How many sets to make a total excess of 24?</text>
+        </g>
+
+        <!-- Step 4: Calculate number of sets -->
+        <g class="step-elem" data-step="4">
+          <text x="20" y="425" class="pencil-text hw-red" font-size="22" font-weight="700">&#9889; Number of sets = 24 &divide; 2 = 12</text>
+          <line x1="20" y1="440" x2="380" y2="440" class="green-stroke draw-path"/>
+        </g>
+
+        <!-- ===== ZONE 3: Verification y=480-680 ===== -->
+
+        <!-- Step 5: Verify -->
+        <g class="step-elem" data-step="5">
+          <text x="20" y="485" class="pencil-text" font-size="20" font-weight="700">Verify: 12 sets</text>
+          <text x="40" y="530" class="pencil-text" font-size="20" font-weight="700">Pens = 12 &times; 3 = 36</text>
+          <text x="40" y="575" class="pencil-text" font-size="20" font-weight="700">Pencils = 12 &times; 5 = 60</text>
+          <text x="40" y="620" class="pencil-text hw-green" font-size="20" font-weight="700">Difference = 60 - 36 = 24 &#10003;</text>
+        </g>
+
+        <!-- ===== ZONE 4: Answer y=660+ ===== -->
+
+        <!-- Step 6: Answer -->
+        <g class="step-elem" data-step="6">
+          <rect x="15" y="665" width="380" height="55" fill="#f0fdf4" stroke="var(--ink-green)" stroke-width="2" rx="6" class="answer-box"/>
+          <text x="35" y="695" class="pencil-text" font-size="20" font-weight="700">She bought 12 sets</text>
+          <text x="35" y="720" class="pencil-text" fill="var(--pencil-soft)" font-size="14">(36 pens and 60 pencils — 24 more pencils &#10003;)</text>
+        </g>
+
+      </svg>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div class="alert-box alert-trap">
+        <h4>&#128293; Common trap</h4>
+        <p>Students add 3 + 5 = 8, then do 24 &divide; 8 = 3 sets. Wrong! The 24 is a <strong>difference</strong>, not a total. Train them to ask: "Is the given number a total or a difference?"</p>
+      </div>
+      <div class="alert-box alert-tip">
+        <h4>&#127793; Teaching tip</h4>
+        <p>Draw exactly one set first and label the per-set difference. Then ask: "If one set gives me 2 extra pencils, how many sets give me 24 extra?" This "unitising" approach builds intuition before the division step.</p>
+      </div>
+    </div>
+
+    <details>
+      <summary>&#128161; Show full mark scheme (3 marks)</summary>
+      <div style="padding:10px 0; font-size:13px; color:var(--ink-soft);">
+        <p><strong>M1:</strong> Find per-set difference: 5 - 3 = 2</p>
+        <p><strong>M1:</strong> Divide total difference by per-set difference: 24 &divide; 2 = 12</p>
+        <p><strong>A1:</strong> 12 sets</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="nav-hint">
+    Next: <a href="repeated_items_frac.html" style="color:var(--accent); font-weight:600;">Repeated Items (Fractional)</a> — when the repeated groups involve fractions.
+  </div>
+
+</div>
+<script>
+  function makeStepController(suffix, totalSteps, narrations) {
+    let currentStep = 0;
+    const svgEl = document.getElementById(`svg${suffix ? '-' + suffix : ''}`);
+    const narrationEl = document.getElementById(`narration${suffix ? '-' + suffix : ''}`);
+    const counterEl = document.getElementById(`step-counter${suffix ? '-' + suffix : ''}`);
+    const prevBtn = document.getElementById(`prev-btn${suffix ? '-' + suffix : ''}`);
+    const nextBtn = document.getElementById(`next-btn${suffix ? '-' + suffix : ''}`);
+    const resetBtn = document.getElementById(`reset-btn${suffix ? '-' + suffix : ''}`);
+    function render() {
+      svgEl.querySelectorAll('.step-elem').forEach(el => { const stepNum = parseInt(el.dataset.step); el.classList.toggle('visible', stepNum <= currentStep); });
+      svgEl.querySelectorAll('.bar-fill, .node-fill').forEach(fill => { const parentStep = parseInt(fill.closest('.step-elem').dataset.step); fill.classList.toggle('ghost', parentStep < currentStep); });
+      narrationEl.innerHTML = narrations[currentStep]; counterEl.textContent = `Step ${currentStep} / ${totalSteps}`;
+      prevBtn.disabled = currentStep === 0; nextBtn.disabled = currentStep === totalSteps;
+      nextBtn.textContent = currentStep === totalSteps ? 'Done \u2713' : 'Next step \u2192';
+    }
+    nextBtn.addEventListener('click', () => { if (currentStep < totalSteps) { currentStep++; render(); } });
+    prevBtn.addEventListener('click', () => { if (currentStep > 0) { currentStep--; render(); } });
+    resetBtn.addEventListener('click', () => { currentStep = 0; render(); });
+    render(); return { next: () => nextBtn.click(), prev: () => prevBtn.click() };
+  }
+  const ctrl = makeStepController('', 6, {
+    0: 'Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.',
+    1: 'Step 1 — 1 set = 3 pens + 5 pencils. Draw the items.',
+    2: 'Step 2 — Per set: 5 - 3 = 2 more pencils than pens.',
+    3: 'Step 3 — Total difference given: 24 more pencils than pens overall.',
+    4: 'Step 4 — Number of sets = 24 &divide; 2 = 12.',
+    5: 'Step 5 — Verify: 12 sets = 36 pens and 60 pencils. Difference = 24 \u2713',
+    6: 'Step 6 — She bought 12 sets. Check passes!'
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); ctrl.next(); } if (e.key === 'ArrowLeft') { e.preventDefault(); ctrl.prev(); } });
+</script>
+</body>
+</html>

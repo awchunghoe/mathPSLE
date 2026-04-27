@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Area of Triangle (Shared Base/Height) — P5 Refresh</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --bg: #fafaf7;
+    --card: #ffffff;
+    --accent: #2f5496;
+    --accent-soft: #e1e8f5;
+    --pencil: #2d3142;
+    --pencil-soft: #5a6478;
+    --paper: #fffdf5;
+    --paper-line: #c9d6e8;
+    --ink-red: #c1272d;
+    --ink-blue: #1f5fa8;
+    --ink-green: #2e7d32;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+    --fill-choc: #fee2e2;
+    --fill-blue: #dbeafe;
+    --fill-green: #dcfce7;
+    --fill-amber: #fef3c7;
+    --fill-ink: #1f3864;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55;
+    padding: 24px 16px 64px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  header {
+    background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%);
+    color: white; padding: 24px 28px; border-radius: 12px;
+    margin-bottom: 16px; box-shadow: var(--shadow);
+  }
+  .breadcrumb { font-size: 12px; opacity: .75; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; opacity: .85; }
+  .priority-row { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    background: rgba(255,255,255,.18);
+  }
+  .chip.priority-very-high { background: #8b0000; }
+
+  .topic-map {
+    background: var(--card); border-radius: 10px;
+    padding: 16px 20px; margin-bottom: 14px; box-shadow: var(--shadow);
+  }
+  .topic-map-row {
+    display: flex; align-items: flex-start;
+    gap: 10px; margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .topic-map-row:last-child { margin-bottom: 0; }
+  .topic-map-label {
+    font-size: 11px; font-weight: 700; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding-top: 5px; flex-shrink: 0; width: 100px;
+  }
+  .topic-map-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .map-chip {
+    padding: 4px 11px; border-radius: 14px;
+    font-size: 12px; font-weight: 500;
+    background: #f1f5f9; color: var(--ink-soft);
+    border: 1px solid #e2e8f0;
+    transition: all 0.15s ease;
+    text-decoration: none; cursor: default;
+  }
+  .map-chip.active {
+    background: var(--accent); color: white;
+    border-color: var(--accent); font-weight: 700;
+    box-shadow: 0 2px 6px rgba(47,84,150,.3);
+  }
+  .map-chip.heuristic-chip {
+    background: #fef3c7; color: #92400e; border-color: #fde68a;
+  }
+  .map-chip.heuristic-chip.active {
+    background: #d97706; color: white; border-color: #d97706;
+    box-shadow: 0 2px 6px rgba(217,119,6,.35);
+  }
+
+  .card {
+    background: var(--card); border-radius: 10px;
+    padding: 18px 22px; margin-bottom: 14px; box-shadow: var(--shadow);
+  }
+  .card-label {
+    display: inline-block;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 9px; border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .label-tip { background: #eff7ec; color: #2e7d32; }
+
+  h2.section-heading {
+    font-size: 18px; font-weight: 700;
+    margin: 22px 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2.section-heading::before {
+    content: ''; width: 4px; height: 18px;
+    background: var(--accent); border-radius: 2px;
+  }
+
+  .signal-list { list-style: none; }
+  .signal-list li {
+    padding: 5px 0 5px 22px; position: relative;
+    font-size: 14px; color: var(--ink-soft);
+  }
+  .signal-list li::before {
+    content: '💬'; position: absolute; left: 0; top: 5px; font-size: 13px;
+  }
+
+  .question-box {
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    padding: 14px 16px; border-radius: 6px;
+    margin-bottom: 18px; font-size: 14px;
+  }
+  .question-box strong { color: var(--accent); }
+
+  .working-pad {
+    background: var(--paper);
+    border: 1px solid #e0d8c2; border-radius: 8px;
+    padding: 24px 28px; margin: 12px 0;
+    min-height: 520px; position: relative;
+    box-shadow: 0 2px 6px rgba(0,0,0,.04);
+  }
+
+  .pad-controls {
+    display: flex; gap: 8px; align-items: center;
+    margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .step-counter { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-left: auto; }
+  .btn {
+    padding: 8px 16px; border-radius: 8px; border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #224075; }
+  .btn-primary:disabled { background: #b0b9cc; cursor: not-allowed; }
+  .btn-secondary { background: white; color: var(--ink); border: 1px solid #cbd5e1; }
+  .btn-secondary:hover { background: #f1f5f9; }
+
+  .step-narration {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 6px; padding: 12px 16px;
+    margin-bottom: 12px; font-size: 15px;
+    color: var(--ink-soft); min-height: 50px;
+  }
+  .step-narration strong { color: var(--accent); }
+
+  /* ===== THEME C: rounded bars, shadows, thicker strokes, ghosting ===== */
+  .pencil-text { font-family: 'Kalam', cursive; fill: var(--pencil); }
+  .hw-blue { fill: var(--ink-blue); }
+  .hw-red { fill: var(--ink-red); }
+  .hw-green { fill: var(--ink-green); }
+  .pencil-stroke { stroke: var(--pencil); stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-width: 2; }
+  .red-stroke { stroke: var(--ink-red); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .blue-stroke { stroke: var(--ink-blue); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .green-stroke { stroke: var(--ink-green); stroke-linecap: round; fill: none; stroke-width: 2; }
+
+  /* Rounded corners + shadows on filled shapes */
+  rect[fill]:not([fill="none"]) { rx: 4; }
+  rect.bar-fill, rect.node-fill {
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.08));
+    transition: opacity 0.4s ease;
+  }
+  /* Answer box: light green background */
+  rect.answer-box { fill: #f0fdf4; rx: 6; }
+  /* Ghosting: dim previous segments */
+  .bar-fill.ghost, .node-fill.ghost { opacity: 0.3; }
+
+  .step-elem { opacity: 0; transition: opacity 0.5s ease; }
+  .step-elem.visible { opacity: 1; }
+  .draw-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+  .step-elem.visible .draw-path { animation: drawIn 0.8s ease forwards; }
+  @keyframes drawIn { to { stroke-dashoffset: 0; } }
+  .strike-line { stroke-dasharray: 200; stroke-dashoffset: 200; }
+  .step-elem.visible .strike-line { animation: strike 0.5s ease forwards; }
+  @keyframes strike { to { stroke-dashoffset: 0; } }
+
+  .alert-box { border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .alert-trap { background: #fdf4e3; border-left: 4px solid #d97706; }
+  .alert-tip  { background: #eff7ec; border-left: 4px solid #2e7d32; }
+  .alert-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .alert-trap h4 { color: #d97706; }
+  .alert-tip h4  { color: #2e7d32; }
+  .alert-box p { font-size: 13.5px; color: var(--ink); margin-bottom: 6px; }
+  .alert-box p:last-child { margin-bottom: 0; }
+
+  details summary {
+    font-weight: 600; color: var(--accent);
+    padding: 8px 0; cursor: pointer; font-size: 14px;
+  }
+
+  .nav-hint {
+    margin-top: 28px; padding: 14px 18px;
+    background: #f0f0e8; border-radius: 8px;
+    font-size: 12px; color: var(--ink-soft);
+    text-align: center; font-style: italic;
+  }
+
+  /* ===== MOBILE: full-bleed working pad + horizontal scroll ===== */
+  @media (max-width: 640px) {
+    body { padding: 12px 0 40px; }
+    .container { padding: 0 12px; }
+    header { border-radius: 0; margin: 0 -12px 12px; padding: 20px 16px; }
+    h1 { font-size: 22px; }
+    .topic-map { border-radius: 8px; padding: 12px 14px; }
+    .topic-map-label { width: auto; min-width: 80px; }
+    .card {
+      padding: 14px 0;
+      border-radius: 8px;
+      margin: 0 -12px 12px;
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+    .card > * { margin-left: 0; margin-right: 0; }
+    .working-pad {
+      margin: 10px -12px;
+      padding: 16px 12px;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .working-pad > svg {
+      min-width: 520px;
+      max-width: none;
+      width: 100%;
+    }
+    .method-tab { padding: 8px 12px; font-size: 12px; }
+    .pad-controls { gap: 6px; }
+    .btn { padding: 7px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P5 Refresh › Heuristic 4.1</div>
+    <h1>Area of Triangle (Shared Base/Height)</h1>
+    <div class="subtitle">Triangles that sit on the same base or between the same parallel lines</div>
+    <div class="priority-row">
+      <span class="chip priority-very-high">🔴 VERY HIGH PREP</span>
+      <span class="chip">⭐ PSLE favourite</span>
+      <span class="chip">Diagram-based (no bar model)</span>
+    </div>
+  </header>
+
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <span class="topic-map-label">Subtopics in Refresh</span>
+      <div class="topic-map-chips">
+        <span class="map-chip active">Area of Triangle (Shared Base/Height)</span>
+        <span class="map-chip">Geometry / Angles</span>
+        <span class="map-chip">Volume of Liquids</span>
+        <span class="map-chip">Tiered Rate</span>
+      </div>
+    </div>
+    <div class="topic-map-row">
+      <span class="topic-map-label">Heuristics used</span>
+      <div class="topic-map-chips">
+        <span class="map-chip heuristic-chip active">Triangle diagram</span>
+        <span class="map-chip heuristic-chip active">Area formula (½ × base × height)</span>
+        <span class="map-chip heuristic-chip">Proportional reasoning</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label label-tip">What it is</span>
+    <p style="font-size:14.5px;">When two or more triangles <strong>share the same height</strong> (usually because they sit between the same parallel lines), their areas are in the <strong>same ratio as their bases</strong>. Students must spot the shared dimension and use the area formula, not guess.</p>
+  </div>
+
+  <h2 class="section-heading">Signal phrases — train students to spot</h2>
+  <div class="card">
+    <ul class="signal-list">
+      <li>"Triangles <em>ABC and ABD</em> share the same height"</li>
+      <li>"The triangles are <em>between the same parallel lines</em>"</li>
+      <li>"Find the area of the <em>shaded triangle</em>" (often one of a pair)</li>
+      <li>"Given area of triangle PQR, find area of triangle PQS"</li>
+    </ul>
+  </div>
+
+  <h2 class="section-heading">Worked example — click through each step</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Question:</strong> In the figure below, triangles <strong>PQR</strong> and <strong>PQS</strong> share the same height from point <strong>P</strong> to the line <strong>QR</strong>. The base <strong>QR = 8 cm</strong> and the area of triangle <strong>PQR = 40 cm²</strong>. If <strong>QS = 5 cm</strong>, find the <strong>area of triangle PQS</strong>.
+    </div>
+
+    <div class="pad-controls">
+      <button class="btn btn-primary" id="prev-btn" disabled>← Previous</button>
+      <button class="btn btn-primary" id="next-btn">Next step →</button>
+      <button class="btn btn-secondary" id="reset-btn">Reset</button>
+      <span class="step-counter" id="step-counter">Step 0 / 8</span>
+    </div>
+
+    <div class="step-narration" id="narration">
+      Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.
+    </div>
+
+    <div class="working-pad">
+      <svg id="svg" viewBox="0 0 920 900" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 10 3, 0 6" fill="var(--ink-red)"/>
+          </marker>
+        </defs>
+
+        <!-- ===== DIAGRAM ZONE: y=30 to y=340 ===== -->
+
+        <!-- Step 1: Draw base QR -->
+        <g class="step-elem" data-step="1">
+          <text x="20" y="55" class="pencil-text" font-size="24" font-weight="700">Draw the base QR = 8 cm</text>
+          <line x1="120" y1="220" x2="680" y2="220" class="pencil-stroke draw-path" stroke-width="2.5"/>
+          <circle cx="120" cy="220" r="4" fill="var(--pencil)"/>
+          <circle cx="680" cy="220" r="4" fill="var(--pencil)"/>
+          <text x="100" y="255" class="pencil-text" font-size="22" font-weight="700">Q</text>
+          <text x="670" y="255" class="pencil-text" font-size="22" font-weight="700">R</text>
+          <text x="380" y="265" class="pencil-text hw-blue" font-size="22" font-weight="700" text-anchor="middle">8 cm</text>
+        </g>
+
+        <!-- Step 2: Draw point P and triangle PQR -->
+        <g class="step-elem" data-step="2">
+          <circle cx="400" cy="50" r="4" fill="var(--pencil)"/>
+          <text x="415" y="45" class="pencil-text" font-size="22" font-weight="700">P</text>
+          <line x1="400" y1="50" x2="120" y2="220" class="pencil-stroke draw-path" stroke-width="2"/>
+          <line x1="400" y1="50" x2="680" y2="220" class="pencil-stroke draw-path" stroke-width="2"/>
+          <polygon points="120,220 680,220 400,50" fill="var(--fill-choc)" opacity="0.4" class="bar-fill"/>
+          <text x="520" y="160" class="pencil-text hw-red" font-size="22" font-weight="700">△ PQR</text>
+        </g>
+
+        <!-- Step 3: Label area of PQR = 40 -->
+        <g class="step-elem" data-step="3">
+          <text x="430" y="155" class="pencil-text hw-blue" font-size="22" font-weight="700">Area = 40 cm²</text>
+          <rect x="420" y="130" width="195" height="32" fill="none" class="blue-stroke draw-path" stroke-width="1.5" rx="4"/>
+        </g>
+
+        <!-- Step 4: Draw point S and triangle PQS -->
+        <g class="step-elem" data-step="4">
+          <circle cx="470" cy="220" r="4" fill="var(--pencil)"/>
+          <text x="455" y="250" class="pencil-text" font-size="22" font-weight="700">S</text>
+          <text x="500" y="295" class="pencil-text hw-blue" font-size="22" font-weight="700">QS = 5 cm</text>
+          <line x1="400" y1="50" x2="470" y2="220" class="pencil-stroke draw-path" stroke-width="2"/>
+          <polygon points="120,220 470,220 400,50" fill="var(--fill-blue)" opacity="0.55" class="bar-fill"/>
+          <text x="230" y="140" class="pencil-text hw-green" font-size="22" font-weight="700" text-anchor="middle">△ PQS</text>
+          <text x="230" y="110" class="pencil-text hw-green" font-size="22" font-weight="700" text-anchor="middle">Area = ?</text>
+        </g>
+
+        <!-- Step 5: Draw shared height -->
+        <g class="step-elem" data-step="5">
+          <line x1="400" y1="50" x2="400" y2="220" class="red-stroke draw-path" stroke-width="2" stroke-dasharray="8,4"/>
+          <text x="65" y="115" class="pencil-text hw-red" font-size="20" font-weight="700">height h</text>
+          <path d="M 390 220 L 410 220 L 400 210 Z" fill="var(--ink-red)"/>
+          <text x="65" y="140" class="pencil-text hw-red" font-size="18" font-weight="700">↑ Same height!</text>
+        </g>
+
+        <!-- ===== CALCULATION ZONE: y=360 to y=660 ===== -->
+
+        <!-- Step 6: Find height from PQR -->
+        <g class="step-elem" data-step="6">
+          <text x="20" y="400" class="pencil-text" font-size="24" font-weight="700">Find height using △ PQR:</text>
+          <text x="40" y="445" class="pencil-text" font-size="22" font-weight="700">Area = ½ × base × height</text>
+          <text x="40" y="490" class="pencil-text" font-size="22">40 = ½ × 8 × h</text>
+          <text x="40" y="535" class="pencil-text" font-size="22">40 = 4 × h</text>
+          <text x="40" y="580" class="pencil-text hw-green" font-size="24" font-weight="700">h = 10 cm</text>
+          <line x1="35" y1="590" x2="220" y2="590" class="green-stroke draw-path" stroke-width="2.5"/>
+        </g>
+
+        <!-- Step 7: Calculate area of PQS -->
+        <g class="step-elem" data-step="7">
+          <text x="20" y="630" class="pencil-text" font-size="24" font-weight="700">Now find area of △ PQS:</text>
+          <text x="40" y="675" class="pencil-text" font-size="22">Area = ½ × 5 × 10</text>
+          <text x="280" y="675" class="pencil-text" font-size="22" fill="var(--pencil-soft)">← QS = 5, h = 10</text>
+          <text x="40" y="720" class="pencil-text hw-green" font-size="28" font-weight="700">= 25 cm²</text>
+        </g>
+
+        <!-- ===== ANSWER ZONE: y=740 to y=860 ===== -->
+
+        <!-- Step 8: Shortcut insight + answer box -->
+        <g class="step-elem" data-step="8">
+          <text x="480" y="400" class="pencil-text hw-red" font-size="22" font-weight="700">💡 Shortcut (same height):</text>
+          <text x="500" y="445" class="pencil-text" font-size="20" font-weight="700">Area ratio = Base ratio</text>
+          <text x="500" y="490" class="pencil-text" font-size="20">40 : ? = 8 : 5</text>
+          <text x="500" y="535" class="pencil-text" font-size="20">? = 40 × 5/8 = 25</text>
+
+          <rect x="20" y="760" width="400" height="55" fill="none" class="green-stroke draw-path answer-box" stroke-width="2.5" rx="6"/>
+          <text x="35" y="795" class="pencil-text hw-green" font-size="28" font-weight="700">★ Area of △ PQS = 25 cm²</text>
+          <text x="20" y="850" class="pencil-text" font-size="17" font-weight="700">Check: 40 + 20 + 60 = 120 ✓  Wait, ½ × 5 × 10 = 25 ✓</text>
+        </g>
+
+      </svg>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Common student traps</h2>
+  <div class="card">
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 1: Assuming same base means same area</h4>
+      <p>Students see triangles on the same line and assume equal areas. <strong>Only true if both base AND height are equal.</strong> Triangles on the same base but different heights have different areas.</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 2: Forgetting the ½ in the area formula</h4>
+      <p>Students write "8 × 10 = 80" instead of "½ × 8 × 10 = 40." The ½ is easy to drop when rushing. Emphasise writing the full formula every single time.</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 3: Using the wrong segment as the base</h4>
+      <p>In △ PQS, students sometimes use QR or SR as the base instead of QS. The base must be the side that sits on the shared line with the known measurement.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">How to teach it</h2>
+  <div class="card">
+    <div class="alert-box alert-tip">
+      <h4>💡 Three teaching anchors</h4>
+      <p><strong>1. Trace the height with a bright colour.</strong> Physically draw the perpendicular dotted line from P to the base. Students often can't "see" the height until it's highlighted.</p>
+      <p><strong>2. Write the full formula every time.</strong> Area = ½ × base × height. Don't let students skip to arithmetic. The formula step catches base/height mix-ups.</p>
+      <p><strong>3. Teach the shortcut AFTER the method.</strong> "Same height → area ratio = base ratio" is a powerful shortcut, but only after students can derive it from the formula. Otherwise it becomes a guess.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Try this one (no peeking)</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Practice:</strong> Triangles <strong>XYZ</strong> and <strong>XWZ</strong> share the same height from <strong>X</strong> to line <strong>YZ</strong>. The base <strong>YZ = 12 cm</strong> and the area of triangle <strong>XYZ = 48 cm²</strong>. If <strong>WZ = 7 cm</strong>, find the <strong>area of triangle XWZ</strong>.
+    </div>
+    <details>
+      <summary>▸ Click to reveal answer</summary>
+      <div style="padding:12px; background:#f8fafc; border-radius:6px; margin-top:8px; font-size:14px;">
+        <p>Height h: 48 = ½ × 12 × h → h = 8 cm</p>
+        <p>Area of △ XWZ = ½ × 7 × 8 = <strong>28 cm²</strong></p>
+        <p>Shortcut: 48 × 7/12 = 28 ✓</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="nav-hint">
+    📍 Area of Triangle (Shared Base/Height) · <a href="index.html" style="color:var(--accent); font-weight:600;">← Back to mindmap</a>
+  </div>
+
+</div>
+
+<script>
+  function makeStepController(suffix, totalSteps, narrations) {
+    let currentStep = 0;
+    const svgEl = document.getElementById(`svg${suffix ? '-' + suffix : ''}`);
+    const narrationEl = document.getElementById(`narration${suffix ? '-' + suffix : ''}`);
+    const counterEl = document.getElementById(`step-counter${suffix ? '-' + suffix : ''}`);
+    const prevBtn = document.getElementById(`prev-btn${suffix ? '-' + suffix : ''}`);
+    const nextBtn = document.getElementById(`next-btn${suffix ? '-' + suffix : ''}`);
+    const resetBtn = document.getElementById(`reset-btn${suffix ? '-' + suffix : ''}`);
+
+    function render() {
+      svgEl.querySelectorAll('.step-elem').forEach(el => {
+        const stepNum = parseInt(el.dataset.step);
+        el.classList.toggle('visible', stepNum <= currentStep);
+      });
+      // Ghosting: dim bar-fills from earlier steps
+      svgEl.querySelectorAll('.bar-fill, .node-fill').forEach(fill => {
+        const parentStep = parseInt(fill.closest('.step-elem').dataset.step);
+        fill.classList.toggle('ghost', parentStep < currentStep);
+      });
+      narrationEl.innerHTML = narrations[currentStep];
+      counterEl.textContent = `Step ${currentStep} / ${totalSteps}`;
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === totalSteps;
+      nextBtn.textContent = currentStep === totalSteps ? 'Done ✓' : 'Next step →';
+    }
+
+    nextBtn.addEventListener('click', () => { if (currentStep < totalSteps) { currentStep++; render(); } });
+    prevBtn.addEventListener('click', () => { if (currentStep > 0) { currentStep--; render(); } });
+    resetBtn.addEventListener('click', () => { currentStep = 0; render(); });
+
+    render();
+    return { next: () => nextBtn.click(), prev: () => prevBtn.click() };
+  }
+
+  const ctrl = makeStepController('', 8, {
+    0: 'Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.',
+    1: '<strong>Step 1 — Draw the base.</strong> Start with the shared base line QR = 8 cm. Mark points Q and R.',
+    2: '<strong>Step 2 — Draw △ PQR.</strong> Point P is above the base. Connect P to Q and R. This is the larger triangle.',
+    3: '<strong>Step 3 — Label the known area.</strong> The area of △ PQR is 40 cm². Write it inside or near the triangle.',
+    4: '<strong>Step 4 — Draw △ PQS.</strong> Point S lies on QR. Connect P to S. QS = 5 cm. This is the triangle we need.',
+    5: '<strong>Step 5 — Highlight the shared height.</strong> Both triangles share the same perpendicular height from P to line QR. Draw it as a dotted line and label it h.',
+    6: '<strong>Step 6 — Find the height.</strong> Using △ PQR: 40 = ½ × 8 × h. Solve: h = 10 cm.',
+    7: '<strong>Step 7 — Calculate area of △ PQS.</strong> Area = ½ × QS × h = ½ × 5 × 10 = 25 cm².',
+    8: '<strong>Step 8 — Shortcut and answer.</strong> Same height means area ratio = base ratio. 40 × 5/8 = 25. Answer: 25 cm².'
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); ctrl.next(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); ctrl.prev(); }
+  });
+</script>
+</body>
+</html>

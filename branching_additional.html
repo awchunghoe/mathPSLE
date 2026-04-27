@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Branching (With Additional Amount) — P5 Heuristic</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --bg: #fafaf7;
+    --card: #ffffff;
+    --accent: #2f5496;
+    --accent-soft: #e1e8f5;
+    --pencil: #2d3142;
+    --pencil-soft: #5a6478;
+    --paper: #fffdf5;
+    --paper-line: #c9d6e8;
+    --ink-red: #c1272d;
+    --ink-blue: #1f5fa8;
+    --ink-green: #2e7d32;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+    --fill-choc: #fee2e2;
+    --fill-blue: #dbeafe;
+    --fill-green: #dcfce7;
+    --fill-amber: #fef3c7;
+    --fill-ink: #1f3864;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55;
+    padding: 24px 16px 64px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  header {
+    background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%);
+    color: white; padding: 24px 28px; border-radius: 12px;
+    margin-bottom: 16px; box-shadow: var(--shadow);
+  }
+  .breadcrumb { font-size: 12px; opacity: .75; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; opacity: .85; }
+  .priority-row { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    background: rgba(255,255,255,.18);
+  }
+  .chip.priority-high { background: #9a3412; }
+
+  .topic-map {
+    background: var(--card); border-radius: 10px;
+    padding: 16px 20px; margin-bottom: 14px; box-shadow: var(--shadow);
+  }
+  .topic-map-row {
+    display: flex; align-items: flex-start;
+    gap: 10px; margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .topic-map-row:last-child { margin-bottom: 0; }
+  .topic-map-label {
+    font-size: 11px; font-weight: 700; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding-top: 5px; flex-shrink: 0; width: 100px;
+  }
+  .topic-map-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .map-chip {
+    padding: 4px 11px; border-radius: 14px;
+    font-size: 12px; font-weight: 500;
+    background: #f1f5f9; color: var(--ink-soft);
+    border: 1px solid #e2e8f0;
+    transition: all 0.15s ease;
+    text-decoration: none; cursor: default;
+  }
+  .map-chip.active {
+    background: var(--accent); color: white;
+    border-color: var(--accent); font-weight: 700;
+    box-shadow: 0 2px 6px rgba(47,84,150,.3);
+  }
+  .map-chip.heuristic-chip {
+    background: #fef3c7; color: #92400e; border-color: #fde68a;
+  }
+  .map-chip.heuristic-chip.active {
+    background: #d97706; color: white; border-color: #d97706;
+    box-shadow: 0 2px 6px rgba(217,119,6,.35);
+  }
+
+  .card {
+    background: var(--card); border-radius: 10px;
+    padding: 18px 22px; margin-bottom: 14px; box-shadow: var(--shadow);
+  }
+  .card-label {
+    display: inline-block;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 9px; border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .label-tip { background: #eff7ec; color: #2e7d32; }
+
+  h2.section-heading {
+    font-size: 18px; font-weight: 700;
+    margin: 22px 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2.section-heading::before {
+    content: ''; width: 4px; height: 18px;
+    background: var(--accent); border-radius: 2px;
+  }
+
+  .signal-list { list-style: none; }
+  .signal-list li {
+    padding: 5px 0 5px 22px; position: relative;
+    font-size: 14px; color: var(--ink-soft);
+  }
+  .signal-list li::before {
+    content: '💬'; position: absolute; left: 0; top: 5px; font-size: 13px;
+  }
+
+  .method-tabs {
+    display: flex; gap: 4px; margin-bottom: 0;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .method-tab {
+    padding: 10px 18px; background: none; border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: var(--ink-soft); cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px; transition: all 0.15s ease;
+  }
+  .method-tab:hover { color: var(--accent); }
+  .method-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .method-tab .badge {
+    font-size: 10px; background: #2e7d32; color: white;
+    padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-weight: 700;
+  }
+  .method-tab .badge-alt { background: #94a3b8; }
+  .method-content { display: none; padding-top: 16px; }
+  .method-content.active { display: block; }
+
+  .method-note {
+    background: #f8fafc; border-left: 3px solid #94a3b8;
+    padding: 10px 14px; border-radius: 4px;
+    font-size: 13px; color: var(--ink-soft);
+    margin-bottom: 14px; font-style: italic;
+  }
+
+  .question-box {
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    padding: 14px 16px; border-radius: 6px;
+    margin-bottom: 18px; font-size: 14px;
+  }
+  .question-box strong { color: var(--accent); }
+
+  .working-pad {
+    background: var(--paper);
+    border: 1px solid #e0d8c2; border-radius: 8px;
+    padding: 24px 28px; margin: 12px 0;
+    min-height: 520px; position: relative;
+    box-shadow: 0 2px 6px rgba(0,0,0,.04);
+  }
+
+  .pad-controls {
+    display: flex; gap: 8px; align-items: center;
+    margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .step-counter { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-left: auto; }
+  .btn {
+    padding: 8px 16px; border-radius: 8px; border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #224075; }
+  .btn-primary:disabled { background: #b0b9cc; cursor: not-allowed; }
+  .btn-secondary { background: white; color: var(--ink); border: 1px solid #cbd5e1; }
+  .btn-secondary:hover { background: #f1f5f9; }
+
+  .step-narration {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 6px; padding: 12px 16px;
+    margin-bottom: 12px; font-size: 15px;
+    color: var(--ink-soft); min-height: 50px;
+  }
+  .step-narration strong { color: var(--accent); }
+
+  /* ===== THEME C: rounded bars, shadows, thicker strokes, ghosting ===== */
+  .pencil-text { font-family: 'Kalam', cursive; fill: var(--pencil); }
+  .hw-blue { fill: var(--ink-blue); }
+  .hw-red { fill: var(--ink-red); }
+  .hw-green { fill: var(--ink-green); }
+  .pencil-stroke { stroke: var(--pencil); stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-width: 2; }
+  .red-stroke { stroke: var(--ink-red); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .blue-stroke { stroke: var(--ink-blue); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .green-stroke { stroke: var(--ink-green); stroke-linecap: round; fill: none; stroke-width: 2; }
+
+  /* Rounded corners + shadows on filled shapes */
+  rect[fill]:not([fill="none"]) { rx: 4; }
+  rect.bar-fill, rect.node-fill {
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.08));
+    transition: opacity 0.4s ease;
+  }
+  /* Answer box: light green background */
+  rect.answer-box { fill: #f0fdf4; rx: 6; }
+  /* Ghosting: dim previous segments */
+  .bar-fill.ghost, .node-fill.ghost { opacity: 0.3; }
+
+  .step-elem { opacity: 0; transition: opacity 0.5s ease; }
+  .step-elem.visible { opacity: 1; }
+  .draw-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+  .step-elem.visible .draw-path { animation: drawIn 0.8s ease forwards; }
+  @keyframes drawIn { to { stroke-dashoffset: 0; } }
+  .strike-line { stroke-dasharray: 200; stroke-dashoffset: 200; }
+  .step-elem.visible .strike-line { animation: strike 0.5s ease forwards; }
+  @keyframes strike { to { stroke-dashoffset: 0; } }
+
+  .alert-box { border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .alert-trap { background: #fdf4e3; border-left: 4px solid #d97706; }
+  .alert-tip  { background: #eff7ec; border-left: 4px solid #2e7d32; }
+  .alert-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .alert-trap h4 { color: #d97706; }
+  .alert-tip h4  { color: #2e7d32; }
+  .alert-box p { font-size: 13.5px; color: var(--ink); margin-bottom: 6px; }
+  .alert-box p:last-child { margin-bottom: 0; }
+
+  details summary {
+    font-weight: 600; color: var(--accent);
+    padding: 8px 0; cursor: pointer; font-size: 14px;
+  }
+
+  .nav-hint {
+    margin-top: 28px; padding: 14px 18px;
+    background: #f0f0e8; border-radius: 8px;
+    font-size: 12px; color: var(--ink-soft);
+    text-align: center; font-style: italic;
+  }
+
+  /* ===== MOBILE: full-bleed working pad + horizontal scroll ===== */
+  @media (max-width: 640px) {
+    body { padding: 12px 0 40px; }
+    .container { padding: 0 12px; }
+    header { border-radius: 0; margin: 0 -12px 12px; padding: 20px 16px; }
+    h1 { font-size: 22px; }
+    .topic-map { border-radius: 8px; padding: 12px 14px; }
+    .topic-map-label { width: auto; min-width: 80px; }
+    .card {
+      padding: 14px 0;
+      border-radius: 8px;
+      margin: 0 -12px 12px;
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+    .card > * { margin-left: 0; margin-right: 0; }
+    .working-pad {
+      margin: 10px -12px;
+      padding: 16px 12px;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .working-pad > svg {
+      min-width: 520px;
+      max-width: none;
+      width: 100%;
+    }
+    .method-tab { padding: 8px 12px; font-size: 12px; }
+    .pad-controls { gap: 6px; }
+    .btn { padding: 7px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P5 Fractions › Heuristic 2.3</div>
+    <h1>Branching (With Additional Amount)</h1>
+    <div class="subtitle">Branching where the final comparison gives an absolute difference</div>
+    <div class="priority-row">
+      <span class="chip priority-high">🟠 HIGH PREP</span>
+      <span class="chip">⭐ Common PSLE pattern</span>
+      <span class="chip">Bar model + fraction tree</span>
+    </div>
+  </header>
+
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <span class="topic-map-label">Subtopics in P5 Fractions</span>
+      <div class="topic-map-chips">
+        <span class="map-chip">Branching (Direct)</span>
+        <span class="map-chip">Branching (Working Backwards)</span>
+        <span class="map-chip active">Branching (With Additional Amount)</span>
+        <span class="map-chip">Repeated Items</span>
+        <span class="map-chip">One Item Unchanged</span>
+        <span class="map-chip">Total Unchanged</span>
+        <span class="map-chip">Difference Unchanged</span>
+        <span class="map-chip">Numerators the Same</span>
+        <span class="map-chip">Quantity × Value</span>
+      </div>
+    </div>
+    <div class="topic-map-row">
+      <span class="topic-map-label">Heuristics used</span>
+      <div class="topic-map-chips">
+        <span class="map-chip heuristic-chip active">Bar model</span>
+        <span class="map-chip heuristic-chip active">Fraction tree</span>
+        <span class="map-chip heuristic-chip">Fraction of remainder</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label label-tip">What it is</span>
+    <p style="font-size:14.5px;">A branching problem where the question gives an <strong>absolute difference</strong> between two final groups (e.g. "20 more strawberry than vanilla"), not just a final total. Students must express <strong>both groups as fractions of the original total</strong>, then use the difference to find the whole.</p>
+  </div>
+
+  <h2 class="section-heading">Signal phrases — train students to spot</h2>
+  <div class="card">
+    <ul class="signal-list">
+      <li>"<em>2/5</em> were chocolate, <em>1/3 of the remainder</em> were vanilla, the rest were strawberry"</li>
+      <li>"There were <strong>20 more</strong> strawberry than vanilla" — absolute difference given</li>
+      <li>"The difference between A and B was <strong>$X</strong>" after sequential fractions</li>
+      <li>Usually requires finding <strong>both final groups as fractions of the original</strong></li>
+    </ul>
+  </div>
+
+  <h2 class="section-heading">Worked example — click through each step</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Question:</strong> A baker baked some cakes. <strong>2/5</strong> were chocolate, <strong>1/3 of the remainder</strong> were vanilla, and the rest were strawberry. There were <strong>20 more strawberry than vanilla</strong>. How many <strong>cakes</strong> did she bake?
+    </div>
+
+    <div class="method-tabs">
+      <button class="method-tab active" data-method="bar">Bar Model <span class="badge">PRIMARY</span></button>
+      <button class="method-tab" data-method="tree">Fraction Tree <span class="badge badge-alt">ALT</span></button>
+    </div>
+
+    <!-- BAR MODEL (PRIMARY) -->
+    <div class="method-content active" id="method-bar">
+      <div class="method-note">
+        💡 <strong>Why this is primary:</strong> The bar model makes it obvious that strawberry and vanilla are both expressed as fractions of the <em>original</em> total — which is the key to using the 20-cake difference.
+      </div>
+
+      <div class="pad-controls">
+        <button class="btn btn-primary" id="prev-btn-a" disabled>← Previous</button>
+        <button class="btn btn-primary" id="next-btn-a">Next step →</button>
+        <button class="btn btn-secondary" id="reset-btn-a">Reset</button>
+        <span class="step-counter" id="step-counter-a">Step 0 / 7</span>
+      </div>
+
+      <div class="step-narration" id="narration-a">
+        Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.
+      </div>
+
+      <div class="working-pad">
+        <svg id="svg-a" viewBox="0 0 920 860" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+
+          <!-- ===== BAR DIAGRAM ZONE: y=30 to y=340 ===== -->
+
+          <!-- Step 1: Draw whole bar -->
+          <g class="step-elem" data-step="1">
+            <text x="20" y="45" class="pencil-text" font-size="24" font-weight="700">Total cakes = ?</text>
+            <rect x="20" y="65" width="800" height="55" fill="none" stroke="var(--pencil)" stroke-width="2"/>
+            <text x="420" y="100" class="pencil-text" font-size="28" font-weight="700" text-anchor="middle">?</text>
+            <text x="20" y="145" class="pencil-text" fill="var(--pencil-soft)" font-size="17">↑ Start with the full bar</text>
+          </g>
+
+          <!-- Step 2: Cut into 5, shade 2/5 chocolate -->
+          <g class="step-elem" data-step="2">
+            <line x1="180" y1="65" x2="180" y2="120" class="pencil-stroke draw-path" stroke-width="1.5"/>
+            <line x1="340" y1="65" x2="340" y2="120" class="pencil-stroke draw-path" stroke-width="1.5"/>
+            <line x1="500" y1="65" x2="500" y2="120" class="pencil-stroke draw-path" stroke-width="1.5"/>
+            <line x1="660" y1="65" x2="660" y2="120" class="pencil-stroke draw-path" stroke-width="1.5"/>
+            <rect x="20" y="65" width="320" height="55" fill="var(--fill-choc)" opacity="0.8" class="bar-fill"/>
+            <text x="180" y="55" class="pencil-text hw-blue" font-size="18" font-weight="700" text-anchor="middle">2/5</text>
+            <text x="180" y="98" class="pencil-text hw-blue" font-size="20" font-weight="700" text-anchor="middle">Chocolate</text>
+            <text x="180" y="140" class="pencil-text hw-blue" font-size="18" font-weight="700" text-anchor="middle">= 40</text>
+            <path d="M 510 130 Q 510 150, 525 150 L 825 150 Q 840 150, 840 165 Q 840 150, 825 150 Q 840 150, 840 130" class="blue-stroke draw-path" stroke-width="1.5" fill="none"/>
+            <text x="690" y="180" class="pencil-text hw-blue" font-size="18" font-weight="700" text-anchor="middle">Remainder = 3/5 = 60</text>
+          </g>
+
+          <!-- Step 3: Zoom into remainder, cut into 3 -->
+          <g class="step-elem" data-step="3">
+            <text x="20" y="220" class="pencil-text" font-size="20" font-weight="700">Zoom into remainder (60 cakes):</text>
+            <rect x="20" y="240" width="480" height="55" fill="none" stroke="var(--pencil)" stroke-width="2"/>
+            <line x1="180" y1="240" x2="180" y2="295" class="pencil-stroke draw-path" stroke-width="1.5"/>
+            <line x1="340" y1="240" x2="340" y2="295" class="pencil-stroke draw-path" stroke-width="1.5"/>
+            <rect x="20" y="240" width="160" height="55" fill="var(--fill-amber)" opacity="0.85" class="bar-fill"/>
+            <text x="100" y="235" class="pencil-text hw-blue" font-size="16" font-weight="700" text-anchor="middle">1/3 of rem</text>
+            <text x="100" y="275" class="pencil-text hw-blue" font-size="20" font-weight="700" text-anchor="middle">Vanilla</text>
+            <text x="100" y="315" class="pencil-text hw-blue" font-size="18" font-weight="700" text-anchor="middle">= 20</text>
+            <rect x="180" y="240" width="320" height="55" fill="var(--fill-green)" opacity="0.6" class="bar-fill"/>
+            <text x="340" y="235" class="pencil-text hw-green" font-size="16" font-weight="700" text-anchor="middle">2/3 of rem</text>
+            <text x="340" y="275" class="pencil-text hw-green" font-size="20" font-weight="700" text-anchor="middle">Strawberry</text>
+            <text x="340" y="315" class="pencil-text hw-green" font-size="18" font-weight="700" text-anchor="middle">= 40</text>
+          </g>
+
+          <!-- ===== WORKING ZONE: y=350 to y=680 ===== -->
+
+          <!-- Step 4: Express both as fraction of original -->
+          <g class="step-elem" data-step="4">
+            <text x="20" y="355" class="pencil-text hw-red" font-size="20" font-weight="700">💡 Express everything as fraction of TOTAL:</text>
+            <text x="40" y="400" class="pencil-text" font-size="20" font-weight="700">Chocolate = 2/5</text>
+            <text x="40" y="440" class="pencil-text" font-size="20" font-weight="700">Vanilla = 1/3 × 3/5 = 1/5</text>
+            <text x="40" y="480" class="pencil-text" font-size="20" font-weight="700">Strawberry = 2/3 × 3/5 = 2/5</text>
+            <line x1="40" y1="490" x2="380" y2="490" class="red-stroke draw-path" stroke-width="2"/>
+          </g>
+
+          <!-- Step 5: Use the difference -->
+          <g class="step-elem" data-step="5">
+            <text x="20" y="525" class="pencil-text" font-size="20" font-weight="700">Difference: Strawberry − Vanilla = 20</text>
+            <text x="40" y="570" class="pencil-text" font-size="22" font-weight="700">2/5 − 1/5 = 1/5 of total</text>
+            <text x="40" y="610" class="pencil-text hw-red" font-size="22" font-weight="700">So: 1/5 of total = 20 cakes</text>
+          </g>
+
+          <!-- Step 6: Solve for total -->
+          <g class="step-elem" data-step="6">
+            <text x="20" y="650" class="pencil-text" font-size="22" font-weight="700">Total = 20 × 5 = 100 cakes</text>
+            <text x="280" y="650" class="pencil-text" fill="var(--pencil-soft)" font-size="18">(or 20 ÷ 1/5 = 100)</text>
+          </g>
+
+          <!-- ===== ANSWER ZONE: y=720 to y=830 ===== -->
+
+          <!-- Step 7: Verify + answer box -->
+          <g class="step-elem" data-step="7">
+            <text x="20" y="735" class="pencil-text" font-size="17" font-weight="700">Check: 40 + 20 + 40 = 100 ✓</text>
+            <text x="20" y="760" class="pencil-text" font-size="17" font-weight="700">40 − 20 = 20 more strawberry ✓</text>
+            <rect x="15" y="790" width="420" height="55" fill="none" class="green-stroke draw-path answer-box" stroke-width="2.5" rx="6"/>
+            <text x="30" y="825" class="pencil-text hw-green" font-size="28" font-weight="700">★ Total = 100 cakes</text>
+          </g>
+
+        </svg>
+      </div>
+    </div>
+
+    <!-- FRACTION TREE (ALT) -->
+    <div class="method-content" id="method-tree">
+      <div class="method-note">
+        💡 <strong>When to use:</strong> Students who prefer the hierarchical tree often find the "multiply along the path" approach faster for finding vanilla and strawberry as fractions of the original.
+      </div>
+
+      <div class="pad-controls">
+        <button class="btn btn-primary" id="prev-btn-b" disabled>← Previous</button>
+        <button class="btn btn-primary" id="next-btn-b">Next step →</button>
+        <button class="btn btn-secondary" id="reset-btn-b">Reset</button>
+        <span class="step-counter" id="step-counter-b">Step 0 / 6</span>
+      </div>
+
+      <div class="step-narration" id="narration-b">
+        Click <strong>"Next step"</strong> to see the fraction tree approach.
+      </div>
+
+      <div class="working-pad">
+        <svg id="svg-b" viewBox="0 0 920 860" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+
+          <!-- ===== TREE DIAGRAM ZONE: y=30 to y=380 ===== -->
+
+          <!-- Step 1: Root = total -->
+          <g class="step-elem" data-step="1">
+            <text x="20" y="40" class="pencil-text" font-size="20" font-weight="700">Tree starts with the total:</text>
+            <rect x="370" y="55" width="180" height="55" rx="8" fill="var(--fill-ink)" stroke="var(--fill-ink)" class="node-fill"/>
+            <text x="460" y="80" fill="white" font-family="Kalam, cursive" font-weight="700" font-size="18" text-anchor="middle">Total Cakes</text>
+            <text x="460" y="100" fill="#cbd5e1" font-family="Kalam, cursive" font-size="16" text-anchor="middle">= ?</text>
+          </g>
+
+          <!-- Step 2: First branch: 2/5 choc, 3/5 remainder -->
+          <g class="step-elem" data-step="2">
+            <line x1="430" y1="110" x2="200" y2="170" class="pencil-stroke draw-path" stroke-width="2"/>
+            <line x1="490" y1="110" x2="720" y2="170" class="pencil-stroke draw-path" stroke-width="2"/>
+            <text x="280" y="155" class="pencil-text" font-size="14" fill="var(--pencil-soft)" font-style="italic">2/5 are chocolate</text>
+            <text x="640" y="155" class="pencil-text" font-size="14" fill="var(--pencil-soft)" font-style="italic">3/5 remainder</text>
+            <rect x="120" y="170" width="160" height="55" rx="8" fill="var(--fill-choc)" stroke="#dc2626" stroke-width="2" class="node-fill"/>
+            <text x="200" y="194" class="pencil-text" font-size="18" font-weight="700" text-anchor="middle">Chocolate</text>
+            <text x="200" y="214" class="pencil-text" fill="#991b1b" font-size="14" text-anchor="middle">= 2/5</text>
+            <rect x="640" y="170" width="160" height="55" rx="8" fill="var(--fill-blue)" stroke="#2563eb" stroke-width="2" class="node-fill"/>
+            <text x="720" y="194" class="pencil-text" font-size="18" font-weight="700" text-anchor="middle">Remainder</text>
+            <text x="720" y="214" class="pencil-text" fill="#1e40af" font-size="14" text-anchor="middle">= 3/5</text>
+          </g>
+
+          <!-- Step 3: Second branch from remainder -->
+          <g class="step-elem" data-step="3">
+            <line x1="680" y1="225" x2="540" y2="290" class="pencil-stroke draw-path" stroke-width="2"/>
+            <line x1="760" y1="225" x2="860" y2="290" class="pencil-stroke draw-path" stroke-width="2"/>
+            <text x="570" y="275" class="pencil-text" font-size="14" fill="var(--pencil-soft)" font-style="italic">1/3 of THIS</text>
+            <text x="840" y="275" class="pencil-text" font-size="14" fill="var(--pencil-soft)" font-style="italic">2/3 of THIS</text>
+            <rect x="430" y="290" width="220" height="65" rx="8" fill="var(--fill-amber)" stroke="#d97706" stroke-width="2" class="node-fill"/>
+            <text x="540" y="315" class="pencil-text" font-size="18" font-weight="700" text-anchor="middle">Vanilla = 1/3</text>
+            <text x="540" y="340" class="pencil-text" fill="#92400e" font-size="14" text-anchor="middle">of remainder</text>
+            <rect x="770" y="290" width="160" height="85" rx="8" fill="var(--fill-green)" stroke="#16a34a" stroke-width="3" class="node-fill"/>
+            <text x="850" y="315" class="pencil-text" font-size="18" font-weight="700" text-anchor="middle">Strawberry</text>
+            <text x="850" y="340" class="pencil-text" fill="#14532d" font-size="14" text-anchor="middle">= 2/3 of rem</text>
+            <text x="850" y="365" class="pencil-text hw-green" fill="#16a34a" font-size="20" font-weight="700" text-anchor="middle">= ?</text>
+          </g>
+
+          <!-- ===== WORKING ZONE: y=410 to y=670 ===== -->
+
+          <!-- Step 4: Multiply along paths -->
+          <g class="step-elem" data-step="4">
+            <text x="20" y="420" class="pencil-text hw-red" font-size="20" font-weight="700">Multiply along the path to original:</text>
+            <text x="40" y="465" class="pencil-text" font-size="20" font-weight="700">Vanilla = 1/3 × 3/5 = 1/5 of total</text>
+            <text x="40" y="510" class="pencil-text" font-size="20" font-weight="700">Strawberry = 2/3 × 3/5 = 2/5 of total</text>
+            <line x1="35" y1="520" x2="420" y2="520" class="red-stroke draw-path" stroke-width="2"/>
+          </g>
+
+          <!-- Step 5: Use difference -->
+          <g class="step-elem" data-step="5">
+            <text x="20" y="555" class="pencil-text" font-size="20" font-weight="700">Strawberry − Vanilla = 20</text>
+            <text x="40" y="600" class="pencil-text" font-size="22" font-weight="700">2/5 − 1/5 = 1/5 of total = 20</text>
+            <text x="40" y="645" class="pencil-text hw-green" font-size="24" font-weight="700">Total = 20 × 5 = 100</text>
+            <line x1="35" y1="655" x2="260" y2="655" class="green-stroke draw-path" stroke-width="2"/>
+          </g>
+
+          <!-- ===== ANSWER ZONE: y=710 to y=810 ===== -->
+
+          <!-- Step 6: Check + answer box -->
+          <g class="step-elem" data-step="6">
+            <text x="20" y="725" class="pencil-text" font-size="17" font-weight="700">Check: 40 + 20 + 40 = 100 ✓</text>
+            <rect x="15" y="760" width="350" height="50" fill="none" class="green-stroke draw-path answer-box" stroke-width="2.5" rx="6"/>
+            <text x="30" y="790" class="pencil-text hw-green" font-size="24" font-weight="700">★ 100 cakes</text>
+          </g>
+
+        </svg>
+      </div>
+    </div>
+
+  </div>
+
+  <h2 class="section-heading">Common student traps</h2>
+  <div class="card">
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 1: Using the remainder as the new whole</h4>
+      <p>Students correctly find vanilla = 1/3 of remainder and strawberry = 2/3 of remainder, but then try to use the 20-cake difference directly on the <em>remainder</em> (20 = 1/3 of 60). The difference is given in the context of the <strong>original total</strong>, not the remainder.</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 2: Adding fractions with different wholes</h4>
+      <p>Students write "2/5 + 1/3 + something = 1" and get stuck. 1/3 is of the remainder, not of the total. You must multiply 1/3 × 3/5 to express vanilla as a fraction of the total.</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 3: Stopping at 60 (the remainder)</h4>
+      <p>Students find the remainder = 60 and think that's the answer. The question asks for the <em>total</em> number of cakes, not the remainder after chocolate.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">How to teach it</h2>
+  <div class="card">
+    <div class="alert-box alert-tip">
+      <h4>💡 Three teaching anchors</h4>
+      <p><strong>1. Force the "express as fraction of total" step.</strong> Before using the 20-cake difference, both groups must be written as fractions of the original. This is the discipline that separates correct from incorrect working.</p>
+      <p><strong>2. Draw the zoomed bar physically separated.</strong> Don't re-cut the original bar — draw a fresh bar for the remainder so students see the new "whole" and then translate back.</p>
+      <p><strong>3. Label the difference ON the original bar.</strong> Once vanilla = 1/5 and strawberry = 2/5 are known, shade those sections on the original 5-part bar. The 1-part gap = 20 becomes visually obvious.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Try this one (no peeking)</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Practice:</strong> A box of apples. <strong>1/4</strong> were green, <strong>2/5 of the remainder</strong> were red, and the rest were yellow. There were <strong>15 more yellow than red</strong>. How many <strong>apples</strong> were there altogether?
+    </div>
+    <details>
+      <summary>▸ Click to reveal answer</summary>
+      <div style="padding:12px; background:#f8fafc; border-radius:6px; margin-top:8px; font-size:14px;">
+        <p>Green = 1/4. Remainder = 3/4.</p>
+        <p>Red = 2/5 × 3/4 = 3/10. Yellow = 3/5 × 3/4 = 9/20.</p>
+        <p>Yellow − Red = 9/20 − 3/10 = 9/20 − 6/20 = 3/20 of total = 15</p>
+        <p>Total = 15 × 20/3 = <strong>100 apples</strong></p>
+      </div>
+    </details>
+  </div>
+
+  <div class="nav-hint">
+    📍 Branching (With Additional Amount) · <a href="index.html" style="color:var(--accent); font-weight:600;">← Back to mindmap</a>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.method-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const method = tab.dataset.method;
+      document.querySelectorAll('.method-tab').forEach(t => t.classList.toggle('active', t === tab));
+      document.querySelectorAll('.method-content').forEach(c => {
+        c.classList.toggle('active', c.id === `method-${method}`);
+      });
+    });
+  });
+
+  function makeStepController(suffix, totalSteps, narrations) {
+    let currentStep = 0;
+    const svgEl = document.getElementById(`svg-${suffix}`);
+    const narrationEl = document.getElementById(`narration-${suffix}`);
+    const counterEl = document.getElementById(`step-counter-${suffix}`);
+    const prevBtn = document.getElementById(`prev-btn-${suffix}`);
+    const nextBtn = document.getElementById(`next-btn-${suffix}`);
+    const resetBtn = document.getElementById(`reset-btn-${suffix}`);
+
+    function render() {
+      svgEl.querySelectorAll('.step-elem').forEach(el => {
+        const stepNum = parseInt(el.dataset.step);
+        el.classList.toggle('visible', stepNum <= currentStep);
+      });
+      // Ghosting: dim bar-fills from earlier steps
+      svgEl.querySelectorAll('.bar-fill, .node-fill').forEach(fill => {
+        const parentStep = parseInt(fill.closest('.step-elem').dataset.step);
+        fill.classList.toggle('ghost', parentStep < currentStep);
+      });
+      narrationEl.innerHTML = narrations[currentStep];
+      counterEl.textContent = `Step ${currentStep} / ${totalSteps}`;
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === totalSteps;
+      nextBtn.textContent = currentStep === totalSteps ? 'Done ✓' : 'Next step →';
+    }
+
+    nextBtn.addEventListener('click', () => { if (currentStep < totalSteps) { currentStep++; render(); } });
+    prevBtn.addEventListener('click', () => { if (currentStep > 0) { currentStep--; render(); } });
+    resetBtn.addEventListener('click', () => { currentStep = 0; render(); });
+
+    render();
+    return { next: () => nextBtn.click(), prev: () => prevBtn.click() };
+  }
+
+  const ctrlA = makeStepController('a', 7, {
+    0: 'Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.',
+    1: '<strong>Step 1 — Draw the whole.</strong> Start with one bar representing the unknown total number of cakes.',
+    2: '<strong>Step 2 — First cut.</strong> 2/5 are chocolate, so divide into 5 parts and shade 2. Remainder = 3/5 = 60 cakes (we will see this later).',
+    3: '<strong>Step 3 — Zoom into remainder.</strong> Draw a fresh bar for the remaining 3 parts. Cut into 3 for vanilla/strawberry. Vanilla = 1/3 of rem = 20. Strawberry = 2/3 of rem = 40.',
+    4: '<strong>Step 4 — KEY INSIGHT.</strong> Express vanilla and strawberry as fractions of the ORIGINAL total: Vanilla = 1/3 × 3/5 = 1/5. Strawberry = 2/3 × 3/5 = 2/5.',
+    5: '<strong>Step 5 — Use the difference.</strong> Strawberry (2/5) − Vanilla (1/5) = 1/5 of total. This 1/5 = 20 cakes.',
+    6: '<strong>Step 6 — Solve.</strong> If 1/5 of total = 20, then total = 20 × 5 = 100 cakes.',
+    7: '<strong>Step 7 — Verify.</strong> Chocolate = 40, Vanilla = 20, Strawberry = 40. Total = 100 ✓. 40 − 20 = 20 more strawberry ✓.'
+  });
+
+  const ctrlB = makeStepController('b', 6, {
+    0: 'Click <strong>"Next step"</strong> to see the fraction tree approach.',
+    1: '<strong>Step 1 — Root.</strong> Total cakes = ?',
+    2: '<strong>Step 2 — First branch.</strong> 2/5 chocolate, 3/5 remainder.',
+    3: '<strong>Step 3 — Second branch.</strong> Remainder splits: 1/3 vanilla, 2/3 strawberry.',
+    4: '<strong>Step 4 — Multiply paths.</strong> Vanilla = 1/3 × 3/5 = 1/5 of total. Strawberry = 2/3 × 3/5 = 2/5 of total.',
+    5: '<strong>Step 5 — Difference.</strong> 2/5 − 1/5 = 1/5 of total = 20 cakes. Total = 100.',
+    6: '<strong>Step 6 — Check and answer.</strong> 40 + 20 + 40 = 100 ✓. Answer: 100 cakes.'
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const activeMethod = document.querySelector('.method-tab.active').dataset.method;
+    const ctrl = activeMethod === 'bar' ? ctrlA : ctrlB;
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); ctrl.next(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); ctrl.prev(); }
+  });
+</script>
+</body>
+</html>

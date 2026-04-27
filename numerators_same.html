@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Numerators the Same — P5 Heuristic</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --bg: #fafaf7;
+    --card: #ffffff;
+    --accent: #2f5496;
+    --accent-soft: #e1e8f5;
+    --pencil: #2d3142;
+    --pencil-soft: #5a6478;
+    --paper: #fffdf5;
+    --paper-line: #c9d6e8;
+    --ink-red: #c1272d;
+    --ink-blue: #1f5fa8;
+    --ink-green: #2e7d32;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+    --fill-choc: #fee2e2;
+    --fill-blue: #dbeafe;
+    --fill-green: #dcfce7;
+    --fill-amber: #fef3c7;
+    --fill-ink: #1f3864;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55;
+    padding: 24px 16px 64px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  header {
+    background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%);
+    color: white; padding: 24px 28px; border-radius: 12px;
+    margin-bottom: 16px; box-shadow: var(--shadow);
+  }
+  .breadcrumb { font-size: 12px; opacity: .75; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; opacity: .85; }
+  .priority-row { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    background: rgba(255,255,255,.18);
+  }
+  .chip.priority-very-high { background: #8b0000; }
+
+  .topic-map {
+    background: var(--card); border-radius: 10px;
+    padding: 16px 20px; margin-bottom: 14px; box-shadow: var(--shadow);
+  }
+  .topic-map-row {
+    display: flex; align-items: flex-start;
+    gap: 10px; margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .topic-map-row:last-child { margin-bottom: 0; }
+  .topic-map-label {
+    font-size: 11px; font-weight: 700; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding-top: 5px; flex-shrink: 0; width: 100px;
+  }
+  .topic-map-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .map-chip {
+    padding: 4px 11px; border-radius: 14px;
+    font-size: 12px; font-weight: 500;
+    background: #f1f5f9; color: var(--ink-soft);
+    border: 1px solid #e2e8f0;
+    transition: all 0.15s ease;
+    text-decoration: none; cursor: default;
+  }
+  .map-chip.active {
+    background: var(--accent); color: white;
+    border-color: var(--accent); font-weight: 700;
+    box-shadow: 0 2px 6px rgba(47,84,150,.3);
+  }
+  .map-chip.heuristic-chip {
+    background: #fef3c7; color: #92400e; border-color: #fde68a;
+  }
+  .map-chip.heuristic-chip.active {
+    background: #d97706; color: white; border-color: #d97706;
+    box-shadow: 0 2px 6px rgba(217,119,6,.35);
+  }
+
+  .card {
+    background: var(--card); border-radius: 10px;
+    padding: 18px 22px; margin-bottom: 14px; box-shadow: var(--shadow);
+  }
+  .card-label {
+    display: inline-block;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 9px; border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .label-tip { background: #eff7ec; color: #2e7d32; }
+
+  h2.section-heading {
+    font-size: 18px; font-weight: 700;
+    margin: 22px 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2.section-heading::before {
+    content: ''; width: 4px; height: 18px;
+    background: var(--accent); border-radius: 2px;
+  }
+
+  .signal-list { list-style: none; }
+  .signal-list li {
+    padding: 5px 0 5px 22px; position: relative;
+    font-size: 14px; color: var(--ink-soft);
+  }
+  .signal-list li::before {
+    content: '💬'; position: absolute; left: 0; top: 5px; font-size: 13px;
+  }
+
+  .method-tabs {
+    display: flex; gap: 4px; margin-bottom: 0;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .method-tab {
+    padding: 10px 18px; background: none; border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: var(--ink-soft); cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px; transition: all 0.15s ease;
+  }
+  .method-tab:hover { color: var(--accent); }
+  .method-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .method-tab .badge {
+    font-size: 10px; background: #2e7d32; color: white;
+    padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-weight: 700;
+  }
+  .method-tab .badge-alt { background: #94a3b8; }
+  .method-content { display: none; padding-top: 16px; }
+  .method-content.active { display: block; }
+
+  .method-note {
+    background: #f8fafc; border-left: 3px solid #94a3b8;
+    padding: 10px 14px; border-radius: 4px;
+    font-size: 13px; color: var(--ink-soft);
+    margin-bottom: 14px; font-style: italic;
+  }
+
+  .question-box {
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    padding: 14px 16px; border-radius: 6px;
+    margin-bottom: 18px; font-size: 14px;
+  }
+  .question-box strong { color: var(--accent); }
+
+  .working-pad {
+    background: var(--paper);
+    border: 1px solid #e0d8c2; border-radius: 8px;
+    padding: 24px 28px; margin: 12px 0;
+    min-height: 480px; position: relative;
+    box-shadow: 0 2px 6px rgba(0,0,0,.04);
+  }
+
+  .pad-controls {
+    display: flex; gap: 8px; align-items: center;
+    margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .step-counter { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-left: auto; }
+  .btn {
+    padding: 8px 16px; border-radius: 8px; border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #224075; }
+  .btn-primary:disabled { background: #b0b9cc; cursor: not-allowed; }
+  .btn-secondary { background: white; color: var(--ink); border: 1px solid #cbd5e1; }
+  .btn-secondary:hover { background: #f1f5f9; }
+
+  .step-narration {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 6px; padding: 10px 14px;
+    margin-bottom: 12px; font-size: 13px;
+    color: var(--ink-soft); min-height: 46px;
+  }
+  .step-narration strong { color: var(--accent); }
+
+  /* ===== THEME C: rounded bars, shadows, thicker strokes, ghosting ===== */
+  .pencil-text { font-family: 'Kalam', cursive; fill: var(--pencil); }
+  .hw-blue { fill: var(--ink-blue); }
+  .hw-red { fill: var(--ink-red); }
+  .hw-green { fill: var(--ink-green); }
+  .pencil-stroke { stroke: var(--pencil); stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-width: 2; }
+  .red-stroke { stroke: var(--ink-red); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .blue-stroke { stroke: var(--ink-blue); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .green-stroke { stroke: var(--ink-green); stroke-linecap: round; fill: none; stroke-width: 2; }
+
+  /* Rounded corners + shadows on filled shapes */
+  rect[fill]:not([fill="none"]) { rx: 4; }
+  rect.bar-fill, rect.node-fill {
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.08));
+    transition: opacity 0.4s ease;
+  }
+  /* Answer box: light green background */
+  rect.answer-box { fill: #f0fdf4; rx: 6; }
+  /* Ghosting: dim previous segments */
+  .bar-fill.ghost, .node-fill.ghost { opacity: 0.3; }
+
+  .step-elem { opacity: 0; transition: opacity 0.5s ease; }
+  .step-elem.visible { opacity: 1; }
+  .draw-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+  .step-elem.visible .draw-path { animation: drawIn 0.8s ease forwards; }
+  @keyframes drawIn { to { stroke-dashoffset: 0; } }
+  .strike-line { stroke-dasharray: 200; stroke-dashoffset: 200; }
+  .step-elem.visible .strike-line { animation: strike 0.5s ease forwards; }
+  @keyframes strike { to { stroke-dashoffset: 0; } }
+
+  .alert-box { border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .alert-trap { background: #fdf4e3; border-left: 4px solid #d97706; }
+  .alert-tip  { background: #eff7ec; border-left: 4px solid #2e7d32; }
+  .alert-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .alert-trap h4 { color: #d97706; }
+  .alert-tip h4  { color: #2e7d32; }
+  .alert-box p { font-size: 13.5px; color: var(--ink); margin-bottom: 6px; }
+  .alert-box p:last-child { margin-bottom: 0; }
+
+  details summary {
+    font-weight: 600; color: var(--accent);
+    padding: 8px 0; cursor: pointer; font-size: 14px;
+  }
+
+  .nav-hint {
+    margin-top: 28px; padding: 14px 18px;
+    background: #f0f0e8; border-radius: 8px;
+    font-size: 12px; color: var(--ink-soft);
+    text-align: center; font-style: italic;
+  }
+
+  /* ===== MOBILE: full-bleed working pad + horizontal scroll ===== */
+  @media (max-width: 640px) {
+    body { padding: 12px 0 40px; }
+    .container { padding: 0 12px; }
+    header { border-radius: 0; margin: 0 -12px 12px; padding: 20px 16px; }
+    h1 { font-size: 22px; }
+    .topic-map { border-radius: 8px; padding: 12px 14px; }
+    .topic-map-label { width: auto; min-width: 80px; }
+    .card {
+      padding: 14px 0;
+      border-radius: 8px;
+      margin: 0 -12px 12px;
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+    .card > * { margin-left: 0; margin-right: 0; }
+    .working-pad {
+      margin: 10px -12px;
+      padding: 16px 12px;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .working-pad > svg {
+      min-width: 520px;
+      max-width: none;
+      width: 100%;
+    }
+    .method-tab { padding: 8px 12px; font-size: 12px; }
+    .pad-controls { gap: 6px; }
+    .btn { padding: 7px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P5 Fractions › Heuristic 2.8</div>
+    <h1>Numerators the Same</h1>
+    <div class="subtitle">Compare or arrange fractions by equalising numerators instead of denominators</div>
+    <div class="priority-row">
+      <span class="chip priority-very-high">🔴 VERY HIGH PREP</span>
+      <span class="chip">⭐ Fast comparison trick</span>
+      <span class="chip">Onsponge favourite</span>
+    </div>
+  </header>
+
+  <!-- ===== TOPIC MAP ===== -->
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <span class="topic-map-label">Subtopics in P5 Fractions</span>
+      <div class="topic-map-chips">
+        <span class="map-chip">Branching (Direct)</span>
+        <span class="map-chip">Branching (Working Backwards)</span>
+        <span class="map-chip">Branching (With Additional Amount)</span>
+        <span class="map-chip">Repeated Items</span>
+        <span class="map-chip">One Item Unchanged</span>
+        <span class="map-chip">Total Unchanged</span>
+        <span class="map-chip">Difference Unchanged</span>
+        <span class="map-chip active">Numerators the Same</span>
+        <span class="map-chip">Quantity × Value</span>
+      </div>
+    </div>
+    <div class="topic-map-row">
+      <span class="topic-map-label">Heuristics used</span>
+      <div class="topic-map-chips">
+        <span class="map-chip heuristic-chip active">Common numerator</span>
+        <span class="map-chip heuristic-chip active">Units bar</span>
+        <span class="map-chip heuristic-chip">LCM</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label label-tip">What it is</span>
+    <p style="font-size:14.5px;">A faster way to compare or arrange fractions when the <strong>LCM of the numerators is small</strong>. Instead of finding a common denominator (which can be huge), make the numerators identical. Then just compare denominators — with the same numerator, the fraction with the <strong>smaller denominator is larger</strong>.</p>
+  </div>
+
+  <h2 class="section-heading">Signal phrases — train students to spot</h2>
+  <div class="card">
+    <ul class="signal-list">
+      <li>"Arrange <em>2/3, 4/7, 6/11</em> in ascending order" — numerators are simple multiples</li>
+      <li>"Which is the smallest: <em>3/5</em> or <em>6/11</em>?" — one numerator is a multiple of the other</li>
+      <li>The <strong>LCM of numerators</strong> is smaller than the LCM of denominators</li>
+      <li>Usually appears in MCQ or short-answer ordering questions</li>
+    </ul>
+  </div>
+
+  <h2 class="section-heading">Worked example — click through each step</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Question:</strong> Arrange <strong>2/3</strong>, <strong>4/7</strong>, and <strong>8/15</strong> in <strong>descending order</strong>.
+    </div>
+
+    <div class="method-tabs">
+      <button class="method-tab active" data-method="arith">Common Numerator <span class="badge">PRIMARY</span></button>
+      <button class="method-tab" data-method="bar">Units Bar <span class="badge badge-alt">ALT</span></button>
+    </div>
+
+    <!-- COMMON NUMERATOR (PRIMARY) -->
+    <div class="method-content active" id="method-arith">
+      <div class="method-note">
+        💡 <strong>Why this is primary:</strong> Fast, paper-efficient, and trains number sense. Students should ask "can I make numerators the same?" before defaulting to common denominator.
+      </div>
+
+      <div class="pad-controls">
+        <button class="btn btn-primary" id="prev-btn-a" disabled>← Previous</button>
+        <button class="btn btn-primary" id="next-btn-a">Next step →</button>
+        <button class="btn btn-secondary" id="reset-btn-a">Reset</button>
+        <span class="step-counter" id="step-counter-a">Step 0 / 7</span>
+      </div>
+
+      <div class="step-narration" id="narration-a">
+        Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.
+      </div>
+
+      <div class="working-pad">
+        <svg id="svg-a" viewBox="0 0 920 820" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+
+          <!-- Step 1: State the problem -->
+          <g class="step-elem" data-step="1">
+            <text x="20" y="40" class="pencil-text" font-size="20" font-weight="700">Arrange in descending order:</text>
+            <text x="40" y="85" class="pencil-text hw-blue" font-size="32" font-weight="700">2/3 ,  4/7 ,  8/15</text>
+            <text x="40" y="120" class="pencil-text" fill="var(--pencil-soft)" font-size="15">↑ Descending = biggest first</text>
+          </g>
+
+          <!-- Step 2: Look at numerators, find LCM -->
+          <g class="step-elem" data-step="2">
+            <text x="20" y="165" class="pencil-text hw-red" font-size="18" font-weight="700">💡 Look at numerators first:</text>
+            <text x="40" y="200" class="pencil-text" font-size="20" font-weight="700">2 ,  4 ,  8</text>
+            <text x="40" y="235" class="pencil-text" font-size="18">LCM of 2, 4, 8 = <tspan font-weight="700" class="hw-blue">8</tspan></text>
+            <line x1="40" y1="242" x2="280" y2="242" class="blue-stroke draw-path" stroke-width="2"/>
+            <text x="40" y="270" class="pencil-text" fill="var(--pencil-soft)" font-size="15">↑ Much smaller than LCM of 3, 7, 15 = 315!</text>
+          </g>
+
+          <!-- Step 3: Convert 2/3 to 8/12 -->
+          <g class="step-elem" data-step="3">
+            <text x="20" y="320" class="pencil-text" font-size="18" font-weight="700">Convert each to numerator 8:</text>
+            <text x="60" y="360" class="pencil-text" font-size="20" font-weight="700">2/3 × 4/4 =</text>
+            <text x="210" y="348" class="pencil-text hw-blue" font-size="22" font-weight="700">8</text>
+            <line x1="205" y1="355" x2="230" y2="355" class="blue-stroke" stroke-width="2"/>
+            <text x="210" y="378" class="pencil-text hw-blue" font-size="22" font-weight="700">12</text>
+            <rect x="200" y="340" width="40" height="42" fill="none" class="blue-stroke draw-path" stroke-width="1.5" rx="3"/>
+            <text x="270" y="365" class="pencil-text" fill="var(--pencil-soft)" font-size="14">(× 4 top and bottom)</text>
+          </g>
+
+          <!-- Step 4: Convert 4/7 to 8/14 -->
+          <g class="step-elem" data-step="4">
+            <text x="60" y="420" class="pencil-text" font-size="20" font-weight="700">4/7 × 2/2 =</text>
+            <text x="210" y="408" class="pencil-text hw-blue" font-size="22" font-weight="700">8</text>
+            <line x1="205" y1="415" x2="230" y2="415" class="blue-stroke" stroke-width="2"/>
+            <text x="210" y="438" class="pencil-text hw-blue" font-size="22" font-weight="700">14</text>
+            <rect x="200" y="400" width="40" height="42" fill="none" class="blue-stroke draw-path" stroke-width="1.5" rx="3"/>
+            <text x="270" y="425" class="pencil-text" fill="var(--pencil-soft)" font-size="14">(× 2 top and bottom)</text>
+          </g>
+
+          <!-- Step 5: 8/15 stays the same -->
+          <g class="step-elem" data-step="5">
+            <text x="60" y="480" class="pencil-text" font-size="20" font-weight="700">8/15 already has 8 on top</text>
+            <text x="60" y="510" class="pencil-text" font-size="20" font-weight="700">=</text>
+            <text x="90" y="498" class="pencil-text hw-blue" font-size="22" font-weight="700">8</text>
+            <line x1="85" y1="505" x2="110" y2="505" class="blue-stroke" stroke-width="2"/>
+            <text x="90" y="528" class="pencil-text hw-blue" font-size="22" font-weight="700">15</text>
+            <rect x="80" y="490" width="40" height="42" fill="none" class="blue-stroke draw-path" stroke-width="1.5" rx="3"/>
+          </g>
+
+          <!-- Step 6: Compare — same numerator rule -->
+          <g class="step-elem" data-step="6">
+            <text x="20" y="565" class="pencil-text hw-red" font-size="18" font-weight="700">Same numerator → compare denominators:</text>
+            <text x="40" y="600" class="pencil-text" font-size="20" font-weight="700">12 < 14 < 15</text>
+            <text x="40" y="630" class="pencil-text" font-size="18">So: 8/12 < 8/14 < 8/15  is WRONG for descending</text>
+            <text x="40" y="655" class="pencil-text hw-green" font-size="18" font-weight="700">→  8/12 > 8/14 > 8/15  ✓</text>
+            <line x1="40" y1="662" x2="310" y2="662" class="green-stroke draw-path" stroke-width="2"/>
+            <text x="330" y="655" class="pencil-text" fill="var(--pencil-soft)" font-size="14">smaller den = bigger fraction</text>
+          </g>
+
+          <!-- Step 7: Answer with check -->
+          <g class="step-elem" data-step="7">
+            <text x="20" y="710" class="pencil-text" font-size="15">Check: 2/3 ≈ 0.667, 4/7 ≈ 0.571, 8/15 ≈ 0.533 ✓</text>
+            <rect x="30" y="750" width="380" height="48" fill="none" class="green-stroke draw-path answer-box" stroke-width="2.5" rx="6"/>
+            <text x="45" y="780" class="pencil-text hw-green" font-size="24" font-weight="700">★ 2/3 > 4/7 > 8/15</text>
+          </g>
+
+        </svg>
+      </div>
+    </div>
+
+    <!-- UNITS BAR (ALT) -->
+    <div class="method-content" id="method-bar">
+      <div class="method-note">
+        💡 <strong>When to use:</strong> For students who still need to "see" why a smaller denominator means a bigger fraction. The bars make the inverse relationship tangible.
+      </div>
+
+      <div class="pad-controls">
+        <button class="btn btn-primary" id="prev-btn-b" disabled>← Previous</button>
+        <button class="btn btn-primary" id="next-btn-b">Next step →</button>
+        <button class="btn btn-secondary" id="reset-btn-b">Reset</button>
+        <span class="step-counter" id="step-counter-b">Step 0 / 6</span>
+      </div>
+
+      <div class="step-narration" id="narration-b">
+        Click <strong>"Next step"</strong> to see the units bar approach.
+      </div>
+
+      <div class="working-pad">
+        <svg id="svg-b" viewBox="0 0 920 820" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+
+          <!-- Step 1: Show the fractions -->
+          <g class="step-elem" data-step="1">
+            <text x="20" y="40" class="pencil-text" font-size="18" font-weight="700">Three fractions. Same numerator = 8:</text>
+          </g>
+
+          <!-- Step 2: Draw three bars with same shaded amount (160px) but different totals -->
+          <g class="step-elem" data-step="2">
+            <!-- 8/12 bar: total=240, shaded=160 -->
+            <rect x="80" y="80" width="240" height="45" fill="none" stroke="var(--pencil)" stroke-width="2"/>
+            <rect x="80" y="80" width="160" height="45" fill="var(--fill-green)" opacity="0.85" class="bar-fill"/>
+            <text x="160" y="108" class="pencil-text hw-green" font-size="16" font-weight="700" text-anchor="middle">8 shaded</text>
+            <text x="200" y="145" class="pencil-text hw-blue" font-size="15" font-weight="700" text-anchor="middle">Total = 12 units</text>
+            <text x="40" y="108" class="pencil-text" font-size="16" font-weight="700">8/12</text>
+
+            <!-- 8/14 bar: total=280, shaded=160 -->
+            <rect x="80" y="185" width="280" height="45" fill="none" stroke="var(--pencil)" stroke-width="2"/>
+            <rect x="80" y="185" width="160" height="45" fill="var(--fill-green)" opacity="0.85" class="bar-fill"/>
+            <text x="160" y="213" class="pencil-text hw-green" font-size="16" font-weight="700" text-anchor="middle">8 shaded</text>
+            <text x="220" y="250" class="pencil-text hw-blue" font-size="15" font-weight="700" text-anchor="middle">Total = 14 units</text>
+            <text x="30" y="213" class="pencil-text" font-size="16" font-weight="700">8/14</text>
+
+            <!-- 8/15 bar: total=300, shaded=160 -->
+            <rect x="80" y="290" width="300" height="45" fill="none" stroke="var(--pencil)" stroke-width="2"/>
+            <rect x="80" y="290" width="160" height="45" fill="var(--fill-green)" opacity="0.85" class="bar-fill"/>
+            <text x="160" y="318" class="pencil-text hw-green" font-size="16" font-weight="700" text-anchor="middle">8 shaded</text>
+            <text x="230" y="355" class="pencil-text hw-blue" font-size="15" font-weight="700" text-anchor="middle">Total = 15 units</text>
+            <text x="30" y="318" class="pencil-text" font-size="16" font-weight="700">8/15</text>
+          </g>
+
+          <!-- Step 3: Label the insight -->
+          <g class="step-elem" data-step="3">
+            <text x="20" y="400" class="pencil-text hw-red" font-size="18" font-weight="700">💡 All three have the SAME shaded amount (8 parts)</text>
+            <text x="20" y="430" class="pencil-text" font-size="16">But the total bar lengths are different:</text>
+            <text x="40" y="460" class="pencil-text" font-size="18" font-weight="700">12 < 14 < 15</text>
+          </g>
+
+          <!-- Step 4: Show which bar is most "full" -->
+          <g class="step-elem" data-step="4">
+            <text x="20" y="505" class="pencil-text" font-size="17" font-weight="700">The shortest bar (8/12) is the "most full":</text>
+            <text x="40" y="535" class="pencil-text hw-green" font-size="18" font-weight="700">8 out of 12 = more than half the bar</text>
+            <text x="40" y="560" class="pencil-text" font-size="18">8 out of 15 = just over half the bar</text>
+            <path d="M 360 95 L 380 95 L 380 305 L 360 305" class="red-stroke draw-path" stroke-width="2" fill="none" marker-end="url(#arrow-c)"/>
+            <text x="390" y="200" class="pencil-text hw-red" font-size="16" font-weight="700" text-anchor="middle">Same</text>
+            <text x="390" y="220" class="pencil-text hw-red" font-size="16" font-weight="700" text-anchor="middle">shaded</text>
+            <text x="390" y="240" class="pencil-text hw-red" font-size="16" font-weight="700" text-anchor="middle">length</text>
+          </g>
+
+          <!-- Step 5: The rule -->
+          <g class="step-elem" data-step="5">
+            <text x="20" y="605" class="pencil-text hw-red" font-size="18" font-weight="700">Rule: Same numerator → smaller denominator = larger</text>
+            <text x="40" y="635" class="pencil-text" font-size="18" font-weight="700">So: 8/12 > 8/14 > 8/15</text>
+          </g>
+
+          <!-- Step 6: Map back and answer -->
+          <g class="step-elem" data-step="6">
+            <text x="20" y="690" class="pencil-text" font-size="16" font-weight="700">Map back to original fractions:</text>
+            <rect x="30" y="730" width="360" height="48" fill="none" class="green-stroke draw-path answer-box" stroke-width="2.5" rx="6"/>
+            <text x="45" y="760" class="pencil-text hw-green" font-size="22" font-weight="700">★ 2/3 > 4/7 > 8/15</text>
+          </g>
+
+          <defs>
+            <marker id="arrow-c" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <polygon points="0 0, 10 3, 0 6" fill="var(--ink-red)"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
+
+  </div>
+
+  <h2 class="section-heading">Common student traps</h2>
+  <div class="card">
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 1: Same direction as common denominator</h4>
+      <p>Students learn "common denominator → smaller numerator is smaller." They apply the same logic to common numerator: "smaller denominator is smaller." <strong>Opposite!</strong> With common numerator, smaller denominator means <em>bigger</em> fraction.</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 2: Forgetting to multiply both parts</h4>
+      <p>Students write "2/3 = 8/3" (only multiplied the top). Every equivalent fraction must multiply <strong>both numerator and denominator</strong> by the same number.</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 3: Blindly using common denominator anyway</h4>
+      <p>LCM of 3, 7, 15 is 315. Students dutifully convert all three to /315, then mis-calculate the new numerators. Common numerator (LCM = 8) is dramatically faster — train the instinct to check numerators first.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">How to teach it</h2>
+  <div class="card">
+    <div class="alert-box alert-tip">
+      <h4>💡 Three teaching anchors</h4>
+      <p><strong>1. Drill the "check numerators first" habit.</strong> Before any ordering question, students should scan the numerators. If one is a simple multiple of another, common numerator is probably faster.</p>
+      <p><strong>2. Say the rule out loud every time.</strong> "Same numerator, opposite direction — smaller denominator, bigger fraction." The muscle memory prevents the direction trap.</p>
+      <p><strong>3. Always verify with decimals.</strong> 2/3 ≈ 0.67, 4/7 ≈ 0.57, 8/15 ≈ 0.53. A quick decimal check catches ordering errors before they get boxed.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Try this one (no peeking)</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Practice:</strong> Arrange <strong>3/5</strong>, <strong>6/11</strong>, and <strong>9/14</strong> in <strong>ascending order</strong>.
+    </div>
+    <details>
+      <summary>▸ Click to reveal answer</summary>
+      <div style="padding:12px; background:#f8fafc; border-radius:6px; margin-top:8px; font-size:14px;">
+        <p>LCM of 3, 6, 9 = 18</p>
+        <p>3/5 = 18/30</p>
+        <p>6/11 = 18/33</p>
+        <p>9/14 = 18/28</p>
+        <p>Since 33 > 30 > 28, ascending order is:</p>
+        <p><strong>6/11 < 3/5 < 9/14</strong></p>
+      </div>
+    </details>
+  </div>
+
+  <div class="nav-hint">
+    📍 Numerators the Same · <a href="index.html" style="color:var(--accent); font-weight:600;">← Back to mindmap</a>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.method-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const method = tab.dataset.method;
+      document.querySelectorAll('.method-tab').forEach(t => t.classList.toggle('active', t === tab));
+      document.querySelectorAll('.method-content').forEach(c => {
+        c.classList.toggle('active', c.id === `method-${method}`);
+      });
+    });
+  });
+
+  function makeStepController(suffix, totalSteps, narrations) {
+    let currentStep = 0;
+    const svgEl = document.getElementById(`svg-${suffix}`);
+    const narrationEl = document.getElementById(`narration-${suffix}`);
+    const counterEl = document.getElementById(`step-counter-${suffix}`);
+    const prevBtn = document.getElementById(`prev-btn-${suffix}`);
+    const nextBtn = document.getElementById(`next-btn-${suffix}`);
+    const resetBtn = document.getElementById(`reset-btn-${suffix}`);
+
+    function render() {
+      svgEl.querySelectorAll('.step-elem').forEach(el => {
+        const stepNum = parseInt(el.dataset.step);
+        el.classList.toggle('visible', stepNum <= currentStep);
+      });
+      // Ghosting: dim bar-fills from earlier steps
+      svgEl.querySelectorAll('.bar-fill, .node-fill').forEach(fill => {
+        const parentStep = parseInt(fill.closest('.step-elem').dataset.step);
+        fill.classList.toggle('ghost', parentStep < currentStep);
+      });
+      narrationEl.innerHTML = narrations[currentStep];
+      counterEl.textContent = `Step ${currentStep} / ${totalSteps}`;
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === totalSteps;
+      nextBtn.textContent = currentStep === totalSteps ? 'Done ✓' : 'Next step →';
+    }
+
+    nextBtn.addEventListener('click', () => { if (currentStep < totalSteps) { currentStep++; render(); } });
+    prevBtn.addEventListener('click', () => { if (currentStep > 0) { currentStep--; render(); } });
+    resetBtn.addEventListener('click', () => { currentStep = 0; render(); });
+
+    render();
+    return { next: () => nextBtn.click(), prev: () => prevBtn.click() };
+  }
+
+  const ctrlA = makeStepController('a', 7, {
+    0: 'Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.',
+    1: '<strong>Step 1 — State the problem.</strong> Arrange 2/3, 4/7, and 8/15 in descending order (biggest first).',
+    2: '<strong>Step 2 — Check numerators first.</strong> The numerators are 2, 4, and 8. Their LCM is 8 — tiny! Much easier than common denominator (LCM of 3, 7, 15 = 315).',
+    3: '<strong>Step 3 — Convert 2/3.</strong> Multiply numerator and denominator by 4: 2/3 × 4/4 = 8/12.',
+    4: '<strong>Step 4 — Convert 4/7.</strong> Multiply numerator and denominator by 2: 4/7 × 2/2 = 8/14.',
+    5: '<strong>Step 5 — 8/15 is already ready.</strong> It already has 8 on top, so it stays as 8/15.',
+    6: '<strong>Step 6 — Compare.</strong> Same numerator = compare denominators. OPPOSITE direction: smaller denominator means bigger fraction. So 8/12 > 8/14 > 8/15.',
+    7: '<strong>Step 7 — Map back and verify.</strong> 8/12 = 2/3, 8/14 = 4/7, 8/15 stays. Answer: 2/3 > 4/7 > 8/15. Check with decimals: 0.667 > 0.571 > 0.533 ✓'
+  });
+
+  const ctrlB = makeStepController('b', 6, {
+    0: 'Click <strong>"Next step"</strong> to see the units bar approach.',
+    1: '<strong>Step 1 — The fractions.</strong> All three converted to common numerator 8: 8/12, 8/14, 8/15.',
+    2: '<strong>Step 2 — Draw the bars.</strong> Each bar has the same shaded length (8 parts), but different total lengths (12, 14, 15 units).',
+    3: '<strong>Step 3 — Same shaded amount.</strong> All three have exactly 8 shaded parts. The difference is how big the total bar is.',
+    4: '<strong>Step 4 — Which is most "full"?</strong> The shortest bar (8/12) is the most filled — 8 parts out of 12. The longest bar (8/15) is the least filled.',
+    5: '<strong>Step 5 — The rule.</strong> Same numerator → smaller denominator = larger fraction. So 8/12 > 8/14 > 8/15.',
+    6: '<strong>Step 6 — Answer.</strong> Map back to original fractions: 2/3 > 4/7 > 8/15.'
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const activeMethod = document.querySelector('.method-tab.active').dataset.method;
+    const ctrl = activeMethod === 'arith' ? ctrlA : ctrlB;
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); ctrl.next(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); ctrl.prev(); }
+  });
+</script>
+</body>
+</html>

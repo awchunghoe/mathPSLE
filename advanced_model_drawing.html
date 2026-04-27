@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Advanced Model Drawing — P6 Heuristic</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --bg: #fafaf7;
+    --card: #ffffff;
+    --accent: #2f5496;
+    --accent-soft: #e1e8f5;
+    --pencil: #2d3142;
+    --pencil-soft: #5a6478;
+    --paper: #fffdf5;
+    --paper-line: #c9d6e8;
+    --ink-red: #c1272d;
+    --ink-blue: #1f5fa8;
+    --ink-green: #2e7d32;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+    --fill-choc: #fee2e2;
+    --fill-blue: #dbeafe;
+    --fill-green: #dcfce7;
+    --fill-amber: #fef3c7;
+    --fill-ink: #1f3864;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55;
+    padding: 24px 16px 64px;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  header {
+    background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%);
+    color: white; padding: 24px 28px; border-radius: 12px;
+    margin-bottom: 16px; box-shadow: var(--shadow);
+  }
+  .breadcrumb { font-size: 12px; opacity: .75; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; opacity: .85; }
+  .priority-row { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    background: rgba(255,255,255,.18);
+  }
+  .chip.priority-very-high { background: #8b0000; }
+
+  .topic-map {
+    background: var(--card); border-radius: 10px;
+    padding: 16px 20px; margin-bottom: 14px; box-shadow: var(--shadow);
+  }
+  .topic-map-row {
+    display: flex; align-items: flex-start;
+    gap: 10px; margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .topic-map-row:last-child { margin-bottom: 0; }
+  .topic-map-label {
+    font-size: 11px; font-weight: 700; color: var(--ink-soft);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding-top: 5px; flex-shrink: 0; width: 100px;
+  }
+  .topic-map-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .map-chip {
+    padding: 4px 11px; border-radius: 14px;
+    font-size: 12px; font-weight: 500;
+    background: #f1f5f9; color: var(--ink-soft);
+    border: 1px solid #e2e8f0;
+    transition: all 0.15s ease;
+    text-decoration: none; cursor: default;
+  }
+  .map-chip.active {
+    background: var(--accent); color: white;
+    border-color: var(--accent); font-weight: 700;
+    box-shadow: 0 2px 6px rgba(47,84,150,.3);
+  }
+  .map-chip.heuristic-chip {
+    background: #fef3c7; color: #92400e; border-color: #fde68a;
+  }
+  .map-chip.heuristic-chip.active {
+    background: #d97706; color: white; border-color: #d97706;
+    box-shadow: 0 2px 6px rgba(217,119,6,.35);
+  }
+
+  .card {
+    background: var(--card); border-radius: 10px;
+    padding: 18px 22px; margin-bottom: 14px; box-shadow: var(--shadow);
+  }
+  .card-label {
+    display: inline-block;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 9px; border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .label-tip { background: #eff7ec; color: #2e7d32; }
+
+  h2.section-heading {
+    font-size: 18px; font-weight: 700;
+    margin: 22px 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2.section-heading::before {
+    content: ''; width: 4px; height: 18px;
+    background: var(--accent); border-radius: 2px;
+  }
+
+  .signal-list { list-style: none; }
+  .signal-list li {
+    padding: 5px 0 5px 22px; position: relative;
+    font-size: 14px; color: var(--ink-soft);
+  }
+  .signal-list li::before {
+    content: '💬'; position: absolute; left: 0; top: 5px; font-size: 13px;
+  }
+
+  .question-box {
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    padding: 14px 16px; border-radius: 6px;
+    margin-bottom: 18px; font-size: 14px;
+  }
+  .question-box strong { color: var(--accent); }
+
+  .working-pad {
+    background: var(--paper);
+    border: 1px solid #e0d8c2; border-radius: 8px;
+    padding: 24px 28px; margin: 12px 0;
+    min-height: 520px; position: relative;
+    box-shadow: 0 2px 6px rgba(0,0,0,.04);
+  }
+
+  .pad-controls {
+    display: flex; gap: 8px; align-items: center;
+    margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .step-counter { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-left: auto; }
+  .btn {
+    padding: 8px 16px; border-radius: 8px; border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #224075; }
+  .btn-primary:disabled { background: #b0b9cc; cursor: not-allowed; }
+  .btn-secondary { background: white; color: var(--ink); border: 1px solid #cbd5e1; }
+  .btn-secondary:hover { background: #f1f5f9; }
+
+  .step-narration {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 6px; padding: 12px 16px;
+    margin-bottom: 12px; font-size: 15px;
+    color: var(--ink-soft); min-height: 50px;
+  }
+  .step-narration strong { color: var(--accent); }
+
+  /* ===== THEME C: rounded bars, shadows, thicker strokes, ghosting ===== */
+  .pencil-text { font-family: 'Kalam', cursive; fill: var(--pencil); }
+  .hw-blue { fill: var(--ink-blue); }
+  .hw-red { fill: var(--ink-red); }
+  .hw-green { fill: var(--ink-green); }
+  .pencil-stroke { stroke: var(--pencil); stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-width: 2; }
+  .red-stroke { stroke: var(--ink-red); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .blue-stroke { stroke: var(--ink-blue); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .green-stroke { stroke: var(--ink-green); stroke-linecap: round; fill: none; stroke-width: 2; }
+
+  /* Rounded corners + shadows on filled shapes */
+  rect[fill]:not([fill="none"]) { rx: 4; }
+  rect.bar-fill, rect.node-fill {
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,.08));
+    transition: opacity 0.4s ease;
+  }
+  /* Answer box: light green background */
+  rect.answer-box { fill: #f0fdf4; rx: 6; }
+  /* Ghosting: dim previous segments */
+  .bar-fill.ghost, .node-fill.ghost { opacity: 0.3; }
+
+  .step-elem { opacity: 0; transition: opacity 0.5s ease; }
+  .step-elem.visible { opacity: 1; }
+  .draw-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+  .step-elem.visible .draw-path { animation: drawIn 0.8s ease forwards; }
+  @keyframes drawIn { to { stroke-dashoffset: 0; } }
+  .strike-line { stroke-dasharray: 200; stroke-dashoffset: 200; }
+  .step-elem.visible .strike-line { animation: strike 0.5s ease forwards; }
+  @keyframes strike { to { stroke-dashoffset: 0; } }
+
+  .alert-box { border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .alert-trap { background: #fdf4e3; border-left: 4px solid #d97706; }
+  .alert-tip  { background: #eff7ec; border-left: 4px solid #2e7d32; }
+  .alert-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .alert-trap h4 { color: #d97706; }
+  .alert-tip h4  { color: #2e7d32; }
+  .alert-box p { font-size: 13.5px; color: var(--ink); margin-bottom: 6px; }
+  .alert-box p:last-child { margin-bottom: 0; }
+
+  details summary {
+    font-weight: 600; color: var(--accent);
+    padding: 8px 0; cursor: pointer; font-size: 14px;
+  }
+
+  .nav-hint {
+    margin-top: 28px; padding: 14px 18px;
+    background: #f0f0e8; border-radius: 8px;
+    font-size: 12px; color: var(--ink-soft);
+    text-align: center; font-style: italic;
+  }
+
+  /* ===== MOBILE: full-bleed working pad + horizontal scroll ===== */
+  @media (max-width: 640px) {
+    body { padding: 12px 0 40px; }
+    .container { padding: 0 12px; }
+    header { border-radius: 0; margin: 0 -12px 12px; padding: 20px 16px; }
+    h1 { font-size: 22px; }
+    .topic-map { border-radius: 8px; padding: 12px 14px; }
+    .topic-map-label { width: auto; min-width: 80px; }
+    .card {
+      padding: 14px 0;
+      border-radius: 8px;
+      margin: 0 -12px 12px;
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+    .card > * { margin-left: 0; margin-right: 0; }
+    .working-pad {
+      margin: 10px -12px;
+      padding: 16px 12px;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .working-pad > svg {
+      min-width: 520px;
+      max-width: none;
+      width: 100%;
+    }
+    .method-tab { padding: 8px 12px; font-size: 12px; }
+    .pad-controls { gap: 6px; }
+    .btn { padding: 7px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P6 Signature › Heuristic 3.1</div>
+    <h1>Advanced Model Drawing</h1>
+    <div class="subtitle">5 canonical bar-model patterns for P6 ratio and transfer problems</div>
+    <div class="priority-row">
+      <span class="chip priority-very-high">🔴 VERY HIGH PREP</span>
+      <span class="chip">⭐ P6 signature</span>
+      <span class="chip">Bar model only</span>
+    </div>
+  </header>
+
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <span class="topic-map-label">Subtopics in P6</span>
+      <div class="topic-map-chips">
+        <span class="map-chip active">Advanced Model Drawing</span>
+        <span class="map-chip">All Items Changed</span>
+        <span class="map-chip">Circles (Boomerang & Rugby)</span>
+        <span class="map-chip">Speed (Common Distance/Time)</span>
+        <span class="map-chip">Algebra (Pre-algebra)</span>
+      </div>
+    </div>
+    <div class="topic-map-row">
+      <span class="topic-map-label">Heuristics used</span>
+      <div class="topic-map-chips">
+        <span class="map-chip heuristic-chip active">Bar model</span>
+        <span class="map-chip heuristic-chip active">Ratio</span>
+        <span class="map-chip heuristic-chip">Unit value</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label label-tip">What it is</span>
+    <p style="font-size:14.5px;">P6 problems where <strong>ratios change after a transfer</strong> — money moves from A to B, items are added or removed, and the new ratio is given. Students draw <strong>before-and-after bars</strong>, keep the unit system consistent, and use the transfer amount to bridge the two states.</p>
+  </div>
+
+  <h2 class="section-heading">Signal phrases — train students to spot</h2>
+  <div class="card">
+    <ul class="signal-list">
+      <li>"The ratio was <em>5:3</em>. After Ali gave Baba <strong>$40</strong>, the ratio became <em>3:2</em>"</li>
+      <li>"<em>Some</em> boys left the hall, and the ratio of boys to girls changed to..."</li>
+      <li>"A <strong>transfer</strong> happens, then a <strong>new ratio</strong> is stated"</li>
+      <li>The <strong>total is unchanged</strong> in internal-transfer problems</li>
+    </ul>
+  </div>
+
+  <h2 class="section-heading">Worked example — click through each step</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Question:</strong> The ratio of <strong>Ali's money to Baba's</strong> was <strong>5:3</strong>. After <strong>Ali gave Baba $40</strong>, the ratio became <strong>3:2</strong>. How much did <strong>Ali have at first</strong>?
+    </div>
+
+    <div class="pad-controls">
+      <button class="btn btn-primary" id="prev-btn" disabled>← Previous</button>
+      <button class="btn btn-primary" id="next-btn">Next step →</button>
+      <button class="btn btn-secondary" id="reset-btn">Reset</button>
+      <span class="step-counter" id="step-counter">Step 0 / 8</span>
+    </div>
+
+    <div class="step-narration" id="narration">
+      Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.
+    </div>
+
+    <div class="working-pad">
+      <svg id="svg" viewBox="0 0 920 960" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+
+        <!-- ===== DIAGRAM ZONE: y=30 to y=530 ===== -->
+
+        <!-- Step 1: Draw Before bars -->
+        <g class="step-elem" data-step="1">
+          <text x="20" y="45" class="pencil-text" font-size="24" font-weight="700">BEFORE: Ali : Baba = 5 : 3</text>
+          <rect x="20" y="65" width="500" height="55" fill="none" stroke="var(--pencil)" stroke-width="2"/>
+          <line x1="120" y1="65" x2="120" y2="120" class="pencil-stroke draw-path" stroke-width="1.5"/>
+          <line x1="220" y1="65" x2="220" y2="120" class="pencil-stroke draw-path" stroke-width="1.5"/>
+          <line x1="320" y1="65" x2="320" y2="120" class="pencil-stroke draw-path" stroke-width="1.5"/>
+          <line x1="420" y1="65" x2="420" y2="120" class="pencil-stroke draw-path" stroke-width="1.5"/>
+          <text x="70" y="98" class="pencil-text hw-blue" font-size="20" font-weight="700" text-anchor="middle">1u</text>
+          <text x="170" y="98" class="pencil-text hw-blue" font-size="20" font-weight="700" text-anchor="middle">1u</text>
+          <text x="270" y="98" class="pencil-text hw-blue" font-size="20" font-weight="700" text-anchor="middle">1u</text>
+          <text x="370" y="98" class="pencil-text hw-blue" font-size="20" font-weight="700" text-anchor="middle">1u</text>
+          <text x="460" y="98" class="pencil-text hw-blue" font-size="20" font-weight="700" text-anchor="middle">1u</text>
+          <text x="260" y="145" class="pencil-text" font-size="20" font-weight="700" text-anchor="middle">Ali = 5u</text>
+
+          <rect x="20" y="165" width="300" height="55" fill="none" stroke="var(--pencil)" stroke-width="2"/>
+          <line x1="120" y1="165" x2="120" y2="220" class="pencil-stroke draw-path" stroke-width="1.5"/>
+          <line x1="220" y1="165" x2="220" y2="220" class="pencil-stroke draw-path" stroke-width="1.5"/>
+          <text x="70" y="198" class="pencil-text hw-blue" font-size="20" font-weight="700" text-anchor="middle">1u</text>
+          <text x="170" y="198" class="pencil-text hw-blue" font-size="20" font-weight="700" text-anchor="middle">1u</text>
+          <text x="260" y="198" class="pencil-text hw-blue" font-size="20" font-weight="700" text-anchor="middle">1u</text>
+          <text x="160" y="245" class="pencil-text" font-size="20" font-weight="700" text-anchor="middle">Baba = 3u</text>
+        </g>
+
+        <!-- Step 2: Show the $40 transfer -->
+        <g class="step-elem" data-step="2">
+          <text x="20" y="285" class="pencil-text hw-red" font-size="22" font-weight="700">Ali gives Baba $40 ↓</text>
+          <path d="M 450 95 Q 550 95, 550 180 Q 550 200, 180 200" class="red-stroke draw-path" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+          <rect x="540" y="80" width="70" height="35" fill="#fee2e2" stroke="var(--ink-red)" stroke-width="1.5" rx="4"/>
+          <text x="575" y="105" class="pencil-text hw-red" font-size="18" font-weight="700" text-anchor="middle">$40</text>
+        </g>
+
+        <!-- Step 3: Draw After bars -->
+        <g class="step-elem" data-step="3">
+          <text x="20" y="320" class="pencil-text" font-size="24" font-weight="700">AFTER: Ali : Baba = 3 : 2</text>
+          <rect x="20" y="340" width="450" height="55" fill="none" stroke="var(--pencil)" stroke-width="2"/>
+          <line x1="170" y1="340" x2="170" y2="395" class="pencil-stroke draw-path" stroke-width="1.5"/>
+          <line x1="320" y1="340" x2="320" y2="395" class="pencil-stroke draw-path" stroke-width="1.5"/>
+          <text x="95" y="373" class="pencil-text hw-green" font-size="20" font-weight="700" text-anchor="middle">1p</text>
+          <text x="245" y="373" class="pencil-text hw-green" font-size="20" font-weight="700" text-anchor="middle">1p</text>
+          <text x="385" y="373" class="pencil-text hw-green" font-size="20" font-weight="700" text-anchor="middle">1p</text>
+          <text x="235" y="420" class="pencil-text" font-size="20" font-weight="700" text-anchor="middle">Ali = 3p</text>
+
+          <rect x="20" y="440" width="300" height="55" fill="none" stroke="var(--pencil)" stroke-width="2"/>
+          <line x1="170" y1="440" x2="170" y2="495" class="pencil-stroke draw-path" stroke-width="1.5"/>
+          <text x="95" y="473" class="pencil-text hw-green" font-size="20" font-weight="700" text-anchor="middle">1p</text>
+          <text x="235" y="473" class="pencil-text hw-green" font-size="20" font-weight="700" text-anchor="middle">1p</text>
+          <text x="160" y="520" class="pencil-text" font-size="20" font-weight="700" text-anchor="middle">Baba = 2p</text>
+        </g>
+
+        <!-- ===== WORKING ZONE: y=555 to y=820 ===== -->
+
+        <!-- Step 4: Key insight — total is unchanged -->
+        <g class="step-elem" data-step="4">
+          <text x="20" y="555" class="pencil-text hw-red" font-size="22" font-weight="700">💡 Total is unchanged (internal transfer):</text>
+          <text x="40" y="595" class="pencil-text" font-size="22" font-weight="700">Before total = 5u + 3u = 8u</text>
+          <text x="40" y="635" class="pencil-text" font-size="22" font-weight="700">After total = 3p + 2p = 5p</text>
+          <text x="40" y="675" class="pencil-text hw-red" font-size="22" font-weight="700">So: 8u = 5p → express both in same units</text>
+        </g>
+
+        <!-- Step 5: Align totals using LCM -->
+        <g class="step-elem" data-step="5">
+          <text x="20" y="710" class="pencil-text" font-size="22" font-weight="700">LCM of 8 and 5 = 40. Let total = 40 parts:</text>
+          <text x="40" y="750" class="pencil-text" font-size="22">Before: Ali = 25 parts, Baba = 15 parts</text>
+        </g>
+
+        <!-- Step 6: After bars in 40-part system -->
+        <g class="step-elem" data-step="6">
+          <text x="480" y="555" class="pencil-text" font-size="22" font-weight="700">After: Ali = 24 parts, Baba = 16 parts</text>
+          <text x="500" y="595" class="pencil-text" font-size="20" fill="var(--pencil-soft)">(since 3:2 = 24:16 out of 40)</text>
+          <text x="480" y="640" class="pencil-text hw-red" font-size="22" font-weight="700">Ali lost: 25 − 24 = 1 part</text>
+          <text x="480" y="680" class="pencil-text hw-red" font-size="22" font-weight="700">1 part = $40 ✓</text>
+        </g>
+
+        <!-- Step 7: Calculate -->
+        <g class="step-elem" data-step="7">
+          <text x="480" y="720" class="pencil-text" font-size="22" font-weight="700">Ali at first = 25 parts</text>
+          <text x="480" y="760" class="pencil-text" font-size="22" font-weight="700">= 25 × $40</text>
+          <text x="480" y="800" class="pencil-text hw-green" font-size="30" font-weight="700">= $1000</text>
+        </g>
+
+        <!-- ===== ANSWER ZONE: y=840 to y=940 ===== -->
+
+        <!-- Step 8: Verify + answer box -->
+        <g class="step-elem" data-step="8">
+          <rect x="20" y="850" width="420" height="55" fill="none" class="green-stroke draw-path answer-box" stroke-width="2.5" rx="6"/>
+          <text x="35" y="885" class="pencil-text hw-green" font-size="28" font-weight="700">★ Ali had $1000 at first</text>
+          <text x="20" y="930" class="pencil-text" font-size="18" font-weight="700">Check:</text>
+          <text x="20" y="955" class="pencil-text" font-size="17">Before: Ali $1000, Baba $600 → 1000:600 = 5:3 ✓</text>
+          <text x="20" y="980" class="pencil-text" font-size="17">After: Ali $960, Baba $640 → 960:640 = 3:2 ✓</text>
+        </g>
+
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 10 3, 0 6" fill="var(--ink-red)"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Common student traps</h2>
+  <div class="card">
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 1: Mixing up the two unit systems</h4>
+      <p>Students use "u" for before AND after, forgetting the ratio change means the units are different. Before units (u) and after units (p) are <strong>not the same size</strong>. They must be aligned via the total or the transfer amount.</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 2: Treating the $40 as a ratio part</h4>
+      <p>Students write "5u − 3u = $40" or "$40 = 2u." The $40 is an <strong>absolute dollar amount</strong>, not a ratio part. It must be connected to the unit system through the total or by cross-multiplication.</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 3: Forgetting that total is unchanged</h4>
+      <p>In internal-transfer problems, the total stays the same. Students sometimes add the $40 to the total instead of recognising it's just moved from one person to another.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">How to teach it</h2>
+  <div class="card">
+    <div class="alert-box alert-tip">
+      <h4>💡 Three teaching anchors</h4>
+      <p><strong>1. Always draw BEFORE and AFTER side by side.</strong> Never try to morph one bar into another — students get lost. Two separate diagrams, two separate unit systems, then bridge them.</p>
+      <p><strong>2. Label the transfer with a bright colour.</strong> The $40 (or whatever moves) should be drawn as a physical block with an arrow. Students need to see it as a <em>thing that moves</em>.</p>
+      <p><strong>3. Force the "total check."</strong> Before total must equal after total in internal transfer. If they don't match, the student has mixed up their units.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Try this one (no peeking)</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Practice:</strong> The ratio of <strong>boys to girls</strong> in a hall was <strong>7:5</strong>. After <strong>24 boys left</strong>, the ratio became <strong>3:5</strong>. How many <strong>boys</strong> were there at first?
+    </div>
+    <details>
+      <summary>▸ Click to reveal answer</summary>
+      <div style="padding:12px; background:#f8fafc; border-radius:6px; margin-top:8px; font-size:14px;">
+        <p>Before: boys = 7u, girls = 5u. Total = 12u.</p>
+        <p>After: boys = 7u − 24, girls = 5u. Ratio = 3:5.</p>
+        <p>So (7u − 24) : 5u = 3 : 5 → 5(7u − 24) = 3(5u) → 35u − 120 = 15u → 20u = 120 → u = 6</p>
+        <p>Boys at first = 7 × 6 = <strong>42 boys</strong></p>
+      </div>
+    </details>
+  </div>
+
+  <div class="nav-hint">
+    📍 Advanced Model Drawing · <a href="index.html" style="color:var(--accent); font-weight:600;">← Back to mindmap</a>
+  </div>
+
+</div>
+
+<script>
+  function makeStepController(suffix, totalSteps, narrations) {
+    let currentStep = 0;
+    const svgEl = document.getElementById(`svg${suffix ? '-' + suffix : ''}`);
+    const narrationEl = document.getElementById(`narration${suffix ? '-' + suffix : ''}`);
+    const counterEl = document.getElementById(`step-counter${suffix ? '-' + suffix : ''}`);
+    const prevBtn = document.getElementById(`prev-btn${suffix ? '-' + suffix : ''}`);
+    const nextBtn = document.getElementById(`next-btn${suffix ? '-' + suffix : ''}`);
+    const resetBtn = document.getElementById(`reset-btn${suffix ? '-' + suffix : ''}`);
+
+    function render() {
+      svgEl.querySelectorAll('.step-elem').forEach(el => {
+        const stepNum = parseInt(el.dataset.step);
+        el.classList.toggle('visible', stepNum <= currentStep);
+      });
+      // Ghosting: dim bar-fills from earlier steps
+      svgEl.querySelectorAll('.bar-fill, .node-fill').forEach(fill => {
+        const parentStep = parseInt(fill.closest('.step-elem').dataset.step);
+        fill.classList.toggle('ghost', parentStep < currentStep);
+      });
+      narrationEl.innerHTML = narrations[currentStep];
+      counterEl.textContent = `Step ${currentStep} / ${totalSteps}`;
+      prevBtn.disabled = currentStep === 0;
+      nextBtn.disabled = currentStep === totalSteps;
+      nextBtn.textContent = currentStep === totalSteps ? 'Done ✓' : 'Next step →';
+    }
+
+    nextBtn.addEventListener('click', () => { if (currentStep < totalSteps) { currentStep++; render(); } });
+    prevBtn.addEventListener('click', () => { if (currentStep > 0) { currentStep--; render(); } });
+    resetBtn.addEventListener('click', () => { currentStep = 0; render(); });
+
+    render();
+    return { next: () => nextBtn.click(), prev: () => prevBtn.click() };
+  }
+
+  const ctrl = makeStepController('', 8, {
+    0: 'Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.',
+    1: '<strong>Step 1 — Draw the BEFORE bars.</strong> Ali = 5u, Baba = 3u. Cut each bar into unit parts.',
+    2: '<strong>Step 2 — Show the transfer.</strong> Ali gives Baba $40. Draw the $40 as a moving block with an arrow.',
+    3: '<strong>Step 3 — Draw the AFTER bars.</strong> Ali : Baba = 3 : 2. Use NEW unit labels (p) to avoid confusion.',
+    4: '<strong>Step 4 — KEY INSIGHT.</strong> Total money is unchanged — it just moved. Before total = 8u. After total = 5p. So 8u = 5p.',
+    5: '<strong>Step 5 — Align the totals.</strong> LCM of 8 and 5 is 40. Express both before and after as 40 equal parts.',
+    6: '<strong>Step 6 — Map the $40 to parts.</strong> In the 40-part system: Ali before = 25 parts, Ali after = 24 parts. He lost 1 part = $40.',
+    7: '<strong>Step 7 — Calculate.</strong> Ali at first = 25 parts × $40 = $1000.',
+    8: '<strong>Step 8 — Verify.</strong> Before: $1000:$600 = 5:3 ✓. After: $960:$640 = 3:2 ✓. Answer: $1000.'
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); ctrl.next(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); ctrl.prev(); }
+  });
+</script>
+</body>
+</html>

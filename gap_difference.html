@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gap & Difference — P5 Heuristic</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a2332; --ink-soft: #4a5568; --bg: #fafaf7; --card: #ffffff;
+    --accent: #2f5496; --accent-soft: #e1e8f5; --pencil: #2d3142; --pencil-soft: #5a6478;
+    --paper: #fffdf5; --ink-red: #c1272d; --ink-blue: #1f5fa8; --ink-green: #2e7d32;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+    --fill-choc: #fee2e2; --fill-blue: #dbeafe; --fill-green: #dcfce7; --fill-amber: #fef3c7; --fill-ink: #1f3864;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; padding: 24px 16px 64px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  header { background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%); color: white; padding: 24px 28px; border-radius: 12px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .breadcrumb { font-size: 12px; opacity: .75; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; opacity: .85; }
+  .priority-row { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.18); }
+  .chip.priority-high { background: #9a3412; }
+  .topic-map { background: var(--card); border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .topic-map-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .topic-map-row:last-child { margin-bottom: 0; }
+  .topic-map-label { font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.5px; padding-top: 5px; flex-shrink: 0; width: 100px; }
+  .topic-map-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .map-chip { padding: 4px 11px; border-radius: 14px; font-size: 12px; font-weight: 500; background: #f1f5f9; color: var(--ink-soft); border: 1px solid #e2e8f0; text-decoration: none; cursor: default; }
+  .map-chip.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: 700; }
+  .map-chip.heuristic-chip { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+  .map-chip.heuristic-chip.active { background: #d97706; color: white; }
+  .card { background: var(--card); border-radius: 10px; padding: 18px 22px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .card-label { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; margin-bottom: 8px; }
+  .label-tip { background: #eff7ec; color: #2e7d32; }
+  h2.section-heading { font-size: 18px; font-weight: 700; margin: 22px 0 10px; display: flex; align-items: center; gap: 8px; }
+  h2.section-heading::before { content: ''; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
+  .signal-list { list-style: none; }
+  .signal-list li { padding: 5px 0 5px 22px; position: relative; font-size: 14px; color: var(--ink-soft); }
+  .signal-list li::before { content: '💬'; position: absolute; left: 0; top: 5px; font-size: 13px; }
+  .question-box { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 14px 16px; border-radius: 6px; margin-bottom: 18px; font-size: 14px; }
+  .question-box strong { color: var(--accent); }
+  .working-pad { background: var(--paper); border: 1px solid #e0d8c2; border-radius: 8px; padding: 24px 28px; margin: 12px 0; min-height: 480px; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+  .pad-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .step-counter { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-left: auto; }
+  .btn { padding: 8px 16px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
+  .btn-primary { background: var(--accent); color: white; } .btn-primary:hover { background: #224075; } .btn-primary:disabled { background: #b0b9cc; cursor: not-allowed; }
+  .btn-secondary { background: white; color: var(--ink); border: 1px solid #cbd5e1; } .btn-secondary:hover { background: #f1f5f9; }
+  .step-narration { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; font-size: 15px; color: var(--ink-soft); min-height: 50px; }
+  .step-narration strong { color: var(--accent); }
+  .pencil-text { font-family: 'Kalam', cursive; fill: var(--pencil); }
+  .hw-blue { fill: var(--ink-blue); } .hw-red { fill: var(--ink-red); } .hw-green { fill: var(--ink-green); }
+  .pencil-stroke { stroke: var(--pencil); stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-width: 2; }
+  .red-stroke { stroke: var(--ink-red); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .blue-stroke { stroke: var(--ink-blue); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .green-stroke { stroke: var(--ink-green); stroke-linecap: round; fill: none; stroke-width: 2; }
+  rect[fill]:not([fill="none"]) { rx: 4; }
+  rect.bar-fill, rect.node-fill { filter: drop-shadow(0 1px 2px rgba(0,0,0,.08)); transition: opacity 0.4s ease; }
+  rect.answer-box { fill: #f0fdf4; rx: 6; }
+  .bar-fill.ghost, .node-fill.ghost { opacity: 0.3; }
+  .step-elem { opacity: 0; transition: opacity 0.5s ease; } .step-elem.visible { opacity: 1; }
+  .draw-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+  .step-elem.visible .draw-path { animation: drawIn 0.8s ease forwards; }
+  @keyframes drawIn { to { stroke-dashoffset: 0; } }
+  .strike-line { stroke-dasharray: 200; stroke-dashoffset: 200; }
+  .step-elem.visible .strike-line { animation: strike 0.5s ease forwards; }
+  @keyframes strike { to { stroke-dashoffset: 0; } }
+  .alert-box { border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .alert-trap { background: #fdf4e3; border-left: 4px solid #d97706; } .alert-tip { background: #eff7ec; border-left: 4px solid #2e7d32; }
+  .alert-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; } .alert-trap h4 { color: #d97706; } .alert-tip h4 { color: #2e7d32; }
+  .alert-box p { font-size: 13.5px; color: var(--ink); margin-bottom: 6px; } .alert-box p:last-child { margin-bottom: 0; }
+  details summary { font-weight: 600; color: var(--accent); padding: 8px 0; cursor: pointer; font-size: 14px; }
+  .nav-hint { margin-top: 28px; padding: 14px 18px; background: #f0f0e8; border-radius: 8px; font-size: 12px; color: var(--ink-soft); text-align: center; font-style: italic; }
+  @media (max-width: 640px) {
+    body { padding: 12px 0 40px; } .container { padding: 0 12px; }
+    header { border-radius: 0; margin: 0 -12px 12px; padding: 20px 16px; } h1 { font-size: 22px; }
+    .topic-map { border-radius: 8px; padding: 12px 14px; } .topic-map-label { width: auto; min-width: 80px; }
+    .card { padding: 14px 0; border-radius: 8px; margin: 0 -12px 12px; padding-left: 12px; padding-right: 12px; }
+    .working-pad { margin: 10px -12px; padding: 16px 12px; border-radius: 0; border-left: none; border-right: none; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .working-pad > svg { min-width: 520px; max-width: none; width: 100%; }
+    .pad-controls { gap: 6px; } .btn { padding: 7px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P5 Whole Numbers › Heuristic 1.3</div>
+    <h1>Gap & Difference</h1>
+    <div class="subtitle">Known total and known gap — use the sum-and-difference formulas</div>
+    <div class="priority-row">
+      <span class="chip priority-high">🟠 HIGH PREP</span>
+      <span class="chip">⭐ Foundational</span>
+      <span class="chip">Bar model + formula</span>
+    </div>
+  </header>
+
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <span class="topic-map-label">Subtopics in P5</span>
+      <div class="topic-map-chips">
+        <span class="map-chip">Branching (Direct)</span>
+        <span class="map-chip">Repeated Items</span>
+        <span class="map-chip active">Gap & Difference</span>
+        <span class="map-chip">One Item Unchanged</span>
+        <span class="map-chip">Total Unchanged</span>
+        <span class="map-chip">Difference Unchanged</span>
+        <span class="map-chip">Quantity x Value</span>
+      </div>
+    </div>
+    <div class="topic-map-row">
+      <span class="topic-map-label">Heuristics used</span>
+      <div class="topic-map-chips">
+        <span class="map-chip heuristic-chip active">Bar model</span>
+        <span class="map-chip heuristic-chip active">Sum & difference</span>
+        <span class="map-chip heuristic-chip">Formulas</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label label-tip">What it is</span>
+    <p style="font-size:14.5px;">The problem gives you <strong>two facts</strong>: the total of both quantities, and the difference between them. Students draw bars to visualise, then apply the classic formulas: <strong>Bigger = (Total + Gap) / 2</strong> and <strong>Smaller = (Total - Gap) / 2</strong>.</p>
+  </div>
+
+  <h2 class="section-heading">Signal phrases — train students to spot</h2>
+  <div class="card">
+    <ul class="signal-list">
+      <li>"Ali and Baba had <em>120 marbles altogether</em>"</li>
+      <li>"Ali had <em>30 more</em> than Baba"</li>
+      <li>"The total was $80 and the difference was $20"</li>
+      <li>Two numbers: <strong>sum known, difference known</strong></li>
+    </ul>
+  </div>
+
+  <h2 class="section-heading">Worked example — click through each step</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Question:</strong> Ali and Baba had <strong>120 marbles</strong> altogether. Ali had <strong>30 more</strong> marbles than Baba. How many marbles did <strong>each</strong> of them have?
+    </div>
+
+    <div class="pad-controls">
+      <button class="btn btn-primary" id="prev-btn" disabled>&#8592; Previous</button>
+      <button class="btn btn-primary" id="next-btn">Next step &#8594;</button>
+      <button class="btn btn-secondary" id="reset-btn">Reset</button>
+      <span class="step-counter" id="step-counter">Step 0 / 6</span>
+    </div>
+
+    <div class="step-narration" id="narration">
+      Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.
+    </div>
+
+    <div class="working-pad">
+      <svg id="svg" viewBox="0 0 920 800" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+
+        <!-- ===== ZONE 1: Diagram y=30-350 ===== -->
+
+        <!-- Step 1: Draw Ali's bar (bigger) -->
+        <g class="step-elem" data-step="1">
+          <text x="20" y="45" class="pencil-text" font-size="22" font-weight="700">Ali has more — draw his bar longer</text>
+          <rect x="120" y="70" width="450" height="50" fill="var(--fill-green)" opacity="0.7" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
+          <line x1="120" y1="70" x2="120" y2="120" class="pencil-stroke draw-path"/>
+          <line x1="570" y1="70" x2="570" y2="120" class="pencil-stroke draw-path"/>
+          <text x="345" y="63" class="pencil-text hw-green" font-size="16" font-weight="700" text-anchor="middle">Ali's marbles</text>
+          <text x="60" y="103" class="pencil-text" font-size="18" font-weight="700">Ali</text>
+        </g>
+
+        <!-- Step 2: Draw Baba's bar (shorter) + gap -->
+        <g class="step-elem" data-step="2">
+          <rect x="120" y="150" width="300" height="50" fill="var(--fill-blue)" opacity="0.6" stroke="var(--ink-blue)" stroke-width="2" class="bar-fill"/>
+          <line x1="120" y1="150" x2="120" y2="200" class="pencil-stroke draw-path"/>
+          <line x1="420" y1="150" x2="420" y2="200" class="pencil-stroke draw-path"/>
+          <text x="270" y="143" class="pencil-text hw-blue" font-size="16" font-weight="700" text-anchor="middle">Baba's marbles</text>
+          <text x="60" y="183" class="pencil-text" font-size="18" font-weight="700">Baba</text>
+          <!-- Gap bracket -->
+          <path d="M 425 160 Q 420 160 420 165 L 420 185 Q 420 190 425 190" class="red-stroke draw-path"/>
+          <line x1="420" y1="177" x2="570" y2="177" class="red-stroke draw-path"/>
+          <path d="M 565 160 Q 570 160 570 165 L 570 185 Q 570 190 575 190" class="red-stroke draw-path"/>
+          <text x="500" y="210" class="pencil-text hw-red" font-size="16" font-weight="700" text-anchor="middle">Gap = 30</text>
+        </g>
+
+        <!-- Step 3: Show total -->
+        <g class="step-elem" data-step="3">
+          <text x="20" y="260" class="pencil-text" font-size="20" font-weight="700">Total = 120</text>
+          <!-- Total bracket -->
+          <path d="M 115 225 Q 110 225 110 230 L 110 245 Q 110 250 115 250" class="green-stroke draw-path"/>
+          <line x1="110" y1="237" x2="575" y2="237" class="green-stroke draw-path"/>
+          <path d="M 570 225 Q 575 225 575 230 L 575 245 Q 575 250 580 250" class="green-stroke draw-path"/>
+          <text x="345" y="270" class="pencil-text hw-green" font-size="16" font-weight="700" text-anchor="middle">Total = 120</text>
+        </g>
+
+        <!-- ===== ZONE 2: Working y=310-550 ===== -->
+
+        <!-- Step 4: Method - remove the gap -->
+        <g class="step-elem" data-step="4">
+          <text x="20" y="320" class="pencil-text hw-red" font-size="22" font-weight="700">&#9889; Method: Remove the gap to make them equal</text>
+          <text x="40" y="365" class="pencil-text" font-size="20" font-weight="700">If Ali had 30 fewer, they'd have the same amount.</text>
+          <text x="40" y="410" class="pencil-text" font-size="20" font-weight="700">Then total would be: 120 - 30 = 90</text>
+          <text x="40" y="455" class="pencil-text" font-size="20" font-weight="700">Baba = 90 &divide; 2 = 45</text>
+          <line x1="40" y1="465" x2="280" y2="465" class="blue-stroke draw-path"/>
+        </g>
+
+        <!-- Step 5: Find Ali -->
+        <g class="step-elem" data-step="5">
+          <text x="20" y="515" class="pencil-text" font-size="22" font-weight="700">Ali = Baba + 30 = 45 + 30 = 75</text>
+          <text x="20" y="560" class="pencil-text hw-green" font-size="20" font-weight="700">Or: Ali = (120 + 30) &divide; 2 = 75</text>
+          <line x1="20" y1="575" x2="420" y2="575" class="green-stroke draw-path"/>
+        </g>
+
+        <!-- ===== ZONE 3: Answer y=600+ ===== -->
+
+        <!-- Step 6: Answer box -->
+        <g class="step-elem" data-step="6">
+          <text x="20" y="620" class="pencil-text" font-size="18" font-weight="700">Formulas:</text>
+          <text x="40" y="660" class="pencil-text" font-size="18" font-weight="700">Bigger = (Total + Gap) &divide; 2</text>
+          <text x="40" y="700" class="pencil-text" font-size="18" font-weight="700">Smaller = (Total - Gap) &divide; 2</text>
+          <rect x="15" y="725" width="420" height="65" fill="#f0fdf4" stroke="var(--ink-green)" stroke-width="2" rx="6" class="answer-box"/>
+          <text x="35" y="755" class="pencil-text" font-size="20" font-weight="700">Ali: 75 marbles, Baba: 45 marbles</text>
+          <text x="35" y="780" class="pencil-text" fill="var(--pencil-soft)" font-size="14">Check: 75 + 45 = 120 &#10003;, 75 - 45 = 30 &#10003;</text>
+        </g>
+
+      </svg>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div class="alert-box alert-trap">
+        <h4>&#128293; Common trap</h4>
+        <p>Students do 120 &divide; 2 = 60 each, then add/subtract 30 to get 90 and 30. This gives the right total (120) but the wrong difference (60)! The formulas must be applied together: <strong>both numbers use (Total +/- Gap) / 2</strong>.</p>
+      </div>
+      <div class="alert-box alert-tip">
+        <h4>&#127793; Teaching tip</h4>
+        <p>Have students memorise the two formulas as a pair: "Bigger gets the plus, smaller gets the minus." Draw the "remove the gap" visual — when you chop off the extra 30 from Ali, both bars become equal (Baba's amount). This makes the division by 2 intuitive.</p>
+      </div>
+    </div>
+
+    <details>
+      <summary>&#128161; Show full mark scheme (3 marks)</summary>
+      <div style="padding:10px 0; font-size:13px; color:var(--ink-soft);">
+        <p><strong>M1:</strong> Correct method: (120 - 30) / 2 or (120 + 30) / 2</p>
+        <p><strong>M1:</strong> One correct answer: Baba = 45 or Ali = 75</p>
+        <p><strong>A1:</strong> Both correct: Ali 75 marbles, Baba 45 marbles</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="nav-hint">
+    Next: <a href="quantity_value_frac.html" style="color:var(--accent); font-weight:600;">Quantity &times; Value (Fractional)</a> — coin problems and weighted grouping with fractions.
+  </div>
+
+</div>
+<script>
+  function makeStepController(suffix, totalSteps, narrations) {
+    let currentStep = 0;
+    const svgEl = document.getElementById(`svg${suffix ? '-' + suffix : ''}`);
+    const narrationEl = document.getElementById(`narration${suffix ? '-' + suffix : ''}`);
+    const counterEl = document.getElementById(`step-counter${suffix ? '-' + suffix : ''}`);
+    const prevBtn = document.getElementById(`prev-btn${suffix ? '-' + suffix : ''}`);
+    const nextBtn = document.getElementById(`next-btn${suffix ? '-' + suffix : ''}`);
+    const resetBtn = document.getElementById(`reset-btn${suffix ? '-' + suffix : ''}`);
+    function render() {
+      svgEl.querySelectorAll('.step-elem').forEach(el => { const stepNum = parseInt(el.dataset.step); el.classList.toggle('visible', stepNum <= currentStep); });
+      svgEl.querySelectorAll('.bar-fill, .node-fill').forEach(fill => { const parentStep = parseInt(fill.closest('.step-elem').dataset.step); fill.classList.toggle('ghost', parentStep < currentStep); });
+      narrationEl.innerHTML = narrations[currentStep]; counterEl.textContent = `Step ${currentStep} / ${totalSteps}`;
+      prevBtn.disabled = currentStep === 0; nextBtn.disabled = currentStep === totalSteps;
+      nextBtn.textContent = currentStep === totalSteps ? 'Done \u2713' : 'Next step \u2192';
+    }
+    nextBtn.addEventListener('click', () => { if (currentStep < totalSteps) { currentStep++; render(); } });
+    prevBtn.addEventListener('click', () => { if (currentStep > 0) { currentStep--; render(); } });
+    resetBtn.addEventListener('click', () => { currentStep = 0; render(); });
+    render(); return { next: () => nextBtn.click(), prev: () => prevBtn.click() };
+  }
+  const ctrl = makeStepController('', 6, {
+    0: 'Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.',
+    1: 'Step 1 — Ali has more. Draw his bar longer.',
+    2: 'Step 2 — Baba has less. Draw his bar shorter. Mark the gap = 30.',
+    3: 'Step 3 — Total = 120. Both bars together make 120.',
+    4: 'Step 4 — Remove the gap: 120 - 30 = 90. Now both equal. Baba = 90 / 2 = 45.',
+    5: 'Step 5 — Ali = 45 + 30 = 75. Or use formula: (120 + 30) / 2 = 75.',
+    6: 'Step 6 — Ali: 75 marbles, Baba: 45 marbles. Both checks pass \u2713'
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); ctrl.next(); } if (e.key === 'ArrowLeft') { e.preventDefault(); ctrl.prev(); } });
+</script>
+</body>
+</html>

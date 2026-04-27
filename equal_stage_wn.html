@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Equal Stage (Whole Numbers) — P5 Heuristic</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #1a2332; --ink-soft: #4a5568; --bg: #fafaf7; --card: #ffffff; --accent: #2f5496; --accent-soft: #e1e8f5; --pencil: #2d3142; --pencil-soft: #5a6478; --paper: #fffdf5; --ink-red: #c1272d; --ink-blue: #1f5fa8; --ink-green: #2e7d32; --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04); --fill-choc: #fee2e2; --fill-blue: #dbeafe; --fill-green: #dcfce7; --fill-amber: #fef3c7; --fill-ink: #1f3864; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; padding: 24px 16px 64px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  header { background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%); color: white; padding: 24px 28px; border-radius: 12px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .breadcrumb { font-size: 12px; opacity: .75; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; opacity: .85; }
+  .priority-row { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.18); }
+  .chip.priority-high { background: #9a3412; }
+  .topic-map { background: var(--card); border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .topic-map-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .topic-map-row:last-child { margin-bottom: 0; }
+  .topic-map-label { font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.5px; padding-top: 5px; flex-shrink: 0; width: 100px; }
+  .topic-map-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .map-chip { padding: 4px 11px; border-radius: 14px; font-size: 12px; font-weight: 500; background: #f1f5f9; color: var(--ink-soft); border: 1px solid #e2e8f0; text-decoration: none; cursor: default; }
+  .map-chip.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: 700; }
+  .map-chip.heuristic-chip { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+  .map-chip.heuristic-chip.active { background: #d97706; color: white; }
+  .card { background: var(--card); border-radius: 10px; padding: 18px 22px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .card-label { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; margin-bottom: 8px; }
+  .label-tip { background: #eff7ec; color: #2e7d32; }
+  h2.section-heading { font-size: 18px; font-weight: 700; margin: 22px 0 10px; display: flex; align-items: center; gap: 8px; }
+  h2.section-heading::before { content: ''; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
+  .signal-list { list-style: none; }
+  .signal-list li { padding: 5px 0 5px 22px; position: relative; font-size: 14px; color: var(--ink-soft); }
+  .signal-list li::before { content: '💬'; position: absolute; left: 0; top: 5px; font-size: 13px; }
+  .method-tabs { display: flex; gap: 4px; margin-bottom: 0; border-bottom: 2px solid #e2e8f0; }
+  .method-tab { padding: 10px 18px; background: none; border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.15s ease; }
+  .method-tab:hover { color: var(--accent); }
+  .method-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .method-tab .badge { font-size: 10px; background: #2e7d32; color: white; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-weight: 700; }
+  .method-tab .badge-alt { background: #94a3b8; }
+  .method-content { display: none; padding-top: 16px; }
+  .method-content.active { display: block; }
+  .method-note { background: #f8fafc; border-left: 3px solid #94a3b8; padding: 10px 14px; border-radius: 4px; font-size: 13px; color: var(--ink-soft); margin-bottom: 14px; font-style: italic; }
+  .question-box { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 14px 16px; border-radius: 6px; margin-bottom: 18px; font-size: 14px; }
+  .question-box strong { color: var(--accent); }
+  .working-pad { background: var(--paper); border: 1px solid #e0d8c2; border-radius: 8px; padding: 24px 28px; margin: 12px 0; min-height: 480px; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+  .pad-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .step-counter { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-left: auto; }
+  .btn { padding: 8px 16px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
+  .btn-primary { background: var(--accent); color: white; } .btn-primary:hover { background: #224075; } .btn-primary:disabled { background: #b0b9cc; cursor: not-allowed; }
+  .btn-secondary { background: white; color: var(--ink); border: 1px solid #cbd5e1; } .btn-secondary:hover { background: #f1f5f9; }
+  .step-narration { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; font-size: 15px; color: var(--ink-soft); min-height: 50px; }
+  .step-narration strong { color: var(--accent); }
+  .pencil-text { font-family: 'Kalam', cursive; fill: var(--pencil); }
+  .hw-blue { fill: var(--ink-blue); } .hw-red { fill: var(--ink-red); } .hw-green { fill: var(--ink-green); }
+  .pencil-stroke { stroke: var(--pencil); stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-width: 2; }
+  .red-stroke { stroke: var(--ink-red); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .blue-stroke { stroke: var(--ink-blue); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .green-stroke { stroke: var(--ink-green); stroke-linecap: round; fill: none; stroke-width: 2; }
+  rect[fill]:not([fill="none"]) { rx: 4; }
+  rect.bar-fill, rect.node-fill { filter: drop-shadow(0 1px 2px rgba(0,0,0,.08)); transition: opacity 0.4s ease; }
+  rect.answer-box { fill: #f0fdf4; rx: 6; }
+  .bar-fill.ghost, .node-fill.ghost { opacity: 0.3; }
+  .step-elem { opacity: 0; transition: opacity 0.5s ease; } .step-elem.visible { opacity: 1; }
+  .draw-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+  .step-elem.visible .draw-path { animation: drawIn 0.8s ease forwards; }
+  @keyframes drawIn { to { stroke-dashoffset: 0; } }
+  .strike-line { stroke-dasharray: 200; stroke-dashoffset: 200; }
+  .step-elem.visible .strike-line { animation: strike 0.5s ease forwards; }
+  @keyframes strike { to { stroke-dashoffset: 0; } }
+  .alert-box { border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .alert-trap { background: #fdf4e3; border-left: 4px solid #d97706; } .alert-tip { background: #eff7ec; border-left: 4px solid #2e7d32; }
+  .alert-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; } .alert-trap h4 { color: #d97706; } .alert-tip h4 { color: #2e7d32; }
+  .alert-box p { font-size: 13.5px; color: var(--ink); margin-bottom: 6px; } .alert-box p:last-child { margin-bottom: 0; }
+  details summary { font-weight: 600; color: var(--accent); padding: 8px 0; cursor: pointer; font-size: 14px; }
+  .nav-hint { margin-top: 28px; padding: 14px 18px; background: #f0f0e8; border-radius: 8px; font-size: 12px; color: var(--ink-soft); text-align: center; font-style: italic; }
+  @media (max-width: 640px) {
+    body { padding: 12px 0 40px; } .container { padding: 0 12px; }
+    header { border-radius: 0; margin: 0 -12px 12px; padding: 20px 16px; } h1 { font-size: 22px; }
+    .topic-map { border-radius: 8px; padding: 12px 14px; } .topic-map-label { width: auto; min-width: 80px; }
+    .card { padding: 14px 0; border-radius: 8px; margin: 0 -12px 12px; padding-left: 12px; padding-right: 12px; }
+    .card > * { margin-left: 0; margin-right: 0; }
+    .working-pad { margin: 10px -12px; padding: 16px 12px; border-radius: 0; border-left: none; border-right: none; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .working-pad > svg { min-width: 520px; max-width: none; width: 100%; }
+    .method-tab { padding: 8px 12px; font-size: 12px; } .pad-controls { gap: 6px; } .btn { padding: 7px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P5 Whole Numbers › Heuristic 1.4</div>
+    <h1>Equal Stage (Whole Numbers)</h1>
+    <div class="subtitle">Two quantities become equal after a transfer — find the original amounts</div>
+    <div class="priority-row">
+      <span class="chip priority-high">🟠 HIGH PREP</span>
+      <span class="chip">⭐ Very common</span>
+      <span class="chip">Bar model + table</span>
+    </div>
+  </header>
+
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <span class="topic-map-label">Subtopics in P5 WN</span>
+      <div class="topic-map-chips">
+        <span class="map-chip">More than / Less than</span>
+        <span class="map-chip">Internal Transfer</span>
+        <span class="map-chip active">Equal Stage</span>
+        <span class="map-chip">Gap &amp; Difference</span>
+      </div>
+    </div>
+    <div class="topic-map-row">
+      <span class="topic-map-label">Heuristics used</span>
+      <div class="topic-map-chips">
+        <span class="map-chip heuristic-chip active">Bar model</span>
+        <span class="map-chip heuristic-chip active">Before/after table</span>
+        <span class="map-chip heuristic-chip">Unit value</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label label-tip">What it is</span>
+    <p style="font-size:14.5px;">Two people start with different amounts. After one <strong>gives some to the other</strong>, they end up <strong>equal</strong>. Students draw before-and-after bars and use the "gap closed" to find the transfer amount and original values.</p>
+  </div>
+
+  <h2 class="section-heading">Signal phrases — train students to spot</h2>
+  <div class="card">
+    <ul class="signal-list">
+      <li>"After Ali gave Baba <strong>$30</strong>, they had <em>the same amount</em>"</li>
+      <li>"In the end, both of them had <strong>equal</strong> amounts of money"</li>
+      <li>"A <strong>transfer</strong> happened, and the two quantities <strong>became equal</strong>"</li>
+      <li>The <strong>initial ratio</strong> is given (e.g., 3 times as much)</li>
+    </ul>
+  </div>
+
+  <h2 class="section-heading">Worked example — click through each step</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Question:</strong> Ali had <strong>3 times as much</strong> money as Baba. After Ali <strong>gave Baba $30</strong>, they had <strong>the same amount</strong>. How much did <strong>Ali have at first</strong>?
+    </div>
+
+    <div class="method-tabs">
+      <button class="method-tab active" data-method="bar">Bar Model <span class="badge">PRIMARY</span></button>
+      <button class="method-tab" data-method="table">Before/After Table <span class="badge badge-alt">ALT</span></button>
+    </div>
+
+    <!-- BAR MODEL -->
+    <div class="method-content active" id="method-bar">
+      <div class="method-note">
+        💡 <strong>Why this is primary:</strong> The bar model makes the "gap" visible. Ali gives half the gap to Baba — both bars become equal length.
+      </div>
+
+      <div class="pad-controls">
+        <button class="btn btn-primary" id="prev-btn-a" disabled>← Previous</button>
+        <button class="btn btn-primary" id="next-btn-a">Next step →</button>
+        <button class="btn btn-secondary" id="reset-btn-a">Reset</button>
+        <span class="step-counter" id="step-counter-a">Step 0 / 6</span>
+      </div>
+
+      <div class="step-narration" id="narration-a">
+        Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.
+      </div>
+
+      <div class="working-pad">
+        <svg id="svg-a" viewBox="0 0 920 800" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+
+          <!-- ===== ZONE 1: Before bars y=30–250 ===== -->
+
+          <!-- Step 1: Baba's bar -->
+          <g class="step-elem" data-step="1">
+            <text x="20" y="45" class="pencil-text" font-size="22" font-weight="700">Baba = 1 unit</text>
+            <rect x="120" y="80" width="120" height="45" fill="var(--fill-blue)" opacity="0.7" stroke="var(--ink-blue)" stroke-width="2" class="bar-fill"/>
+            <text x="180" y="108" class="pencil-text hw-blue" font-size="18" font-weight="700" text-anchor="middle">1u</text>
+            <text x="20" y="108" class="pencil-text" font-size="16" font-weight="700">Baba</text>
+          </g>
+
+          <!-- Step 2: Ali's bar = 3 units -->
+          <g class="step-elem" data-step="2">
+            <text x="20" y="165" class="pencil-text" font-size="22" font-weight="700">Ali = 3 units</text>
+            <rect x="120" y="200" width="360" height="45" fill="var(--fill-green)" opacity="0.6" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
+            <line x1="240" y1="200" x2="240" y2="245" class="pencil-stroke draw-path" stroke-width="2"/>
+            <line x1="360" y1="200" x2="360" y2="245" class="pencil-stroke draw-path" stroke-width="2"/>
+            <text x="180" y="195" class="pencil-text hw-green" font-size="14" font-weight="700" text-anchor="middle">1u</text>
+            <text x="300" y="195" class="pencil-text hw-green" font-size="14" font-weight="700" text-anchor="middle">1u</text>
+            <text x="420" y="195" class="pencil-text hw-green" font-size="14" font-weight="700" text-anchor="middle">1u</text>
+            <text x="300" y="228" class="pencil-text hw-green" font-size="16" font-weight="700" text-anchor="middle">3u</text>
+            <text x="20" y="228" class="pencil-text" font-size="16" font-weight="700">Ali</text>
+          </g>
+
+          <!-- ===== ZONE 2: The gap y=290–470 ===== -->
+
+          <!-- Step 3: Show the gap -->
+          <g class="step-elem" data-step="3">
+            <text x="20" y="290" class="pencil-text hw-red" font-size="20" font-weight="700">💡 The gap = 3u − 1u = 2u</text>
+            <rect x="240" y="330" width="240" height="40" fill="var(--fill-choc)" opacity="0.5" stroke="var(--ink-red)" stroke-width="2" class="bar-fill"/>
+            <text x="360" y="355" class="pencil-text hw-red" font-size="16" font-weight="700" text-anchor="middle">2u gap</text>
+            <text x="20" y="395" class="pencil-text" font-size="16">Ali must give HALF the gap (1u) to make them equal</text>
+          </g>
+
+          <!-- Step 4: $30 = 1 unit -->
+          <g class="step-elem" data-step="4">
+            <text x="20" y="440" class="pencil-text hw-red" font-size="20" font-weight="700">Ali gave $30 = 1 unit</text>
+            <text x="40" y="480" class="pencil-text" font-size="22" font-weight="700">So: 1 unit = $30</text>
+            <line x1="40" y1="490" x2="230" y2="490" class="red-stroke draw-path" stroke-width="2"/>
+          </g>
+
+          <!-- ===== ZONE 3: Answer y=530–700 ===== -->
+
+          <!-- Step 5: Calculate Ali before -->
+          <g class="step-elem" data-step="5">
+            <text x="20" y="530" class="pencil-text" font-size="20" font-weight="700">Ali at first = 3 × $30 = $90</text>
+            <text x="20" y="570" class="pencil-text" font-size="20" font-weight="700">Baba at first = 1 × $30 = $30</text>
+          </g>
+
+          <!-- Step 6: Check + answer box -->
+          <g class="step-elem" data-step="6">
+            <text x="20" y="620" class="pencil-text" font-size="16">Check: Ali $90 − $30 = $60. Baba $30 + $30 = $60. Equal! ✓</text>
+            <rect x="15" y="660" width="340" height="50" fill="none" class="green-stroke draw-path answer-box" stroke-width="2.5" rx="6"/>
+            <text x="30" y="692" class="pencil-text hw-green" font-size="24" font-weight="700">★ Ali had $90 at first</text>
+          </g>
+
+        </svg>
+      </div>
+    </div>
+
+    <!-- BEFORE/AFTER TABLE -->
+    <div class="method-content" id="method-table">
+      <div class="method-note">
+        💡 <strong>When to use:</strong> Students who prefer tables over bars. The table makes the "before = after total" constraint explicit.
+      </div>
+
+      <div class="pad-controls">
+        <button class="btn btn-primary" id="prev-btn-b" disabled>← Previous</button>
+        <button class="btn btn-primary" id="next-btn-b">Next step →</button>
+        <button class="btn btn-secondary" id="reset-btn-b">Reset</button>
+        <span class="step-counter" id="step-counter-b">Step 0 / 5</span>
+      </div>
+
+      <div class="step-narration" id="narration-b">
+        Click <strong>"Next step"</strong> to see the table approach.
+      </div>
+
+      <div class="working-pad">
+        <svg id="svg-b" viewBox="0 0 920 720" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+
+          <!-- ===== ZONE 1: Table y=30–380 ===== -->
+
+          <!-- Step 1: Table headers -->
+          <g class="step-elem" data-step="1">
+            <text x="20" y="45" class="pencil-text" font-size="22" font-weight="700">Before/After Table:</text>
+            <rect x="120" y="70" width="160" height="50" fill="var(--fill-ink)" stroke="var(--fill-ink)" stroke-width="2" class="node-fill"/>
+            <text x="200" y="100" fill="white" font-family="Kalam, cursive" font-size="18" font-weight="700" text-anchor="middle">Before</text>
+            <rect x="280" y="70" width="160" height="50" fill="var(--fill-ink)" stroke="var(--fill-ink)" stroke-width="2" class="node-fill"/>
+            <text x="360" y="100" fill="white" font-family="Kalam, cursive" font-size="18" font-weight="700" text-anchor="middle">After</text>
+            <line x1="120" y1="120" x2="440" y2="120" class="pencil-stroke" stroke-width="2"/>
+            <line x1="280" y1="70" x2="280" y2="310" class="pencil-stroke" stroke-width="2"/>
+          </g>
+
+          <!-- Step 2: Fill rows -->
+          <g class="step-elem" data-step="2">
+            <text x="20" y="160" class="pencil-text" font-size="18" font-weight="700">Ali</text>
+            <rect x="120" y="130" width="160" height="55" fill="var(--fill-green)" opacity="0.5" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
+            <text x="200" y="165" class="pencil-text hw-green" font-size="18" font-weight="700" text-anchor="middle">3u</text>
+            <rect x="280" y="130" width="160" height="55" fill="var(--fill-amber)" opacity="0.5" stroke="#d97706" stroke-width="2" class="bar-fill"/>
+            <text x="360" y="155" class="pencil-text" font-size="16" font-weight="700" text-anchor="middle">3u − $30</text>
+            <text x="360" y="175" class="pencil-text" font-size="14" text-anchor="middle">(gave $30)</text>
+            <line x1="120" y1="185" x2="440" y2="185" class="pencil-stroke" stroke-width="2"/>
+          </g>
+
+          <!-- Step 3: Baba row -->
+          <g class="step-elem" data-step="3">
+            <text x="20" y="240" class="pencil-text" font-size="18" font-weight="700">Baba</text>
+            <rect x="120" y="210" width="160" height="55" fill="var(--fill-blue)" opacity="0.5" stroke="var(--ink-blue)" stroke-width="2" class="bar-fill"/>
+            <text x="200" y="245" class="pencil-text hw-blue" font-size="18" font-weight="700" text-anchor="middle">1u</text>
+            <rect x="280" y="210" width="160" height="55" fill="var(--fill-amber)" opacity="0.5" stroke="#d97706" stroke-width="2" class="bar-fill"/>
+            <text x="360" y="235" class="pencil-text" font-size="16" font-weight="700" text-anchor="middle">1u + $30</text>
+            <text x="360" y="255" class="pencil-text" font-size="14" text-anchor="middle">(received $30)</text>
+            <line x1="120" y1="265" x2="440" y2="265" class="pencil-stroke" stroke-width="2"/>
+          </g>
+
+          <!-- Step 4: Equate after -->
+          <g class="step-elem" data-step="4">
+            <text x="20" y="310" class="pencil-text hw-red" font-size="20" font-weight="700">After: Ali = Baba → 3u − $30 = 1u + $30</text>
+            <text x="40" y="355" class="pencil-text" font-size="22" font-weight="700">2u = $60 → u = $30</text>
+            <line x1="40" y1="365" x2="260" y2="365" class="red-stroke draw-path" stroke-width="2"/>
+          </g>
+
+          <!-- ===== ZONE 2: Answer y=410–530 ===== -->
+
+          <!-- Step 5: Answer -->
+          <g class="step-elem" data-step="5">
+            <text x="20" y="420" class="pencil-text" font-size="20">Ali = 3 × $30 = $90</text>
+            <text x="20" y="460" class="pencil-text" font-size="20">Baba = 1 × $30 = $30</text>
+            <rect x="15" y="490" width="340" height="50" fill="none" class="green-stroke draw-path answer-box" stroke-width="2.5" rx="6"/>
+            <text x="30" y="522" class="pencil-text hw-green" font-size="24" font-weight="700">★ Ali had $90 at first</text>
+            <text x="20" y="580" class="pencil-text" font-size="15">Check: $90 − $30 = $60 and $30 + $30 = $60 ✓</text>
+          </g>
+
+        </svg>
+      </div>
+    </div>
+
+  </div>
+
+  <h2 class="section-heading">Common student traps</h2>
+  <div class="card">
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 1: Thinking the transfer = the gap</h4>
+      <p>The gap is 2 units ($60), but Ali only gives $30. Students think "Ali gives everything extra." No — Ali gives <strong>half the gap</strong> so both end up equal.</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 2: Adding $30 to the total</h4>
+      <p>Students add $30 to the total thinking new money appeared. The $30 already existed — it just moved. Total before = total after.</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 3: Setting 3u = $30</h4>
+      <p>Students see "gave $30" and think that's the unit value. But $30 is only <strong>1 unit</strong> (half the gap), not 3 units.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">How to teach it</h2>
+  <div class="card">
+    <div class="alert-box alert-tip">
+      <h4>💡 Three teaching anchors</h4>
+      <p><strong>1. "Close the gap."</strong> The gap between Ali and Baba must be split in half. One half stays with Ali, the other goes to Baba. This is the $30.</p>
+      <p><strong>2. Draw the after bars as equal length.</strong> Physically redraw both bars the same length after step 4. The visual equality makes the algebra obvious.</p>
+      <p><strong>3. Check with the total.</strong> Before total ($90 + $30 = $120) must equal after total ($60 + $60 = $120). This catches direction errors.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Try this one (no peeking)</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Practice:</strong> Tom had <strong>5 times as many</strong> stickers as Jerry. After Tom <strong>gave Jerry 24 stickers</strong>, they had the <strong>same number</strong>. How many stickers did <strong>Tom have at first</strong>?
+    </div>
+    <details>
+      <summary>▸ Click to reveal answer</summary>
+      <div style="padding:12px; background:#f8fafc; border-radius:6px; margin-top:8px; font-size:14px;">
+        <p>Tom = 5u, Jerry = 1u. Gap = 4u.</p>
+        <p>Tom gives half the gap = 2u = 24 stickers → 1u = 12</p>
+        <p>Tom at first = 5 × 12 = <strong>60 stickers</strong></p>
+        <p>Check: 60 − 24 = 36, 12 + 24 = 36 ✓</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="nav-hint">
+    📍 Equal Stage (Whole Numbers) · <a href="index.html" style="color:var(--accent); font-weight:600;">← Back to mindmap</a>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.method-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const method = tab.dataset.method;
+      document.querySelectorAll('.method-tab').forEach(t => t.classList.toggle('active', t === tab));
+      document.querySelectorAll('.method-content').forEach(c => {
+        c.classList.toggle('active', c.id === `method-${method}`);
+      });
+    });
+  });
+
+  function makeStepController(suffix, totalSteps, narrations) {
+    let currentStep = 0;
+    const svgEl = document.getElementById(`svg-${suffix}`);
+    const narrationEl = document.getElementById(`narration-${suffix}`);
+    const counterEl = document.getElementById(`step-counter-${suffix}`);
+    const prevBtn = document.getElementById(`prev-btn-${suffix}`);
+    const nextBtn = document.getElementById(`next-btn-${suffix}`);
+    const resetBtn = document.getElementById(`reset-btn-${suffix}`);
+    function render() {
+      svgEl.querySelectorAll('.step-elem').forEach(el => { const stepNum = parseInt(el.dataset.step); el.classList.toggle('visible', stepNum <= currentStep); });
+      svgEl.querySelectorAll('.bar-fill, .node-fill').forEach(fill => { const parentStep = parseInt(fill.closest('.step-elem').dataset.step); fill.classList.toggle('ghost', parentStep < currentStep); });
+      narrationEl.innerHTML = narrations[currentStep]; counterEl.textContent = `Step ${currentStep} / ${totalSteps}`;
+      prevBtn.disabled = currentStep === 0; nextBtn.disabled = currentStep === totalSteps;
+      nextBtn.textContent = currentStep === totalSteps ? 'Done ✓' : 'Next step →';
+    }
+    nextBtn.addEventListener('click', () => { if (currentStep < totalSteps) { currentStep++; render(); } });
+    prevBtn.addEventListener('click', () => { if (currentStep > 0) { currentStep--; render(); } });
+    resetBtn.addEventListener('click', () => { currentStep = 0; render(); });
+    render(); return { next: () => nextBtn.click(), prev: () => prevBtn.click() };
+  }
+
+  const ctrlA = makeStepController('a', 6, {
+    0: 'Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.',
+    1: '<strong>Step 1 — Baba = 1 unit.</strong> Start with the smaller amount.',
+    2: '<strong>Step 2 — Ali = 3 units.</strong> Ali has 3 times as much as Baba.',
+    3: '<strong>Step 3 — The gap.</strong> 3u − 1u = 2u gap. To make equal, Ali gives HALF the gap (1u) to Baba.',
+    4: '<strong>Step 4 — Find the unit.</strong> Ali gave $30 = 1u. So 1 unit = $30.',
+    5: '<strong>Step 5 — Calculate.</strong> Ali at first = 3 × $30 = $90. Baba = 1 × $30 = $30.',
+    6: '<strong>Step 6 — Check and answer.</strong> $90 − $30 = $60 and $30 + $30 = $60. Equal! ✓'
+  });
+
+  const ctrlB = makeStepController('b', 5, {
+    0: 'Click <strong>"Next step"</strong> to see the table approach.',
+    1: '<strong>Step 1 — Table headers.</strong> Before and After columns.',
+    2: '<strong>Step 2 — Ali row.</strong> Before = 3u, After = 3u − $30.',
+    3: '<strong>Step 3 — Baba row.</strong> Before = 1u, After = 1u + $30.',
+    4: '<strong>Step 4 — Equate after.</strong> After amounts are equal: 3u − $30 = 1u + $30 → 2u = $60 → u = $30.',
+    5: '<strong>Step 5 — Answer.</strong> Ali = 3 × $30 = $90. Check: $90 − $30 = $60 = $30 + $30 ✓'
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const activeMethod = document.querySelector('.method-tab.active').dataset.method;
+    const ctrl = activeMethod === 'bar' ? ctrlA : ctrlB;
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); ctrl.next(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); ctrl.prev(); }
+  });
+</script>
+</body>
+</html>

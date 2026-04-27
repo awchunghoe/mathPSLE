@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Circles (Boomerang &amp; Rugby) — P6 Heuristic</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #1a2332; --ink-soft: #4a5568; --bg: #fafaf7; --card: #ffffff; --accent: #2f5496; --accent-soft: #e1e8f5; --pencil: #2d3142; --pencil-soft: #5a6478; --paper: #fffdf5; --ink-red: #c1272d; --ink-blue: #1f5fa8; --ink-green: #2e7d32; --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04); --fill-choc: #fee2e2; --fill-blue: #dbeafe; --fill-green: #dcfce7; --fill-amber: #fef3c7; --fill-ink: #1f3864; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; padding: 24px 16px 64px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  header { background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%); color: white; padding: 24px 28px; border-radius: 12px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .breadcrumb { font-size: 12px; opacity: .75; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; opacity: .85; }
+  .priority-row { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.18); }
+  .chip.priority-high { background: #9a3412; }
+  .topic-map { background: var(--card); border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .topic-map-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .topic-map-row:last-child { margin-bottom: 0; }
+  .topic-map-label { font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.5px; padding-top: 5px; flex-shrink: 0; width: 100px; }
+  .topic-map-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .map-chip { padding: 4px 11px; border-radius: 14px; font-size: 12px; font-weight: 500; background: #f1f5f9; color: var(--ink-soft); border: 1px solid #e2e8f0; text-decoration: none; cursor: default; }
+  .map-chip.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: 700; }
+  .map-chip.heuristic-chip { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+  .map-chip.heuristic-chip.active { background: #d97706; color: white; }
+  .card { background: var(--card); border-radius: 10px; padding: 18px 22px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .card-label { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; margin-bottom: 8px; }
+  .label-tip { background: #eff7ec; color: #2e7d32; }
+  h2.section-heading { font-size: 18px; font-weight: 700; margin: 22px 0 10px; display: flex; align-items: center; gap: 8px; }
+  h2.section-heading::before { content: ''; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
+  .signal-list { list-style: none; }
+  .signal-list li { padding: 5px 0 5px 22px; position: relative; font-size: 14px; color: var(--ink-soft); }
+  .signal-list li::before { content: '💬'; position: absolute; left: 0; top: 5px; font-size: 13px; }
+  .question-box { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 14px 16px; border-radius: 6px; margin-bottom: 18px; font-size: 14px; }
+  .question-box strong { color: var(--accent); }
+  .working-pad { background: var(--paper); border: 1px solid #e0d8c2; border-radius: 8px; padding: 24px 28px; margin: 12px 0; min-height: 480px; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+  .pad-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .step-counter { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-left: auto; }
+  .btn { padding: 8px 16px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
+  .btn-primary { background: var(--accent); color: white; } .btn-primary:hover { background: #224075; } .btn-primary:disabled { background: #b0b9cc; cursor: not-allowed; }
+  .btn-secondary { background: white; color: var(--ink); border: 1px solid #cbd5e1; } .btn-secondary:hover { background: #f1f5f9; }
+  .step-narration { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; font-size: 15px; color: var(--ink-soft); min-height: 50px; }
+  .step-narration strong { color: var(--accent); }
+  .pencil-text { font-family: 'Kalam', cursive; fill: var(--pencil); }
+  .hw-blue { fill: var(--ink-blue); } .hw-red { fill: var(--ink-red); } .hw-green { fill: var(--ink-green); }
+  .pencil-stroke { stroke: var(--pencil); stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-width: 2; }
+  .red-stroke { stroke: var(--ink-red); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .blue-stroke { stroke: var(--ink-blue); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .green-stroke { stroke: var(--ink-green); stroke-linecap: round; fill: none; stroke-width: 2; }
+  rect[fill]:not([fill="none"]) { rx: 4; }
+  rect.bar-fill, rect.node-fill { filter: drop-shadow(0 1px 2px rgba(0,0,0,.08)); transition: opacity 0.4s ease; }
+  rect.answer-box { fill: #f0fdf4; rx: 6; }
+  .bar-fill.ghost, .node-fill.ghost { opacity: 0.3; }
+  .step-elem { opacity: 0; transition: opacity 0.5s ease; } .step-elem.visible { opacity: 1; }
+  .draw-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+  .step-elem.visible .draw-path { animation: drawIn 0.8s ease forwards; }
+  @keyframes drawIn { to { stroke-dashoffset: 0; } }
+  .strike-line { stroke-dasharray: 200; stroke-dashoffset: 200; }
+  .step-elem.visible .strike-line { animation: strike 0.5s ease forwards; }
+  @keyframes strike { to { stroke-dashoffset: 0; } }
+  .alert-box { border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .alert-trap { background: #fdf4e3; border-left: 4px solid #d97706; } .alert-tip { background: #eff7ec; border-left: 4px solid #2e7d32; }
+  .alert-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; } .alert-trap h4 { color: #d97706; } .alert-tip h4 { color: #2e7d32; }
+  .alert-box p { font-size: 13.5px; color: var(--ink); margin-bottom: 6px; } .alert-box p:last-child { margin-bottom: 0; }
+  details summary { font-weight: 600; color: var(--accent); padding: 8px 0; cursor: pointer; font-size: 14px; }
+  .nav-hint { margin-top: 28px; padding: 14px 18px; background: #f0f0e8; border-radius: 8px; font-size: 12px; color: var(--ink-soft); text-align: center; font-style: italic; }
+  @media (max-width: 640px) {
+    body { padding: 12px 0 40px; } .container { padding: 0 12px; }
+    header { border-radius: 0; margin: 0 -12px 12px; padding: 20px 16px; } h1 { font-size: 22px; }
+    .topic-map { border-radius: 8px; padding: 12px 14px; } .topic-map-label { width: auto; min-width: 80px; }
+    .card { padding: 14px 0; border-radius: 8px; margin: 0 -12px 12px; padding-left: 12px; padding-right: 12px; }
+    .card > * { margin-left: 0; margin-right: 0; }
+    .working-pad { margin: 10px -12px; padding: 16px 12px; border-radius: 0; border-left: none; border-right: none; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .working-pad > svg { min-width: 520px; max-width: none; width: 100%; }
+    .pad-controls { gap: 6px; } .btn { padding: 7px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P6 Signature › Heuristic 3.3</div>
+    <h1>Circles (Boomerang &amp; Rugby)</h1>
+    <div class="subtitle">Composite shapes made from semicircles — cut-and-paste to simplify</div>
+    <div class="priority-row">
+      <span class="chip priority-high">🟠 HIGH PREP</span>
+      <span class="chip">⭐ P6 signature</span>
+      <span class="chip">Circle diagram</span>
+    </div>
+  </header>
+
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <span class="topic-map-label">Subtopics in P6</span>
+      <div class="topic-map-chips">
+        <span class="map-chip">Advanced Model Drawing</span>
+        <span class="map-chip">All Items Changed</span>
+        <span class="map-chip active">Circles (Boomerang &amp; Rugby)</span>
+        <span class="map-chip">Speed (Common Distance/Time)</span>
+        <span class="map-chip">Algebra (Pre-algebra)</span>
+      </div>
+    </div>
+    <div class="topic-map-row">
+      <span class="topic-map-label">Heuristics used</span>
+      <div class="topic-map-chips">
+        <span class="map-chip heuristic-chip active">Circle diagram</span>
+        <span class="map-chip heuristic-chip active">Cut-and-paste</span>
+        <span class="map-chip heuristic-chip">Semicircle area</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label label-tip">What it is</span>
+    <p style="font-size:14.5px;">"Boomerang" and "Rugby" shapes are composites of semicircles arranged around a rectangle or square. The trick: <strong>cut and paste</strong> curved segments to transform the shape into something simple (a rectangle, a triangle, or a single circle). Never compute each semicircle separately.</p>
+  </div>
+
+  <h2 class="section-heading">Signal phrases — train students to spot</h2>
+  <div class="card">
+    <ul class="signal-list">
+      <li>"The figure is made up of a rectangle and <em>semicircles</em>"</li>
+      <li>"Find the <strong>area of the shaded region</strong>" in a circle composite</li>
+      <li>"The figure consists of <em>quadrants</em> and straight lines"</li>
+      <li>Look for <strong>matching curved segments</strong> that can be swapped</li>
+    </ul>
+  </div>
+
+  <h2 class="section-heading">Worked example — click through each step</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Question:</strong> The figure shows a rectangle <strong>ABCD</strong> with a semicircle on each side. <strong>AB = 14 cm</strong> and <strong>BC = 10 cm</strong>. Find the <strong>area of the shaded region</strong>. (Take π = 22/7)
+    </div>
+
+    <div class="pad-controls">
+      <button class="btn btn-primary" id="prev-btn" disabled>← Previous</button>
+      <button class="btn btn-primary" id="next-btn">Next step →</button>
+      <button class="btn btn-secondary" id="reset-btn">Reset</button>
+      <span class="step-counter" id="step-counter">Step 0 / 7</span>
+    </div>
+
+    <div class="step-narration" id="narration">
+      Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.
+    </div>
+
+    <div class="working-pad">
+      <svg id="svg" viewBox="0 0 920 860" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+
+        <!-- ===== ZONE 1: Diagram y=30–380 ===== -->
+
+        <!-- Step 1: Draw rectangle -->
+        <g class="step-elem" data-step="1">
+          <text x="20" y="45" class="pencil-text" font-size="22" font-weight="700">Rectangle ABCD: 14 cm × 10 cm</text>
+          <rect x="250" y="80" width="280" height="200" fill="var(--fill-amber)" opacity="0.3" stroke="var(--pencil)" stroke-width="2" class="bar-fill"/>
+          <text x="390" y="185" class="pencil-text" font-size="20" font-weight="700" text-anchor="middle">ABCD</text>
+          <text x="390" y="305" class="pencil-text" font-size="16" text-anchor="middle">14 cm</text>
+          <text x="220" y="185" class="pencil-text" font-size="16" text-anchor="middle">10 cm</text>
+        </g>
+
+        <!-- Step 2: Semicircles on AB and CD (long sides) -->
+        <g class="step-elem" data-step="2">
+          <path d="M 250 80 Q 180 180, 250 280" class="pencil-stroke draw-path" stroke-width="2" fill="none"/>
+          <path d="M 530 80 Q 600 180, 530 280" class="pencil-stroke draw-path" stroke-width="2" fill="none"/>
+          <text x="180" y="185" class="pencil-text hw-blue" font-size="14" font-weight="700">semi</text>
+          <text x="560" y="185" class="pencil-text hw-blue" font-size="14" font-weight="700">semi</text>
+          <text x="20" y="340" class="pencil-text" fill="var(--pencil-soft)" font-size="15">↑ Two semicircles on the 14-cm sides (diameter = 14)</text>
+        </g>
+
+        <!-- Step 3: Semicircles on BC and AD (short sides) -->
+        <g class="step-elem" data-step="3">
+          <path d="M 250 280 Q 390 380, 530 280" class="pencil-stroke draw-path" stroke-width="2" fill="none"/>
+          <path d="M 250 80 Q 390 -20, 530 80" class="pencil-stroke draw-path" stroke-width="2" fill="none"/>
+          <text x="390" y="365" class="pencil-text hw-red" font-size="14" font-weight="700">semi</text>
+          <text x="390" y="35" class="pencil-text hw-red" font-size="14" font-weight="700">semi</text>
+          <text x="20" y="390" class="pencil-text" fill="var(--pencil-soft)" font-size="15">↑ Two semicircles on the 10-cm sides (diameter = 10)</text>
+        </g>
+
+        <!-- ===== ZONE 2: Working y=420–650 ===== -->
+
+        <!-- Step 4: Cut-and-paste insight -->
+        <g class="step-elem" data-step="4">
+          <text x="20" y="435" class="pencil-text hw-red" font-size="20" font-weight="700">💡 Cut-and-paste: the two blue semicircles</text>
+          <text x="40" y="475" class="pencil-text" font-size="18" font-weight="700">Each has diameter 14 → radius 7</text>
+          <text x="40" y="515" class="pencil-text" font-size="18" font-weight="700">Two semicircles = 1 full circle (r = 7)</text>
+          <text x="40" y="555" class="pencil-text hw-green" font-size="18" font-weight="700">Area = π × 7² = 22/7 × 49 = 154 cm²</text>
+        </g>
+
+        <!-- Step 5: The red semicircles -->
+        <g class="step-elem" data-step="5">
+          <text x="20" y="600" class="pencil-text hw-red" font-size="20" font-weight="700">The two red semicircles (diameter 10):</text>
+          <text x="40" y="640" class="pencil-text" font-size="18" font-weight="700">Two semicircles = 1 full circle (r = 5)</text>
+          <text x="40" y="680" class="pencil-text" font-size="18" font-weight="700">Area = π × 5² = 22/7 × 25 = 550/7 ≈ 78.6 cm²</text>
+        </g>
+
+        <!-- ===== ZONE 3: Answer y=720–810 ===== -->
+
+        <!-- Step 6: Total area -->
+        <g class="step-elem" data-step="6">
+          <text x="20" y="530" class="pencil-text" font-size="18" font-weight="700">Total shaded = rectangle + all 4 semicircles</text>
+          <text x="40" y="570" class="pencil-text" font-size="18">= (14 × 10) + 154 + 550/7</text>
+          <text x="40" y="610" class="pencil-text" font-size="18">= 140 + 154 + 78 4/7</text>
+          <text x="40" y="650" class="pencil-text hw-green" font-size="22" font-weight="700">= 372 4/7 cm²</text>
+        </g>
+
+        <!-- Step 7: Answer box -->
+        <g class="step-elem" data-step="7">
+          <rect x="15" y="720" width="420" height="50" fill="none" class="green-stroke draw-path answer-box" stroke-width="2.5" rx="6"/>
+          <text x="30" y="752" class="pencil-text hw-green" font-size="24" font-weight="700">★ Area = 372 4/7 cm² (or 2608/7)</text>
+        </g>
+
+      </svg>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Common student traps</h2>
+  <div class="card">
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 1: Computing 4 separate semicircles</h4>
+      <p>Students calculate each semicircle individually with ½ × π × r² four times. The shortcut: <strong>pair the matching semicircles</strong> into full circles.</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 2: Using diameter as radius</h4>
+      <p>Students use r = 14 instead of r = 7. The formula uses <strong>radius</strong>, not diameter. Halve the diameter first.</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 3: Forgetting the rectangle</h4>
+      <p>Students sum the circle areas but forget to add the central rectangle. The total area = rectangle + all curved parts.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">How to teach it</h2>
+  <div class="card">
+    <div class="alert-box alert-tip">
+      <h4>💡 Three teaching anchors</h4>
+      <p><strong>1. "Pair the matching curves."</strong> Two semicircles with the same diameter = one full circle. This is the first thing to do before any area calculation.</p>
+      <p><strong>2. Label radius on every arc.</strong> Write "r = 7" directly on the semicircle. Prevents the diameter-as-radius error.</p>
+      <p><strong>3. Trace the outline with your finger.</strong> The full perimeter helps students see which parts are "inside" (rectangle) vs "outside" (semicircles).</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Try this one (no peeking)</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Practice:</strong> A rectangle measures <strong>20 cm × 12 cm</strong> with semicircles on all four sides. Find the <strong>total area</strong> of the figure. (Take π = 3.14)
+    </div>
+    <details>
+      <summary>▸ Click to reveal answer</summary>
+      <div style="padding:12px; background:#f8fafc; border-radius:6px; margin-top:8px; font-size:14px;">
+        <p>Two semis on 20-cm side → 1 circle r=10: 3.14 × 100 = 314 cm²</p>
+        <p>Two semis on 12-cm side → 1 circle r=6: 3.14 × 36 = 113.04 cm²</p>
+        <p>Rectangle: 20 × 12 = 240 cm²</p>
+        <p>Total = 240 + 314 + 113.04 = <strong>667.04 cm²</strong></p>
+      </div>
+    </details>
+  </div>
+
+  <div class="nav-hint">
+    📍 Circles (Boomerang &amp; Rugby) · <a href="index.html" style="color:var(--accent); font-weight:600;">← Back to mindmap</a>
+  </div>
+
+</div>
+
+<script>
+  function makeStepController(suffix, totalSteps, narrations) {
+    let currentStep = 0;
+    const svgEl = document.getElementById(`svg${suffix ? '-' + suffix : ''}`);
+    const narrationEl = document.getElementById(`narration${suffix ? '-' + suffix : ''}`);
+    const counterEl = document.getElementById(`step-counter${suffix ? '-' + suffix : ''}`);
+    const prevBtn = document.getElementById(`prev-btn${suffix ? '-' + suffix : ''}`);
+    const nextBtn = document.getElementById(`next-btn${suffix ? '-' + suffix : ''}`);
+    const resetBtn = document.getElementById(`reset-btn${suffix ? '-' + suffix : ''}`);
+    function render() {
+      svgEl.querySelectorAll('.step-elem').forEach(el => { const stepNum = parseInt(el.dataset.step); el.classList.toggle('visible', stepNum <= currentStep); });
+      svgEl.querySelectorAll('.bar-fill, .node-fill').forEach(fill => { const parentStep = parseInt(fill.closest('.step-elem').dataset.step); fill.classList.toggle('ghost', parentStep < currentStep); });
+      narrationEl.innerHTML = narrations[currentStep]; counterEl.textContent = `Step ${currentStep} / ${totalSteps}`;
+      prevBtn.disabled = currentStep === 0; nextBtn.disabled = currentStep === totalSteps;
+      nextBtn.textContent = currentStep === totalSteps ? 'Done ✓' : 'Next step →';
+    }
+    nextBtn.addEventListener('click', () => { if (currentStep < totalSteps) { currentStep++; render(); } });
+    prevBtn.addEventListener('click', () => { if (currentStep > 0) { currentStep--; render(); } });
+    resetBtn.addEventListener('click', () => { currentStep = 0; render(); });
+    render(); return { next: () => nextBtn.click(), prev: () => prevBtn.click() };
+  }
+  const ctrl = makeStepController('', 7, {
+    0: 'Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.',
+    1: '<strong>Step 1 — Draw the rectangle.</strong> 14 cm × 10 cm.',
+    2: '<strong>Step 2 — Semicircles on long sides.</strong> Two semicircles with diameter 14 cm.',
+    3: '<strong>Step 3 — Semicircles on short sides.</strong> Two semicircles with diameter 10 cm.',
+    4: '<strong>Step 4 — Pair the blue semicircles.</strong> Two semicircles (d=14) = 1 full circle, r=7. Area = π × 49 = 154 cm².',
+    5: '<strong>Step 5 — Pair the red semicircles.</strong> Two semicircles (d=10) = 1 full circle, r=5. Area = π × 25 = 550/7 cm².',
+    6: '<strong>Step 6 — Total area.</strong> Rectangle (140) + circle 1 (154) + circle 2 (550/7) = 372 4/7 cm².',
+    7: '<strong>Step 7 — Answer.</strong> 372 4/7 cm².'
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); ctrl.next(); } if (e.key === 'ArrowLeft') { e.preventDefault(); ctrl.prev(); } });
+</script>
+</body>
+</html>

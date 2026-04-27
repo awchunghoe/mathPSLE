@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSLE Math Heuristics — Josh's Tutor Deck</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a2332; --ink-soft: #4a5568; --bg: #f8f7f4; --card: #ffffff;
+    --accent: #2f5496; --accent-soft: #e1e8f5; --accent-mid: #3d6cb8;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+    --shadow-hover: 0 4px 12px rgba(0,0,0,.1), 0 8px 24px rgba(0,0,0,.06);
+    --p5-frac: #fef3c7; --p5-frac-text: #92400e;
+    --p5-wn: #dbeafe; --p5-wn-text: #1e40af;
+    --p5-geo: #dcfce7; --p5-geo-text: #166534;
+    --p6-ratio: #fee2e2; --p6-ratio-text: #991b1b;
+    --p6-geo: #f3e8ff; --p6-geo-text: #6b21a8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; padding: 0; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+  /* Hero */
+  .hero { background: linear-gradient(135deg, #1f3864 0%, #2f5496 50%, #3d6cb8 100%); color: white; padding: 48px 0 56px; text-align: center; }
+  .hero h1 { font-size: 36px; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.5px; }
+  .hero .tagline { font-size: 16px; opacity: 0.85; max-width: 520px; margin: 0 auto 24px; }
+  .hero-stats { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 800; }
+  .stat-label { font-size: 12px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Topic sections */
+  .section { margin: 36px 0; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .section-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+  .badge-frac { background: var(--p5-frac); color: var(--p5-frac-text); }
+  .badge-wn { background: var(--p5-wn); color: var(--p5-wn-text); }
+  .badge-geo { background: var(--p5-geo); color: var(--p5-geo-text); }
+  .badge-ratio { background: var(--p6-ratio); color: var(--p6-ratio-text); }
+  .badge-geo6 { background: var(--p6-geo); color: var(--p6-geo-text); }
+  .section-title { font-size: 20px; font-weight: 700; }
+
+  /* Card grid */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .topic-card { background: var(--card); border-radius: 10px; padding: 16px 18px; box-shadow: var(--shadow); text-decoration: none; color: inherit; display: block; transition: all 0.2s ease; border-left: 4px solid var(--accent); position: relative; }
+  .topic-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+  .topic-card.border-frac { border-left-color: #f59e0b; }
+  .topic-card.border-wn { border-left-color: #3b82f6; }
+  .topic-card.border-geo { border-left-color: #22c55e; }
+  .topic-card.border-ratio { border-left-color: #ef4444; }
+  .topic-card.border-geo6 { border-left-color: #a855f7; }
+
+  .card-title { font-size: 15px; font-weight: 700; margin-bottom: 5px; color: var(--ink); }
+  .card-desc { font-size: 12.5px; color: var(--ink-soft); line-height: 1.45; margin-bottom: 10px; }
+  .card-meta { display: flex; gap: 6px; flex-wrap: wrap; }
+  .meta-chip { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+  .chip-high { background: #fdf4e3; color: #b45309; }
+  .chip-psle { background: #eff7ec; color: #2e7d32; }
+  .chip-fund { background: #e1e8f5; color: var(--accent); }
+  .chip-p6 { background: #f3e8ff; color: #6b21a8; }
+  .chip-bar { background: #f1f5f9; color: #475569; }
+
+  .card-arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-soft); opacity: 0.4; font-size: 18px; transition: opacity 0.15s; }
+  .topic-card:hover .card-arrow { opacity: 0.8; }
+
+  /* Footer */
+  footer { text-align: center; padding: 40px 0; font-size: 12px; color: var(--ink-soft); margin-top: 20px; }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 26px; }
+    .hero { padding: 32px 0 40px; }
+    .card-grid { grid-template-columns: 1fr; }
+    .container { padding: 0 12px; }
+    .section { margin: 24px 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="container">
+    <h1>PSLE Math Heuristics</h1>
+    <p class="tagline">Interactive tutor-style worked examples for P5 & P6 problem sums. Click through step by step, mark by mark.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">20</div><div class="stat-label">Topics</div></div>
+      <div class="stat"><div class="stat-num">P5&ndash;P6</div><div class="stat-label">Level</div></div>
+      <div class="stat"><div class="stat-num">&rarr;</div><div class="stat-label">Arrow keys work</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- P5 Fractions -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-badge badge-frac">P5 Fractions</span>
+      <span class="section-title">Ratio, proportion & fraction heuristics</span>
+    </div>
+    <div class="card-grid">
+      <a href="branching_direct.html" class="topic-card border-frac">
+        <div class="card-title">Branching (Direct)</div>
+        <div class="card-desc">Read from left to right: &ldquo;of the remainder&rdquo; means multiply fractions in sequence.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">PSLE</span>
+          <span class="meta-chip chip-bar">Bar + Tree</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="branching_additional.html" class="topic-card border-frac">
+        <div class="card-title">Branching (With Additional)</div>
+        <div class="card-desc">A fixed extra amount is added at a branch. Model the extra, then branch normally.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">PSLE</span>
+          <span class="meta-chip chip-bar">Bar + Tree</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="numerators_same.html" class="topic-card border-frac">
+        <div class="card-title">Numerators the Same</div>
+        <div class="card-desc">When numerators match, compare denominators directly. Bigger denominator = smaller value.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-fund">Fundamental</span>
+          <span class="meta-chip chip-bar">Units bar</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="one_item_unchanged_frac.html" class="topic-card border-frac">
+        <div class="card-title">One Item Unchanged (Fractional)</div>
+        <div class="card-desc">Only one quantity changes &mdash; use the unchanged item as your anchor unit.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">PSLE</span>
+          <span class="meta-chip chip-bar">Bar + Table</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="total_unchanged_frac.html" class="topic-card border-frac">
+        <div class="card-title">Total Unchanged (Fractional)</div>
+        <div class="card-desc">Internal transfer &mdash; total stays the same. Express both before/after in units.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">PSLE</span>
+          <span class="meta-chip chip-bar">Bar model</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="difference_unchanged_frac.html" class="topic-card border-frac">
+        <div class="card-title">Difference Unchanged (Fractional)</div>
+        <div class="card-desc">Both change by same fraction &mdash; the gap scales proportionally with the kept fraction.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">PSLE</span>
+          <span class="meta-chip chip-bar">Bar model</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="repeated_items_frac.html" class="topic-card border-frac">
+        <div class="card-title">Repeated Items (Fractional)</div>
+        <div class="card-desc">Apply the fraction first, then use per-group difference to find number of sets.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">PSLE</span>
+          <span class="meta-chip chip-bar">Grouping</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="more_than_less_than.html" class="topic-card border-frac">
+        <div class="card-title">More Than / Less Than</div>
+        <div class="card-desc">Translate fractional comparison language: &ldquo;$15 more than&rdquo; means left = right + 15.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Language trap</span>
+          <span class="meta-chip chip-bar">Bar model</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="quantity_value_frac.html" class="topic-card border-frac">
+        <div class="card-title">Quantity &times; Value (Fractional)</div>
+        <div class="card-desc">Coin problems: fraction of each type, total value given. Build a value equation.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Common</span>
+          <span class="meta-chip chip-bar">Value eqn</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- P5 Whole Numbers -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-badge badge-wn">P5 Whole Numbers</span>
+      <span class="section-title">Grouping, transfer & comparison</span>
+    </div>
+    <div class="card-grid">
+      <a href="gap_difference.html" class="topic-card border-wn">
+        <div class="card-title">Gap &amp; Difference</div>
+        <div class="card-desc">Total and difference both known. Bigger = (Total+Gap)/2, Smaller = (Total&minus;Gap)/2.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-fund">Foundational</span>
+          <span class="meta-chip chip-bar">Bar model</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="repeated_items_wn.html" class="topic-card border-wn">
+        <div class="card-title">Repeated Items (Whole Number)</div>
+        <div class="card-desc">Identical groups with a fixed difference. Divide total gap by per-group gap.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Common</span>
+          <span class="meta-chip chip-bar">Grouping</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="difference_unchanged_wn.html" class="topic-card border-wn">
+        <div class="card-title">Difference Unchanged (Whole Number)</div>
+        <div class="card-desc">Both change by same amount &mdash; the gap stays constant. Use it as anchor.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">PSLE</span>
+          <span class="meta-chip chip-bar">Bar model</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="equal_stage_wn.html" class="topic-card border-wn">
+        <div class="card-title">Equal Stage (Whole Number)</div>
+        <div class="card-desc">Both end up equal after different changes. Use the equal-state as your anchor.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">PSLE</span>
+          <span class="meta-chip chip-bar">Bar + Table</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="internal_transfer.html" class="topic-card border-wn">
+        <div class="card-title">Internal Transfer</div>
+        <div class="card-desc">Items move within a group &mdash; total unchanged. Work backwards from the equal state.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Classic</span>
+          <span class="meta-chip chip-bar">Bar model</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- P5 Geometry -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-badge badge-geo">P5 Geometry</span>
+      <span class="section-title">Area and model drawing</span>
+    </div>
+    <div class="card-grid">
+      <a href="area_triangle.html" class="topic-card border-geo">
+        <div class="card-title">Area of Triangles</div>
+        <div class="card-desc">Shared base or height relationships. Area ratio equals the ratio of the non-shared dimension.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">PSLE</span>
+          <span class="meta-chip chip-bar">Diagram</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="advanced_model_drawing.html" class="topic-card border-geo">
+        <div class="card-title">Advanced Model Drawing</div>
+        <div class="card-desc">Complex bar models with multiple conditions and transfers. Break into stages.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">PSLE</span>
+          <span class="meta-chip chip-bar">Bar model</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- P6 Ratios -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-badge badge-ratio">P6 Ratios</span>
+      <span class="section-title">Advanced ratio & speed problems</span>
+    </div>
+    <div class="card-grid">
+      <a href="all_items_changed.html" class="topic-card border-ratio">
+        <div class="card-title">All Items Changed</div>
+        <div class="card-desc">Both quantities change by different amounts. Set up a ratio equation and solve for u.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-p6">P6 Advanced</span>
+          <span class="meta-chip chip-psle">Challenging</span>
+          <span class="meta-chip chip-bar">Units table</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="speed_ratio.html" class="topic-card border-ratio">
+        <div class="card-title">Speed Ratio</div>
+        <div class="card-desc">Inverse ratio of speed to time. Same distance means speed ratio flips the time ratio.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-p6">P6 Advanced</span>
+          <span class="meta-chip chip-psle">PSLE</span>
+          <span class="meta-chip chip-bar">Table</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- P6 Geometry -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-badge badge-geo6">P6 Geometry</span>
+      <span class="section-title">Circles, volume & cross-sections</span>
+    </div>
+    <div class="card-grid">
+      <a href="circles_p6.html" class="topic-card border-geo6">
+        <div class="card-title">Circles (P6)</div>
+        <div class="card-desc">Composite shapes: boomerang, rugby, overlapping circles. Find the shaded area.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-p6">P6 Advanced</span>
+          <span class="meta-chip chip-psle">PSLE</span>
+          <span class="meta-chip chip-bar">Diagram</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="volume_of_liquids.html" class="topic-card border-geo6">
+        <div class="card-title">Volume of Liquids</div>
+        <div class="card-desc">Water displacement and height changes. Cross-section method for irregular containers.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-p6">P6 Advanced</span>
+          <span class="meta-chip chip-psle">PSLE</span>
+          <span class="meta-chip chip-bar">Cross-section</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="container">
+    Built for tutor cross-training &middot; Static HTML, no backend needed &middot; Works offline
+  </div>
+</footer>
+
+</body>
+</html>

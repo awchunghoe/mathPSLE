@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Volume of Liquids — P5 Refresh</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #1a2332; --ink-soft: #4a5568; --bg: #fafaf7; --card: #ffffff; --accent: #2f5496; --accent-soft: #e1e8f5; --pencil: #2d3142; --pencil-soft: #5a6478; --paper: #fffdf5; --ink-red: #c1272d; --ink-blue: #1f5fa8; --ink-green: #2e7d32; --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04); --fill-choc: #fee2e2; --fill-blue: #dbeafe; --fill-green: #dcfce7; --fill-amber: #fef3c7; --fill-ink: #1f3864; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; padding: 24px 16px 64px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  header { background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%); color: white; padding: 24px 28px; border-radius: 12px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .breadcrumb { font-size: 12px; opacity: .75; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; opacity: .85; }
+  .priority-row { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.18); }
+  .chip.priority-high { background: #9a3412; }
+  .topic-map { background: var(--card); border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .topic-map-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .topic-map-row:last-child { margin-bottom: 0; }
+  .topic-map-label { font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.5px; padding-top: 5px; flex-shrink: 0; width: 100px; }
+  .topic-map-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .map-chip { padding: 4px 11px; border-radius: 14px; font-size: 12px; font-weight: 500; background: #f1f5f9; color: var(--ink-soft); border: 1px solid #e2e8f0; text-decoration: none; cursor: default; }
+  .map-chip.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: 700; }
+  .map-chip.heuristic-chip { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+  .map-chip.heuristic-chip.active { background: #d97706; color: white; }
+  .card { background: var(--card); border-radius: 10px; padding: 18px 22px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .card-label { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; margin-bottom: 8px; }
+  .label-tip { background: #eff7ec; color: #2e7d32; }
+  h2.section-heading { font-size: 18px; font-weight: 700; margin: 22px 0 10px; display: flex; align-items: center; gap: 8px; }
+  h2.section-heading::before { content: ''; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
+  .signal-list { list-style: none; }
+  .signal-list li { padding: 5px 0 5px 22px; position: relative; font-size: 14px; color: var(--ink-soft); }
+  .signal-list li::before { content: '💬'; position: absolute; left: 0; top: 5px; font-size: 13px; }
+  .question-box { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 14px 16px; border-radius: 6px; margin-bottom: 18px; font-size: 14px; }
+  .question-box strong { color: var(--accent); }
+  .working-pad { background: var(--paper); border: 1px solid #e0d8c2; border-radius: 8px; padding: 24px 28px; margin: 12px 0; min-height: 480px; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+  .pad-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .step-counter { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-left: auto; }
+  .btn { padding: 8px 16px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
+  .btn-primary { background: var(--accent); color: white; } .btn-primary:hover { background: #224075; } .btn-primary:disabled { background: #b0b9cc; cursor: not-allowed; }
+  .btn-secondary { background: white; color: var(--ink); border: 1px solid #cbd5e1; } .btn-secondary:hover { background: #f1f5f9; }
+  .step-narration { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; font-size: 15px; color: var(--ink-soft); min-height: 50px; }
+  .step-narration strong { color: var(--accent); }
+  .pencil-text { font-family: 'Kalam', cursive; fill: var(--pencil); }
+  .hw-blue { fill: var(--ink-blue); } .hw-red { fill: var(--ink-red); } .hw-green { fill: var(--ink-green); }
+  .pencil-stroke { stroke: var(--pencil); stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-width: 2; }
+  .red-stroke { stroke: var(--ink-red); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .blue-stroke { stroke: var(--ink-blue); stroke-linecap: round; fill: none; stroke-width: 2; }
+  .green-stroke { stroke: var(--ink-green); stroke-linecap: round; fill: none; stroke-width: 2; }
+  rect[fill]:not([fill="none"]) { rx: 4; }
+  rect.bar-fill, rect.node-fill { filter: drop-shadow(0 1px 2px rgba(0,0,0,.08)); transition: opacity 0.4s ease; }
+  rect.answer-box { fill: #f0fdf4; rx: 6; }
+  .bar-fill.ghost, .node-fill.ghost { opacity: 0.3; }
+  .step-elem { opacity: 0; transition: opacity 0.5s ease; } .step-elem.visible { opacity: 1; }
+  .draw-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+  .step-elem.visible .draw-path { animation: drawIn 0.8s ease forwards; }
+  @keyframes drawIn { to { stroke-dashoffset: 0; } }
+  .strike-line { stroke-dasharray: 200; stroke-dashoffset: 200; }
+  .step-elem.visible .strike-line { animation: strike 0.5s ease forwards; }
+  @keyframes strike { to { stroke-dashoffset: 0; } }
+  .alert-box { border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .alert-trap { background: #fdf4e3; border-left: 4px solid #d97706; } .alert-tip { background: #eff7ec; border-left: 4px solid #2e7d32; }
+  .alert-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; } .alert-trap h4 { color: #d97706; } .alert-tip h4 { color: #2e7d32; }
+  .alert-box p { font-size: 13.5px; color: var(--ink); margin-bottom: 6px; } .alert-box p:last-child { margin-bottom: 0; }
+  details summary { font-weight: 600; color: var(--accent); padding: 8px 0; cursor: pointer; font-size: 14px; }
+  .nav-hint { margin-top: 28px; padding: 14px 18px; background: #f0f0e8; border-radius: 8px; font-size: 12px; color: var(--ink-soft); text-align: center; font-style: italic; }
+  @media (max-width: 640px) {
+    body { padding: 12px 0 40px; } .container { padding: 0 12px; }
+    header { border-radius: 0; margin: 0 -12px 12px; padding: 20px 16px; } h1 { font-size: 22px; }
+    .topic-map { border-radius: 8px; padding: 12px 14px; } .topic-map-label { width: auto; min-width: 80px; }
+    .card { padding: 14px 0; border-radius: 8px; margin: 0 -12px 12px; padding-left: 12px; padding-right: 12px; }
+    .card > * { margin-left: 0; margin-right: 0; }
+    .working-pad { margin: 10px -12px; padding: 16px 12px; border-radius: 0; border-left: none; border-right: none; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .working-pad > svg { min-width: 520px; max-width: none; width: 100%; }
+    .pad-controls { gap: 6px; } .btn { padding: 7px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P5 Refresh › Heuristic 4.3</div>
+    <h1>Volume of Liquids</h1>
+    <div class="subtitle">Tank volume problems using cross-section diagrams</div>
+    <div class="priority-row">
+      <span class="chip priority-high">🟠 HIGH PREP</span>
+      <span class="chip">⭐ PSLE refresh topic</span>
+      <span class="chip">Cross-section diagram</span>
+    </div>
+  </header>
+
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <span class="topic-map-label">Subtopics in Refresh</span>
+      <div class="topic-map-chips">
+        <span class="map-chip">Area of Triangle (Shared Base/Height)</span>
+        <span class="map-chip">Geometry / Angles</span>
+        <span class="map-chip active">Volume of Liquids</span>
+        <span class="map-chip">Tiered Rate</span>
+      </div>
+    </div>
+    <div class="topic-map-row">
+      <span class="topic-map-label">Heuristics used</span>
+      <div class="topic-map-chips">
+        <span class="map-chip heuristic-chip active">Cross-section drawing</span>
+        <span class="map-chip heuristic-chip active">Volume formula</span>
+        <span class="map-chip heuristic-chip">Unit conversion</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label label-tip">What it is</span>
+    <p style="font-size:14.5px;">Problems involving rectangular tanks being filled, drained, or transferred between containers. Students draw a <strong>cross-section</strong> (side view) of the tank, mark the water level, and use <strong>Volume = length × width × height</strong> with careful unit conversion.</p>
+  </div>
+
+  <h2 class="section-heading">Signal phrases — train students to spot</h2>
+  <div class="card">
+    <ul class="signal-list">
+      <li>"A rectangular tank measures <em>30 cm by 20 cm by 25 cm</em>"</li>
+      <li>"Water is <strong>poured into</strong> / <strong>drained from</strong> the tank"</li>
+      <li>"Find the <strong>new water level</strong>" or "height of the water"</li>
+      <li>"The tank is <strong>filled to the brim</strong>" or "<strong>2/3 full</strong>"</li>
+    </ul>
+  </div>
+
+  <h2 class="section-heading">Worked example — click through each step</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Question:</strong> A rectangular tank measures <strong>40 cm × 25 cm × 30 cm</strong>. It is filled with water to a height of <strong>18 cm</strong>. If <strong>4.5 litres</strong> of water is poured out, what is the <strong>new height of the water</strong>?
+    </div>
+
+    <div class="pad-controls">
+      <button class="btn btn-primary" id="prev-btn" disabled>← Previous</button>
+      <button class="btn btn-primary" id="next-btn">Next step →</button>
+      <button class="btn btn-secondary" id="reset-btn">Reset</button>
+      <span class="step-counter" id="step-counter">Step 0 / 7</span>
+    </div>
+
+    <div class="step-narration" id="narration">
+      Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.
+    </div>
+
+    <div class="working-pad">
+      <svg id="svg" viewBox="0 0 920 860" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+
+        <!-- ===== ZONE 1: Cross-section diagram y=30–380 ===== -->
+
+        <!-- Step 1: Draw tank -->
+        <g class="step-elem" data-step="1">
+          <text x="20" y="45" class="pencil-text" font-size="22" font-weight="700">Tank: 40 cm × 25 cm × 30 cm</text>
+          <rect x="120" y="70" width="300" height="240" fill="none" stroke="var(--pencil)" stroke-width="2"/>
+          <text x="270" y="325" class="pencil-text" font-size="16" text-anchor="middle">40 cm</text>
+          <text x="100" y="195" class="pencil-text" font-size="16" text-anchor="middle" transform="rotate(-90, 100, 195)">30 cm</text>
+          <text x="20" y="370" class="pencil-text" fill="var(--pencil-soft)" font-size="15">↑ Side view (cross-section) — width (25 cm) goes into page</text>
+        </g>
+
+        <!-- Step 2: Show initial water level at 18 cm -->
+        <g class="step-elem" data-step="2">
+          <rect x="120" y="178" width="300" height="132" fill="var(--fill-blue)" opacity="0.4" stroke="var(--ink-blue)" stroke-width="2" class="bar-fill"/>
+          <line x1="100" y1="178" x2="120" y2="178" class="blue-stroke draw-path" stroke-width="2"/>
+          <text x="60" y="185" class="pencil-text hw-blue" font-size="16" font-weight="700">18 cm</text>
+          <text x="270" y="250" class="pencil-text hw-blue" font-size="18" font-weight="700" text-anchor="middle">Water</text>
+        </g>
+
+        <!-- Step 3: Convert 4.5 litres to cm³ -->
+        <g class="step-elem" data-step="3">
+          <text x="480" y="100" class="pencil-text hw-red" font-size="20" font-weight="700">💡 Convert litres → cm³:</text>
+          <text x="500" y="140" class="pencil-text" font-size="20" font-weight="700">4.5 L = 4500 cm³</text>
+          <text x="500" y="175" class="pencil-text" fill="var(--pencil-soft)" font-size="15">(1 L = 1000 cm³)</text>
+        </g>
+
+        <!-- Step 4: Volume poured out = drop in height × base area -->
+        <g class="step-elem" data-step="4">
+          <text x="480" y="225" class="pencil-text" font-size="18" font-weight="700">Volume out = base area × height drop</text>
+          <text x="500" y="265" class="pencil-text" font-size="20">4500 = (40 × 25) × h</text>
+          <text x="500" y="305" class="pencil-text" font-size="20">4500 = 1000 × h</text>
+          <line x1="500" y1="315" x2="720" y2="315" class="pencil-stroke draw-path" stroke-width="2"/>
+        </g>
+
+        <!-- ===== ZONE 2: Working y=400–600 ===== -->
+
+        <!-- Step 5: Find height drop -->
+        <g class="step-elem" data-step="5">
+          <text x="20" y="420" class="pencil-text hw-green" font-size="22" font-weight="700">Height drop = 4500 ÷ 1000 = 4.5 cm</text>
+          <text x="20" y="465" class="pencil-text" font-size="20">New height = 18 − 4.5 = 13.5 cm</text>
+        </g>
+
+        <!-- Step 6: Show on diagram -->
+        <g class="step-elem" data-step="6">
+          <text x="20" y="510" class="pencil-text" font-size="18" font-weight="700">On the diagram:</text>
+          <rect x="120" y="550" width="300" height="66" fill="var(--fill-green)" opacity="0.3" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
+          <line x1="100" y1="616" x2="120" y2="616" class="green-stroke draw-path" stroke-width="2"/>
+          <text x="50" y="623" class="pencil-text hw-green" font-size="16" font-weight="700">13.5 cm</text>
+          <line x1="120" y1="178" x2="420" y2="178" class="red-stroke draw-path" stroke-width="2" stroke-dasharray="8,4"/>
+          <text x="430" y="185" class="pencil-text hw-red" font-size="14">old level</text>
+          <line x1="120" y1="550" x2="420" y2="550" class="green-stroke draw-path" stroke-width="2"/>
+          <text x="430" y="558" class="pencil-text hw-green" font-size="14">new level</text>
+        </g>
+
+        <!-- ===== ZONE 3: Answer y=660–760 ===== -->
+
+        <!-- Step 7: Answer -->
+        <g class="step-elem" data-step="7">
+          <rect x="15" y="660" width="380" height="50" fill="none" class="green-stroke draw-path answer-box" stroke-width="2.5" rx="6"/>
+          <text x="30" y="692" class="pencil-text hw-green" font-size="24" font-weight="700">★ New height = 13.5 cm</text>
+          <text x="20" y="750" class="pencil-text" font-size="15">Check: Volume remaining = 40 × 25 × 13.5 = 13500 cm³ = 13.5 L. Original = 40×25×18 = 18000 = 18 L. 18 − 4.5 = 13.5 ✓</text>
+        </g>
+
+      </svg>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Common student traps</h2>
+  <div class="card">
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 1: Forgetting to convert litres to cm³</h4>
+      <p>Tank dimensions are in cm but volume is given in litres. Students plug 4.5 straight into cm formulas. <strong>Always convert first:</strong> 1 L = 1000 cm³.</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 2: Using tank height instead of water height</h4>
+      <p>The tank is 30 cm tall but water is only at 18 cm. Students calculate volume using 30 cm. Read the question — it says "filled to a height of 18 cm."</p>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Trap 3: Dividing volume by height instead of base area</h4>
+      <p>Students do 4500 ÷ 18 = 250 (wrong). The correct formula: Volume = base area × height, so height = Volume ÷ base area = 4500 ÷ (40 × 25).</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">How to teach it</h2>
+  <div class="card">
+    <div class="alert-box alert-tip">
+      <h4>💡 Three teaching anchors</h4>
+      <p><strong>1. Draw the cross-section first.</strong> Side view with water shaded. Students need to SEE the water level, not just imagine it.</p>
+      <p><strong>2. Write the conversion as step 1.</strong> 1 L = 1000 cm³. Write it at the top of every liquid volume question before touching any other numbers.</p>
+      <p><strong>3. Label "water" vs "tank" clearly.</strong> Water height and tank height are different. Write "water = 18 cm" and "tank = 30 cm" as separate labels.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Try this one (no peeking)</h2>
+  <div class="card">
+    <div class="question-box">
+      <strong>Practice:</strong> A rectangular tank measures <strong>50 cm × 30 cm × 40 cm</strong>. It contains water to a height of <strong>24 cm</strong>. How many <strong>litres</strong> of water must be added to fill it to the brim?
+    </div>
+    <details>
+      <summary>▸ Click to reveal answer</summary>
+      <div style="padding:12px; background:#f8fafc; border-radius:6px; margin-top:8px; font-size:14px;">
+        <p>Height needed = 40 − 24 = 16 cm</p>
+        <p>Volume = 50 × 30 × 16 = 24000 cm³</p>
+        <p>= 24000 ÷ 1000 = <strong>24 litres</strong></p>
+      </div>
+    </details>
+  </div>
+
+  <div class="nav-hint">
+    📍 Volume of Liquids · <a href="index.html" style="color:var(--accent); font-weight:600;">← Back to mindmap</a>
+  </div>
+
+</div>
+
+<script>
+  function makeStepController(suffix, totalSteps, narrations) {
+    let currentStep = 0;
+    const svgEl = document.getElementById(`svg${suffix ? '-' + suffix : ''}`);
+    const narrationEl = document.getElementById(`narration${suffix ? '-' + suffix : ''}`);
+    const counterEl = document.getElementById(`step-counter${suffix ? '-' + suffix : ''}`);
+    const prevBtn = document.getElementById(`prev-btn${suffix ? '-' + suffix : ''}`);
+    const nextBtn = document.getElementById(`next-btn${suffix ? '-' + suffix : ''}`);
+    const resetBtn = document.getElementById(`reset-btn${suffix ? '-' + suffix : ''}`);
+    function render() {
+      svgEl.querySelectorAll('.step-elem').forEach(el => { const stepNum = parseInt(el.dataset.step); el.classList.toggle('visible', stepNum <= currentStep); });
+      svgEl.querySelectorAll('.bar-fill, .node-fill').forEach(fill => { const parentStep = parseInt(fill.closest('.step-elem').dataset.step); fill.classList.toggle('ghost', parentStep < currentStep); });
+      narrationEl.innerHTML = narrations[currentStep]; counterEl.textContent = `Step ${currentStep} / ${totalSteps}`;
+      prevBtn.disabled = currentStep === 0; nextBtn.disabled = currentStep === totalSteps;
+      nextBtn.textContent = currentStep === totalSteps ? 'Done ✓' : 'Next step →';
+    }
+    nextBtn.addEventListener('click', () => { if (currentStep < totalSteps) { currentStep++; render(); } });
+    prevBtn.addEventListener('click', () => { if (currentStep > 0) { currentStep--; render(); } });
+    resetBtn.addEventListener('click', () => { currentStep = 0; render(); });
+    render(); return { next: () => nextBtn.click(), prev: () => prevBtn.click() };
+  }
+  const ctrl = makeStepController('', 7, {
+    0: 'Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.',
+    1: '<strong>Step 1 — Draw the tank.</strong> Cross-section: 40 cm wide, 30 cm tall. Width (25 cm) goes into the page.',
+    2: '<strong>Step 2 — Show water level.</strong> Water at 18 cm. Shade the water region.',
+    3: '<strong>Step 3 — Convert units.</strong> 4.5 L = 4500 cm³. Critical step!',
+    4: '<strong>Step 4 — Set up the formula.</strong> Volume poured out = base area × height drop. 4500 = (40 × 25) × h.',
+    5: '<strong>Step 5 — Solve.</strong> Height drop = 4500 ÷ 1000 = 4.5 cm. New height = 18 − 4.5 = 13.5 cm.',
+    6: '<strong>Step 6 — Show on diagram.</strong> New water level drawn 4.5 cm below the old level.',
+    7: '<strong>Step 7 — Answer.</strong> New height = 13.5 cm. Check with volume: 40 × 25 × 13.5 = 13500 cm³ = 13.5 L. 18 − 4.5 = 13.5 ✓'
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); ctrl.next(); } if (e.key === 'ArrowLeft') { e.preventDefault(); ctrl.prev(); } });
+</script>
+</body>
+</html>
