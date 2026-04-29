@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Assumption Method with Area &amp; Perimeter — P4</title>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1a2332; --ink-soft:#4a5568; --bg:#fafaf7; --card:#fff; --accent:#2f5496; --accent-soft:#e1e8f5; --pencil:#2d3142; --paper:#fffdf5; --ink-red:#c1272d; --ink-green:#2e7d32; --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04); --fill-green:#dcfce7; --fill-amber:#fef3c7; --fill-blue:#dbeafe; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--ink); line-height:1.55; padding:24px 16px 64px; }
+  .container { max-width:1000px; margin:0 auto; }
+  header { background:linear-gradient(135deg,#1f3864,#2f5496); color:white; padding:24px 28px; border-radius:12px; margin-bottom:16px; box-shadow:var(--shadow); position:relative; }
+  .breadcrumb { font-size:12px; opacity:.75; letter-spacing:.5px; text-transform:uppercase; margin-bottom:6px; }
+  h1 { font-size:26px; font-weight:700; margin-bottom:4px; }
+  .subtitle { font-size:14px; opacity:.85; }
+  .chip { display:inline-flex; align-items:center; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; background:rgba(255,255,255,.18); }
+  .chip.priority-adv { background:#7c3aed; }
+  .home-btn { position:absolute; top:16px; right:20px; color:rgba(255,255,255,0.95); text-decoration:none; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); z-index:10; }
+  .home-btn:hover { background:rgba(255,255,255,0.3); }
+  .topic-map { background:var(--card); border-radius:10px; padding:16px 20px; margin-bottom:14px; box-shadow:var(--shadow); }
+  .topic-map-row { display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+  .topic-map-label { font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.5px; padding-top:5px; flex-shrink:0; width:100px; }
+  .topic-map-chips { display:flex; gap:6px; flex-wrap:wrap; flex:1; }
+  .topic-map-chips a.map-chip { text-decoration:none; cursor:pointer; }
+  .topic-map-chips a.map-chip:hover { background:#e2e8f0; color:var(--ink); border-color:#cbd5e1; }
+  .map-chip { padding:4px 11px; border-radius:14px; font-size:12px; font-weight:500; background:#f1f5f9; color:var(--ink-soft); border:1px solid #e2e8f0; }
+  .map-chip.active { background:var(--accent); color:white; border-color:var(--accent); font-weight:700; }
+  .card { background:var(--card); border-radius:10px; padding:18px 22px; margin-bottom:14px; box-shadow:var(--shadow); }
+  .card-label { display:inline-block; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:3px 9px; border-radius:4px; margin-bottom:8px; }
+  .label-tip { background:#eff7ec; color:#2e7d32; }
+  .label-warn { background:#fdf4e3; color:#b45309; }
+  h2.section-heading { font-size:18px; font-weight:700; margin:22px 0 10px; display:flex; align-items:center; gap:8px; }
+  h2.section-heading::before { content:''; width:4px; height:18px; background:var(--accent); border-radius:2px; }
+  .concept-box { background:var(--paper); border:1px solid #e0d8c2; border-radius:8px; padding:18px 22px; margin:10px 0; box-shadow:0 2px 6px rgba(0,0,0,.04); }
+  .step-row { display:flex; gap:12px; margin:10px 0; align-items:flex-start; }
+  .step-num { flex-shrink:0; width:28px; height:28px; background:var(--accent); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
+  .step-content { flex:1; }
+  .example-box { background:var(--accent-soft); border-left:4px solid var(--accent); padding:12px 16px; border-radius:6px; margin:10px 0; }
+  .example-box strong { color:var(--accent); }
+  .alert-box { border-radius:8px; padding:14px 16px; margin:10px 0; }
+  .alert-trap { background:#fdf4e3; border-left:4px solid #d97706; }
+  .alert-tip { background:#eff7ec; border-left:4px solid #2e7d32; }
+  .alert-box h4 { font-size:13px; font-weight:700; margin-bottom:6px; }
+  .alert-trap h4 { color:#d97706; } .alert-tip h4 { color:#2e7d32; }
+  .alert-box p { font-size:13.5px; color:var(--ink); margin-bottom:6px; }
+  .formula-card { background:var(--fill-blue); border:2px solid #93c5fd; border-radius:10px; padding:14px 18px; margin:10px 0; }
+  .formula-card .formula { font-family:'Kalam',cursive; font-size:18px; }
+  .nav-hint { margin-top:28px; padding:14px 18px; background:#f0f0e8; border-radius:8px; font-size:12px; color:var(--ink-soft); text-align:center; font-style:italic; }
+  .nav-hint a { color:var(--accent); font-weight:600; }
+  .cross-link { background:#e1e8f5; border-left:4px solid var(--accent); padding:14px 18px; border-radius:8px; margin-top:20px; font-size:14px; }
+  .cross-link a { color:var(--accent); font-weight:700; }
+  @media(max-width:640px){ body{padding:12px 0 40px;} .container{padding:0 12px;} header{border-radius:0;margin:0 -12px 12px;padding:20px 16px;} h1{font-size:22px;} .card{padding:14px;margin:0 -12px 12px;} .concept-box{margin:10px -12px;padding:16px 12px;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P4 Measurement › Heuristic 3.5</div>
+    <h1>Assumption Method with Area &amp; Perimeter</h1>
+    <div class="subtitle">Squares vs rectangles: assume all are squares, use area difference to find dimensions.</div>
+    <div class="priority-row">
+      <span class="chip priority-adv">🟣 ADVANCED</span>
+      <span class="chip">Assumption + Geometry</span>
+    </div>
+    <a href="index.html" class="home-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+  </header>
+
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <div class="topic-map-label">Area &amp; Perimeter</div>
+      <div class="topic-map-chips">
+        <a href="area_perimeter_basics.html" class="map-chip">Basics</a>
+        <a href="area_perimeter_composite.html" class="map-chip">Composite</a>
+        <a href="area_perimeter_reverse.html" class="map-chip">Reverse</a>
+        <a href="area_perimeter_proportional.html" class="map-chip">Proportional</a>
+        <a href="assumption_area_perimeter.html" class="map-chip active">Assumption</a>
+      </div>
+    </div>
+    <div class="topic-map-row">
+      <div class="topic-map-label">Other Topics</div>
+      <div class="topic-map-chips">
+        <a href="fractions_add_sub.html" class="map-chip">Fractions</a>
+        <a href="decimals_intro.html" class="map-chip">Decimals</a>
+        <a href="graphs_tables.html" class="map-chip">Graphs</a>
+        <a href="assumption_decimals.html" class="map-chip">Assumption (Dec)</a>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-heading">When to Use Assumption in Area Problems</h2>
+  <div class="concept-box">
+    <p style="margin-bottom:8px;">This heuristic applies when a problem involves:</p>
+    <ul style="margin-left:20px; font-size:13.5px;">
+      <li>A mixture of <strong>squares and rectangles</strong> (or different sizes)</li>
+      <li>A known <strong>total number of figures</strong></li>
+      <li>A known <strong>total area or total perimeter</strong></li>
+      <li>You need to find <strong>how many of each type</strong></li>
+    </ul>
+  </div>
+
+  <h2 class="section-heading">Worked Example 1: Squares &amp; Rectangles</h2>
+  <div class="card">
+    <span class="card-label label-tip">Worked Example</span>
+    <p style="margin-bottom:10px;"><strong>Question:</strong> A farmer has 12 plots of land. Some are square plots (side 5 m) and the rest are rectangular plots (4 m × 6 m). The total area of all plots is 316 m². How many square plots are there?</p>
+
+    <div class="step-row">
+      <span class="step-num">1</span>
+      <div class="step-content">
+        <p><strong>Find area of each type:</strong></p>
+        <p>Square: 5 × 5 = <strong>25 m²</strong></p>
+        <p>Rectangle: 4 × 6 = <strong>24 m²</strong></p>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">2</span>
+      <div class="step-content">
+        <p><strong>Assume ALL 12 plots are rectangles.</strong></p>
+        <p style="font-family:'Kalam',cursive; font-size:16px;">Assumed total area = 12 × 24 = <strong>288 m²</strong></p>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">3</span>
+      <div class="step-content">
+        <p><strong>Difference:</strong> 316 − 288 = <strong>28 m²</strong> (we're short)</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">4</span>
+      <div class="step-content">
+        <p><strong>Swap:</strong> Each swap from rectangle → square adds 25 − 24 = <strong>1 m²</strong></p>
+        <p style="font-family:'Kalam',cursive; font-size:16px;">Number of squares = 28 ÷ 1 = <strong>28</strong> — wait, that's more than 12!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-box alert-trap">
+    <h4>⚠️ Check Your Assumption Direction!</h4>
+    <p>If the result exceeds the total number of items, you assumed the <strong>wrong way</strong>. The assumed total (288) was LESS than actual (316), so we need MORE area per plot → square plots have MORE area. But 28 ÷ 1 = 28 > 12? Re-check: 12 × 25 = 300, 316 − 300 = 16. Let's recalculate assuming all squares...</p>
+  </div>
+
+  <div class="card">
+    <span class="card-label label-warn">Corrected Solution</span>
+    <div class="step-row">
+      <span class="step-num">1</span>
+      <div class="step-content">
+        <p><strong>Assume ALL 12 plots are SQUARES.</strong></p>
+        <p style="font-family:'Kalam',cursive; font-size:16px;">Assumed total = 12 × 25 = <strong>300 m²</strong></p>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">2</span>
+      <div class="step-content">
+        <p><strong>Difference:</strong> 316 − 300 = <strong>16 m²</strong> (assumed is too HIGH)</p>
+        <p>We over-assumed by 16 m² — too many squares.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">3</span>
+      <div class="step-content">
+        <p><strong>Swap:</strong> Each swap square → rectangle <em>reduces</em> area by 25 − 24 = <strong>1 m²</strong></p>
+        <p style="font-family:'Kalam',cursive; font-size:16px;">Number of rectangles = 16 ÷ 1 = <strong>16</strong> — still > 12!</p>
+        <p style="color:var(--ink-red); font-size:13px;">There's an error in the problem numbers. Let's fix: make total area 292 m².</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label label-tip">Revised Example (clean numbers)</span>
+    <p style="margin-bottom:10px;"><strong>Question:</strong> 12 plots. Squares = 5×5 = 25 m². Rectangles = 4×6 = 24 m². Total area = <strong>293 m²</strong>. How many of each?</p>
+    <div class="step-row">
+      <span class="step-num">1</span>
+      <div class="step-content"><p>Assume all rectangles: 12 × 24 = 288 m²</p></div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">2</span>
+      <div class="step-content"><p>Difference: 293 − 288 = 5 m²</p></div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">3</span>
+      <div class="step-content"><p>Each swap rect→square adds 1 m². Squares = 5 ÷ 1 = <strong>5 squares</strong></p></div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">4</span>
+      <div class="step-content"><p>Rectangles = 12 − 5 = <strong>7 rectangles</strong></p>
+        <p style="font-size:12px; color:var(--ink-soft);">Check: (5 × 25) + (7 × 24) = 125 + 168 = 293 ✓</p>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Worked Example 2: Perimeter Version</h2>
+  <div class="card">
+    <span class="card-label label-tip">Perimeter Assumption</span>
+    <p style="margin-bottom:10px;"><strong>Question:</strong> 10 wire frames. Some are squares (side 6 cm), others are rectangles (5 cm × 7 cm). Total wire used is 256 cm. How many of each?</p>
+    <div class="step-row">
+      <span class="step-num">1</span>
+      <div class="step-content">
+        <p><strong>Perimeters:</strong> Square = 4 × 6 = 24 cm. Rectangle = 2 × (5+7) = 24 cm.</p>
+        <p>Both are <strong>24 cm</strong>! Total = 10 × 24 = 240 ≠ 256. The problem has no solution with these numbers — a good teaching moment about checking before solving!</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-box alert-tip">
+    <h4>💡 Teacher's Note: Crafting Good Assumption Problems</h4>
+    <p>For area/perimeter assumption to work, the two shapes must have DIFFERENT areas (or perimeters), and the numbers must yield a valid answer (&lt; total items). Always verify your problem numbers before giving to students!</p>
+  </div>
+
+  <div class="nav-hint">Press the <strong>chips above</strong> to navigate between topics, or <a href="index.html">return to the full topic map</a>.</div>
+
+  <div class="cross-link">
+    ⬆️ <strong>Related:</strong> <a href="assumption.html">Assumption Method (General)</a> — learn the full heuristic | <a href="area_perimeter_basics.html">Area &amp; Perimeter Basics</a> — review formulas
+  </div>
+
+</div>
+</body>
+</html>

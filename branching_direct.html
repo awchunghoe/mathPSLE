@@ -274,6 +274,9 @@
     .pad-controls { gap: 6px; }
     .btn { padding: 7px 12px; font-size: 12px; }
   }
+  .home-btn { position:absolute; top:16px; right:20px; color:rgba(255,255,255,0.95); text-decoration:none; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); transition:all 0.15s; z-index:10; }
+  .home-btn:hover { background:rgba(255,255,255,0.3); color:#fff; }
+
 </style>
 </head>
 <body>
@@ -288,6 +291,10 @@
       <span class="chip">⭐ Signature P5 heuristic</span>
       <span class="chip">PSLE favourite</span>
     </div>
+    <a href="index.html" class="home-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
   </header>
 
   <!-- ===== TOPIC MAP ===== -->
@@ -296,14 +303,15 @@
       <span class="topic-map-label">Subtopics in P5 Fractions</span>
       <div class="topic-map-chips">
         <span class="map-chip active">Branching (Direct)</span>
-        <span class="map-chip">Branching (Working Backwards)</span>
-        <span class="map-chip">Branching (With Additional Amount)</span>
-        <span class="map-chip">Repeated Items</span>
-        <span class="map-chip">One Item Unchanged</span>
-        <span class="map-chip">Total Unchanged</span>
-        <span class="map-chip">Difference Unchanged</span>
-        <span class="map-chip">Numerators the Same</span>
-        <span class="map-chip">Quantity × Value</span>
+        <span class="map-chip active">Branching (Working Backwards)</span>
+        <a href="branching_additional.html" class="map-chip">Branching (With Additional)</a>
+        <a href="repeated_items_frac.html" class="map-chip">Repeated Items (Fractional)</a>
+        <a href="one_item_unchanged_frac.html" class="map-chip">One Item Unchanged (Fractional)</a>
+        <a href="total_unchanged_frac.html" class="map-chip">Total Unchanged (Fractional)</a>
+        <a href="difference_unchanged_frac.html" class="map-chip">Difference Unchanged (Fractional)</a>
+        <a href="numerators_same.html" class="map-chip">Numerators the Same</a>
+        <a href="more_than_less_than.html" class="map-chip">More Than / Less Than</a>
+        <a href="quantity_value_frac.html" class="map-chip">Quantity &amp;times; Value (Fractional)</a>
       </div>
     </div>
     <div class="topic-map-row">

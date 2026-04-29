@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Addition &amp; Subtraction of Fractions — P4</title>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a2332; --ink-soft: #4a5568; --bg: #fafaf7; --card: #ffffff;
+    --accent: #2f5496; --accent-soft: #e1e8f5; --pencil: #2d3142; --pencil-soft: #5a6478;
+    --paper: #fffdf5; --ink-red: #c1272d; --ink-blue: #1f5fa8; --ink-green: #2e7d32;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+    --fill-green: #dcfce7; --fill-blue: #dbeafe; --fill-amber: #fef3c7; --fill-choc: #fee2e2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; padding: 24px 16px 64px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  header { background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%); color: white; padding: 24px 28px; border-radius: 12px; margin-bottom: 16px; box-shadow: var(--shadow); position: relative; }
+  .breadcrumb { font-size: 12px; opacity: .75; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; opacity: .85; }
+  .priority-row { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.18); }
+  .chip.priority-fund { background: #166534; }
+  .home-btn { position:absolute; top:16px; right:20px; color:rgba(255,255,255,0.95); text-decoration:none; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); transition:all 0.15s; z-index:10; }
+  .home-btn:hover { background:rgba(255,255,255,0.3); color:#fff; }
+  .topic-map { background: var(--card); border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .topic-map-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .topic-map-row:last-child { margin-bottom: 0; }
+  .topic-map-label { font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.5px; padding-top: 5px; flex-shrink: 0; width: 100px; }
+  .topic-map-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .topic-map-chips a.map-chip { text-decoration: none; cursor: pointer; }
+  .topic-map-chips a.map-chip:hover { background: #e2e8f0; color: var(--ink); border-color: #cbd5e1; }
+  .map-chip { padding: 4px 11px; border-radius: 14px; font-size: 12px; font-weight: 500; background: #f1f5f9; color: var(--ink-soft); border: 1px solid #e2e8f0; text-decoration: none; cursor: default; }
+  .map-chip.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: 700; }
+  .card { background: var(--card); border-radius: 10px; padding: 18px 22px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .card-label { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; margin-bottom: 8px; }
+  .label-tip { background: #eff7ec; color: #2e7d32; }
+  .label-warn { background: #fdf4e3; color: #b45309; }
+  h2.section-heading { font-size: 18px; font-weight: 700; margin: 22px 0 10px; display: flex; align-items: center; gap: 8px; }
+  h2.section-heading::before { content: ''; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
+  .concept-box { background: var(--paper); border: 1px solid #e0d8c2; border-radius: 8px; padding: 18px 22px; margin: 10px 0; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+  .step-row { display: flex; gap: 12px; margin: 10px 0; align-items: flex-start; }
+  .step-num { flex-shrink: 0; width: 28px; height: 28px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+  .step-content { flex: 1; }
+  .fraction-visual { display: flex; gap: 4px; margin: 8px 0; }
+  .frac-box { width: 40px; height: 40px; border: 2px solid var(--ink-green); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+  .frac-box.filled { background: var(--fill-green); }
+  .frac-box.empty { background: white; }
+  .example-box { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 6px; margin: 10px 0; }
+  .example-box strong { color: var(--accent); }
+  .alert-box { border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .alert-trap { background: #fdf4e3; border-left: 4px solid #d97706; }
+  .alert-tip { background: #eff7ec; border-left: 4px solid #2e7d32; }
+  .alert-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .alert-trap h4 { color: #d97706; } .alert-tip h4 { color: #2e7d32; }
+  .alert-box p { font-size: 13.5px; color: var(--ink); margin-bottom: 6px; }
+  .nav-hint { margin-top: 28px; padding: 14px 18px; background: #f0f0e8; border-radius: 8px; font-size: 12px; color: var(--ink-soft); text-align: center; font-style: italic; }
+  .nav-hint a { color: var(--accent); font-weight: 600; }
+  .cross-link { background: #e1e8f5; border-left: 4px solid var(--accent); padding: 14px 18px; border-radius: 8px; margin-top: 20px; font-size: 14px; }
+  .cross-link a { color: var(--accent); font-weight: 700; }
+  @media (max-width: 640px) {
+    body { padding: 12px 0 40px; } .container { padding: 0 12px; }
+    header { border-radius: 0; margin: 0 -12px 12px; padding: 20px 16px; } h1 { font-size: 22px; }
+    .topic-map { border-radius: 8px; padding: 12px 14px; }
+    .card { padding: 14px 0; border-radius: 8px; margin: 0 -12px 12px; padding-left: 12px; padding-right: 12px; }
+    .concept-box { margin: 10px -12px; padding: 16px 12px; border-radius: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P4 Fractions › Concept 1.1</div>
+    <h1>Addition &amp; Subtraction of Fractions</h1>
+    <div class="subtitle">Same denominator: add the numerators. Different denominators: find equivalent fractions first.</div>
+    <div class="priority-row">
+      <span class="chip priority-fund">🟢 FOUNDATIONAL</span>
+      <span class="chip">MOE P4 Core</span>
+    </div>
+    <a href="index.html" class="home-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+  </header>
+
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <span class="topic-map-label">P4 Fractions</span>
+      <div class="topic-map-chips">
+        <a href="fractions_add_sub.html" class="map-chip active">Add &amp; Sub</a>
+        <a href="fraction_of_set.html" class="map-chip">Fraction of a Set</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label label-tip">What it is</span>
+    <p style="font-size:14.5px;">P4 students learn to add and subtract fractions in three situations: <strong>(1)</strong> same denominator, <strong>(2)</strong> one denominator is a multiple of the other (e.g., 2 and 4), and <strong>(3)</strong> mixed numbers. The core rule never changes: you can only add/subtract when the denominators are the same. Denominators ≤ 12 per MOE syllabus.</p>
+  </div>
+
+  <h2 class="section-heading">Case 1: Same Denominator</h2>
+  <div class="concept-box">
+    <p style="font-size:14.5px; margin-bottom:12px;"><strong>Rule:</strong> Add or subtract the numerators. Keep the denominator.</p>
+    <div class="example-box">
+      <strong>Example:</strong> 2/7 + 3/7 = (2+3)/7 = <strong>5/7</strong>
+    </div>
+    <div class="example-box">
+      <strong>Example:</strong> 5/6 - 1/6 = (5-1)/6 = <strong>4/6 = 2/3</strong> (simplify!)
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Common trap</h4>
+      <p>Students add both numerators AND denominators: 2/7 + 3/7 = 5/14. <strong>Wrong!</strong> The denominator stays 7 — you're adding pieces of the same-sized whole.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Case 2: Different Denominators (one is a multiple)</h2>
+  <div class="concept-box">
+    <p style="font-size:14.5px; margin-bottom:12px;"><strong>Rule:</strong> Find the equivalent fraction so both share the same denominator. Usually the <strong>bigger</strong> denominator.</p>
+    <div class="step-row">
+      <span class="step-num">1</span>
+      <div class="step-content">
+        <p style="font-size:14px;">Identify which denominator is the multiple. For 1/2 + 1/4: 4 is a multiple of 2.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">2</span>
+      <div class="step-content">
+        <p style="font-size:14px;">Convert: 1/2 = 2/4 (multiply top and bottom by 2).</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">3</span>
+      <div class="step-content">
+        <p style="font-size:14px;">Now add: 2/4 + 1/4 = <strong>3/4</strong></p>
+      </div>
+    </div>
+    <div class="example-box">
+      <strong>Another:</strong> 3/4 - 1/8 → 3/4 = 6/8 → 6/8 - 1/8 = <strong>5/8</strong>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Case 3: Mixed Numbers</h2>
+  <div class="concept-box">
+    <p style="font-size:14.5px; margin-bottom:12px;"><strong>Rule:</strong> Add/subtract the whole numbers separately, then the fractions. If the fraction goes negative, borrow 1 from the whole number.</p>
+    <div class="example-box">
+      <strong>Example:</strong> 2 1/4 + 1 2/4 = (2+1) + (1/4 + 2/4) = <strong>3 3/4</strong>
+    </div>
+    <div class="example-box">
+      <strong>Example (borrowing):</strong> 3 1/5 - 1 3/5 → 3 1/5 = 2 6/5 → (2-1) + (6/5 - 3/5) = <strong>1 3/5</strong>
+    </div>
+    <div class="alert-box alert-tip">
+      <h4>💡 Teaching tip</h4>
+      <p>Draw the mixed number as a whole number bar + a fraction bar. When borrowing, "break" one whole bar into fraction pieces. Visual learners get this instantly.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Simplification Checklist</h2>
+  <div class="concept-box">
+    <div class="step-row">
+      <span class="step-num">1</span>
+      <div class="step-content"><p style="font-size:14px;">Is the answer a <strong>proper fraction</strong> in lowest terms? (e.g., 4/6 → 2/3)</p></div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">2</span>
+      <div class="step-content"><p style="font-size:14px;">Is it an <strong>improper fraction</strong> that should be a mixed number? (e.g., 7/4 → 1 3/4)</p></div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">3</span>
+      <div class="step-content"><p style="font-size:14px;">Did I check if numerator = denominator? (e.g., 6/6 = 1 whole)</p></div>
+    </div>
+  </div>
+
+  <div class="cross-link">
+    ⬆️ <strong>P5 Extension:</strong> Once students master adding/subtracting fractions, they move to <a href="part_whole.html">Part-Whole</a> — using fractions as parts of a total to solve problem sums.
+  </div>
+
+  <div class="nav-hint">
+    Next: <a href="fraction_of_set.html">Fraction of a Set</a> — finding a fraction of a group of items.
+  </div>
+
+</div>
+</body>
+</html>

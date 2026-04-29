@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>More Than / Less Than with Decimals — P4</title>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1a2332; --ink-soft:#4a5568; --bg:#fafaf7; --card:#fff; --accent:#2f5496; --accent-soft:#e1e8f5; --pencil:#2d3142; --paper:#fffdf5; --ink-red:#c1272d; --ink-green:#2e7d32; --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04); --fill-green:#dcfce7; --fill-amber:#fef3c7; --fill-blue:#dbeafe; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--ink); line-height:1.55; padding:24px 16px 64px; }
+  .container { max-width:1000px; margin:0 auto; }
+  header { background:linear-gradient(135deg,#1f3864,#2f5496); color:white; padding:24px 28px; border-radius:12px; margin-bottom:16px; box-shadow:var(--shadow); position:relative; }
+  .breadcrumb { font-size:12px; opacity:.75; letter-spacing:.5px; text-transform:uppercase; margin-bottom:6px; }
+  h1 { font-size:26px; font-weight:700; margin-bottom:4px; }
+  .subtitle { font-size:14px; opacity:.85; }
+  .chip { display:inline-flex; align-items:center; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; background:rgba(255,255,255,.18); }
+  .chip.priority-imp { background:#b45309; }
+  .home-btn { position:absolute; top:16px; right:20px; color:rgba(255,255,255,0.95); text-decoration:none; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); z-index:10; }
+  .home-btn:hover { background:rgba(255,255,255,0.3); }
+  .topic-map { background:var(--card); border-radius:10px; padding:16px 20px; margin-bottom:14px; box-shadow:var(--shadow); }
+  .topic-map-row { display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+  .topic-map-label { font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.5px; padding-top:5px; flex-shrink:0; width:100px; }
+  .topic-map-chips { display:flex; gap:6px; flex-wrap:wrap; flex:1; }
+  .topic-map-chips a.map-chip { text-decoration:none; cursor:pointer; }
+  .topic-map-chips a.map-chip:hover { background:#e2e8f0; color:var(--ink); border-color:#cbd5e1; }
+  .map-chip { padding:4px 11px; border-radius:14px; font-size:12px; font-weight:500; background:#f1f5f9; color:var(--ink-soft); border:1px solid #e2e8f0; }
+  .map-chip.active { background:var(--accent); color:white; border-color:var(--accent); font-weight:700; }
+  .card { background:var(--card); border-radius:10px; padding:18px 22px; margin-bottom:14px; box-shadow:var(--shadow); }
+  .card-label { display:inline-block; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:3px 9px; border-radius:4px; margin-bottom:8px; }
+  .label-tip { background:#eff7ec; color:#2e7d32; }
+  .label-warn { background:#fdf4e3; color:#b45309; }
+  h2.section-heading { font-size:18px; font-weight:700; margin:22px 0 10px; display:flex; align-items:center; gap:8px; }
+  h2.section-heading::before { content:''; width:4px; height:18px; background:var(--accent); border-radius:2px; }
+  .concept-box { background:var(--paper); border:1px solid #e0d8c2; border-radius:8px; padding:18px 22px; margin:10px 0; box-shadow:0 2px 6px rgba(0,0,0,.04); }
+  .step-row { display:flex; gap:12px; margin:10px 0; align-items:flex-start; }
+  .step-num { flex-shrink:0; width:28px; height:28px; background:var(--accent); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
+  .step-content { flex:1; }
+  .example-box { background:var(--accent-soft); border-left:4px solid var(--accent); padding:12px 16px; border-radius:6px; margin:10px 0; }
+  .example-box strong { color:var(--accent); }
+  .alert-box { border-radius:8px; padding:14px 16px; margin:10px 0; }
+  .alert-trap { background:#fdf4e3; border-left:4px solid #d97706; }
+  .alert-tip { background:#eff7ec; border-left:4px solid #2e7d32; }
+  .alert-box h4 { font-size:13px; font-weight:700; margin-bottom:6px; }
+  .alert-trap h4 { color:#d97706; } .alert-tip h4 { color:#2e7d32; }
+  .alert-box p { font-size:13.5px; color:var(--ink); margin-bottom:6px; }
+  .method-tabs { display:flex; gap:4px; margin-bottom:0; border-bottom:2px solid #e2e8f0; }
+  .method-tab { padding:10px 18px; background:none; border:none; font-family:'Inter',sans-serif; font-size:13px; font-weight:600; color:var(--ink-soft); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; }
+  .method-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .method-content { display:none; padding-top:16px; }
+  .method-content.active { display:block; }
+  .formula-card { background:var(--fill-blue); border:2px solid #93c5fd; border-radius:10px; padding:14px 18px; margin:10px 0; }
+  .formula-card .formula { font-family:'Kalam',cursive; font-size:20px; }
+  .nav-hint { margin-top:28px; padding:14px 18px; background:#f0f0e8; border-radius:8px; font-size:12px; color:var(--ink-soft); text-align:center; font-style:italic; }
+  .nav-hint a { color:var(--accent); font-weight:600; }
+  .cross-link { background:#e1e8f5; border-left:4px solid var(--accent); padding:14px 18px; border-radius:8px; margin-top:20px; font-size:14px; }
+  .cross-link a { color:var(--accent); font-weight:700; }
+  @media(max-width:640px){ body{padding:12px 0 40px;} .container{padding:0 12px;} header{border-radius:0;margin:0 -12px 12px;padding:20px 16px;} h1{font-size:22px;} .card{padding:14px;margin:0 -12px 12px;} .concept-box{margin:10px -12px;padding:16px 12px;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P4 Decimals › Heuristic 5.1</div>
+    <h1>More Than / Less Than with Decimals</h1>
+    <div class="subtitle">The same heuristic as whole numbers — but watch the decimal points!</div>
+    <div class="priority-row">
+      <span class="chip priority-imp">🟡 IMPORTANT</span>
+      <span class="chip">MOE P4</span>
+    </div>
+    <a href="index.html" class="home-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+  </header>
+
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <div class="topic-map-label">Decimals</div>
+      <div class="topic-map-chips">
+        <a href="decimals_intro.html" class="map-chip">Intro</a>
+        <a href="decimals_add_sub.html" class="map-chip">Add/Sub</a>
+        <a href="decimals_mul_div.html" class="map-chip">Mul/Div</a>
+        <a href="more_than_less_than_decimals.html" class="map-chip active">More/Less</a>
+        <a href="repeated_items_decimals.html" class="map-chip">Repeated</a>
+        <a href="quantity_value_decimals.html" class="map-chip">Qty×Value</a>
+        <a href="assumption_decimals.html" class="map-chip">Assumption</a>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-heading">The Model Method with Decimals</h2>
+  <div class="concept-box">
+    <p style="margin-bottom:8px;">The "More Than / Less Than" heuristic uses the <strong>Comparison Model</strong>. With decimals, align the decimal points carefully.</p>
+    <div class="formula-card">
+      <div class="formula">Bigger = Smaller + Difference</div>
+      <div class="formula">Smaller = Bigger − Difference</div>
+      <div class="formula">Total = Bigger + Smaller</div>
+    </div>
+  </div>
+
+  <div class="method-tabs">
+    <button class="method-tab active" data-tab="more">More Than</button>
+    <button class="method-tab" data-tab="less">Less Than</button>
+  </div>
+
+  <div class="method-content active" id="tab-more">
+    <h2 class="section-heading">Type: "More Than" (A is $3.50 more than B)</h2>
+    <div class="card">
+      <span class="card-label label-tip">Worked Example</span>
+      <p style="margin-bottom:10px;"><strong>Question:</strong> Alice has $8.50. Alice has $2.75 more than Ben. How much do they have altogether?</p>
+
+      <div class="step-row">
+        <span class="step-num">1</span>
+        <div class="step-content">
+          <p><strong>Draw the model:</strong> Alice's bar is longer. The extra part = $2.75</p>
+          <p style="font-family:'Kalam',cursive; font-size:16px; margin-top:4px;">Alice: |==========|$2.75| ($8.50 total)</p>
+          <p style="font-family:'Kalam',cursive; font-size:16px;">Ben:   |==========| (?)</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <span class="step-num">2</span>
+        <div class="step-content">
+          <p><strong>Find Ben (shorter bar):</strong></p>
+          <p style="font-family:'Kalam',cursive; font-size:18px;">Ben = 8.50 − 2.75 = <strong>$5.75</strong></p>
+        </div>
+      </div>
+      <div class="step-row">
+        <span class="step-num">3</span>
+        <div class="step-content">
+          <p><strong>Total = Alice + Ben</strong></p>
+          <p style="font-family:'Kalam',cursive; font-size:18px;">= 8.50 + 5.75 = <strong>$14.25</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="method-content" id="tab-less">
+    <h2 class="section-heading">Type: "Less Than" (A is $4.20 less than B)</h2>
+    <div class="card">
+      <span class="card-label label-tip">Worked Example</span>
+      <p style="margin-bottom:10px;"><strong>Question:</strong> A ribbon is 6.40 m long. It is 1.85 m shorter than a rope. What is the total length of both?</p>
+
+      <div class="step-row">
+        <span class="step-num">1</span>
+        <div class="step-content">
+          <p><strong>Rope is longer:</strong> Rope = Ribbon + 1.85</p>
+          <p style="font-family:'Kalam',cursive; font-size:16px; margin-top:4px;">Ribbon: |========| (6.40)</p>
+          <p style="font-family:'Kalam',cursive; font-size:16px;">Rope:   |========|1.85| (?)</p>
+        </div>
+      </div>
+      <div class="step-row">
+        <span class="step-num">2</span>
+        <div class="step-content">
+          <p><strong>Rope = 6.40 + 1.85 = 8.25 m</strong></p>
+        </div>
+      </div>
+      <div class="step-row">
+        <span class="step-num">3</span>
+        <div class="step-content">
+          <p><strong>Total = 6.40 + 8.25 = 14.65 m</strong></p>
+          <p style="font-family:'Kalam',cursive; font-size:16px;">Total = 2 × 6.40 + 1.85 = 12.80 + 1.85 = <strong>14.65 m</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-box alert-trap">
+    <h4>⚠️ Common Trap: Decimal Alignment</h4>
+    <p>8.50 − 2.75: <strong>NEVER</strong> write as 8.5 − 2.75 with right-alignment error.</p>
+    <p>Correct: &nbsp;&nbsp;8.50<br>&nbsp;&nbsp;&nbsp;− 2.75<br>= 5.75</p>
+  </div>
+
+  <div class="nav-hint">Press the <strong>chips above</strong> to navigate between decimal topics, or <a href="index.html">return to the full topic map</a>.</div>
+
+  <div class="cross-link">
+    ⬆️ <strong>P5 Extension:</strong> <a href="more_than_less_than.html">More Than/Less Than (Fractions)</a> — the same heuristic with fractions instead of decimals
+  </div>
+
+</div>
+<script>
+  document.querySelectorAll('.method-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.method-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

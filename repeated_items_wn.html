@@ -15,7 +15,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; padding: 24px 16px 64px; }
   .container { max-width: 1000px; margin: 0 auto; }
-  header { background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%); color: white; padding: 24px 28px; border-radius: 12px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  header { background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%); color: white; padding: 24px 28px; border-radius: 12px; margin-bottom: 16px; box-shadow: var(--shadow); position: relative; }
   .breadcrumb { font-size: 12px; opacity: .75; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
   h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
   .subtitle { font-size: 14px; opacity: .85; }
@@ -31,6 +31,10 @@
   .map-chip.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: 700; }
   .map-chip.heuristic-chip { background: #fef3c7; color: #92400e; border-color: #fde68a; }
   .map-chip.heuristic-chip.active { background: #d97706; color: white; }
+  .topic-map-chips a.map-chip { text-decoration: none; cursor: pointer; }
+  .topic-map-chips a.map-chip:hover { background: #e2e8f0; color: var(--ink); border-color: #cbd5e1; }
+  .topic-map-chips a.map-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+
   .card { background: var(--card); border-radius: 10px; padding: 18px 22px; margin-bottom: 14px; box-shadow: var(--shadow); }
   .card-label { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; margin-bottom: 8px; }
   .label-tip { background: #eff7ec; color: #2e7d32; }
@@ -81,6 +85,9 @@
     .working-pad > svg { min-width: 520px; max-width: none; width: 100%; }
     .pad-controls { gap: 6px; } .btn { padding: 7px 12px; font-size: 12px; }
   }
+  .home-btn { position:absolute; top:16px; right:20px; color:rgba(255,255,255,0.95); text-decoration:none; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); transition:all 0.15s; z-index:10; }
+  .home-btn:hover { background:rgba(255,255,255,0.3); color:#fff; }
+
 </style>
 </head>
 <body>
@@ -95,20 +102,25 @@
       <span class="chip">⭐ Common exam pattern</span>
       <span class="chip">Grouping method</span>
     </div>
+      <a href="index.html" style="position:absolute;top:24px;right:28px;color:white;text-decoration:none;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;opacity:0.85;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="index.html" class="home-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
   </header>
 
   <div class="topic-map">
     <div class="topic-map-row">
       <span class="topic-map-label">Subtopics in P5</span>
       <div class="topic-map-chips">
-        <span class="map-chip">Branching (Direct)</span>
-        <span class="map-chip">Branching (Working Backwards)</span>
-        <span class="map-chip">Branching (With Additional)</span>
-        <span class="map-chip active">Repeated Items</span>
-        <span class="map-chip">One Item Unchanged</span>
-        <span class="map-chip">Total Unchanged</span>
-        <span class="map-chip">Gap & Difference</span>
-        <span class="map-chip">Quantity x Value</span>
+        <a href="gap_difference.html" class="map-chip">Gap &amp; Difference</a>
+        <span class="map-chip active">Repeated Items (Whole Number)</span>
+        <a href="difference_unchanged_wn.html" class="map-chip">Difference Unchanged (Whole Number)</a>
+        <a href="equal_stage_wn.html" class="map-chip">Equal Stage (Whole Number)</a>
+        <a href="internal_transfer.html" class="map-chip">Internal Transfer</a>
       </div>
     </div>
     <div class="topic-map-row">

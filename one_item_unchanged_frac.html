@@ -15,7 +15,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; padding: 24px 16px 64px; }
   .container { max-width: 1000px; margin: 0 auto; }
-  header { background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%); color: white; padding: 24px 28px; border-radius: 12px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  header { background: linear-gradient(135deg, #1f3864 0%, #2f5496 100%); color: white; padding: 24px 28px; border-radius: 12px; margin-bottom: 16px; box-shadow: var(--shadow); position: relative; }
   .breadcrumb { font-size: 12px; opacity: .75; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
   h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
   .subtitle { font-size: 14px; opacity: .85; }
@@ -95,6 +95,9 @@
     .working-pad > svg { min-width: 520px; max-width: none; width: 100%; }
     .method-tab { padding: 8px 12px; font-size: 12px; } .pad-controls { gap: 6px; } .btn { padding: 7px 12px; font-size: 12px; }
   }
+  .home-btn { position:absolute; top:16px; right:20px; color:rgba(255,255,255,0.95); text-decoration:none; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); transition:all 0.15s; z-index:10; }
+  .home-btn:hover { background:rgba(255,255,255,0.3); color:#fff; }
+
 </style>
 </head>
 <body>
@@ -109,21 +112,26 @@
       <span class="chip">⭐ Very common</span>
       <span class="chip">Bar model + table</span>
     </div>
+    <a href="index.html" class="home-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
   </header>
 
   <div class="topic-map">
     <div class="topic-map-row">
       <span class="topic-map-label">Subtopics in P5 Fractions</span>
       <div class="topic-map-chips">
-        <span class="map-chip">Branching (Direct)</span>
-        <span class="map-chip">Branching (Working Backwards)</span>
-        <span class="map-chip">Branching (With Additional Amount)</span>
-        <span class="map-chip">Repeated Items</span>
-        <span class="map-chip active">One Item Unchanged</span>
-        <span class="map-chip">Total Unchanged</span>
-        <span class="map-chip">Difference Unchanged</span>
-        <span class="map-chip">Numerators the Same</span>
-        <span class="map-chip">Quantity × Value</span>
+        <a href="branching_direct.html" class="map-chip">Branching (Direct)</a>
+        <a href="branching_direct.html" class="map-chip">Branching (Working Backwards)</a>
+        <a href="branching_additional.html" class="map-chip">Branching (With Additional)</a>
+        <a href="repeated_items_frac.html" class="map-chip">Repeated Items (Fractional)</a>
+        <span class="map-chip active">One Item Unchanged (Fractional)</span>
+        <a href="total_unchanged_frac.html" class="map-chip">Total Unchanged (Fractional)</a>
+        <a href="difference_unchanged_frac.html" class="map-chip">Difference Unchanged (Fractional)</a>
+        <a href="numerators_same.html" class="map-chip">Numerators the Same</a>
+        <a href="more_than_less_than.html" class="map-chip">More Than / Less Than</a>
+        <a href="quantity_value_frac.html" class="map-chip">Quantity &amp;times; Value (Fractional)</a>
       </div>
     </div>
     <div class="topic-map-row">

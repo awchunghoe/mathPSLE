@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Line Graphs — Reading, Interpreting &amp; Plotting — P4</title>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#1a2332; --ink-soft:#4a5568; --bg:#fafaf7; --card:#fff; --accent:#2f5496; --accent-soft:#e1e8f5; --pencil:#2d3142; --paper:#fffdf5; --ink-red:#c1272d; --ink-green:#2e7d32; --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04); --fill-green:#dcfce7; --fill-amber:#fef3c7; --fill-blue:#dbeafe; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--ink); line-height:1.55; padding:24px 16px 64px; }
+  .container { max-width:1000px; margin:0 auto; }
+  header { background:linear-gradient(135deg,#1f3864,#2f5496); color:white; padding:24px 28px; border-radius:12px; margin-bottom:16px; box-shadow:var(--shadow); position:relative; }
+  .breadcrumb { font-size:12px; opacity:.75; letter-spacing:.5px; text-transform:uppercase; margin-bottom:6px; }
+  h1 { font-size:26px; font-weight:700; margin-bottom:4px; }
+  .subtitle { font-size:14px; opacity:.85; }
+  .chip { display:inline-flex; align-items:center; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; background:rgba(255,255,255,.18); }
+  .chip.priority-imp { background:#b45309; }
+  .chip.priority-fund { background:#166534; }
+  .home-btn { position:absolute; top:16px; right:20px; color:rgba(255,255,255,0.95); text-decoration:none; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); z-index:10; }
+  .home-btn:hover { background:rgba(255,255,255,0.3); }
+  .topic-map { background:var(--card); border-radius:10px; padding:16px 20px; margin-bottom:14px; box-shadow:var(--shadow); }
+  .topic-map-row { display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+  .topic-map-label { font-size:11px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.5px; padding-top:5px; flex-shrink:0; width:80px; }
+  .topic-map-chips { display:flex; gap:6px; flex-wrap:wrap; flex:1; }
+  .topic-map-chips a.map-chip { text-decoration:none; cursor:pointer; }
+  .topic-map-chips a.map-chip:hover { background:#e2e8f0; color:var(--ink); border-color:#cbd5e1; }
+  .map-chip { padding:4px 11px; border-radius:14px; font-size:12px; font-weight:500; background:#f1f5f9; color:var(--ink-soft); border:1px solid #e2e8f0; }
+  .map-chip.active { background:var(--accent); color:white; border-color:var(--accent); font-weight:700; }
+  .card { background:var(--card); border-radius:10px; padding:18px 22px; margin-bottom:14px; box-shadow:var(--shadow); }
+  .card-label { display:inline-block; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:3px 9px; border-radius:4px; margin-bottom:8px; }
+  .label-tip { background:#eff7ec; color:#2e7d32; }
+  .label-warn { background:#fdf4e3; color:#b45309; }
+  h2.section-heading { font-size:18px; font-weight:700; margin:22px 0 10px; display:flex; align-items:center; gap:8px; }
+  h2.section-heading::before { content:''; width:4px; height:18px; background:var(--accent); border-radius:2px; }
+  .concept-box { background:var(--paper); border:1px solid #e0d8c2; border-radius:8px; padding:18px 22px; margin:10px 0; box-shadow:0 2px 6px rgba(0,0,0,.04); }
+  .step-row { display:flex; gap:12px; margin:10px 0; align-items:flex-start; }
+  .step-num { flex-shrink:0; width:28px; height:28px; background:var(--accent); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
+  .step-content { flex:1; }
+  .example-box { background:var(--accent-soft); border-left:4px solid var(--accent); padding:12px 16px; border-radius:6px; margin:10px 0; }
+  .example-box strong { color:var(--accent); }
+  .alert-box { border-radius:8px; padding:14px 16px; margin:10px 0; }
+  .alert-trap { background:#fdf4e3; border-left:4px solid #d97706; }
+  .alert-tip { background:#eff7ec; border-left:4px solid #2e7d32; }
+  .alert-box h4 { font-size:13px; font-weight:700; margin-bottom:6px; }
+  .alert-trap h4 { color:#d97706; } .alert-tip h4 { color:#2e7d32; }
+  .alert-box p { font-size:13.5px; color:var(--ink); margin-bottom:6px; }
+  .graph-wrap { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin:10px 0; overflow-x:auto; }
+  .nav-hint { margin-top:28px; padding:14px 18px; background:#f0f0e8; border-radius:8px; font-size:12px; color:var(--ink-soft); text-align:center; font-style:italic; }
+  .nav-hint a { color:var(--accent); font-weight:600; }
+  .cross-link { background:#e1e8f5; border-left:4px solid var(--accent); padding:14px 18px; border-radius:8px; margin-top:20px; font-size:14px; }
+  .cross-link a { color:var(--accent); font-weight:700; }
+  @media(max-width:640px){ body{padding:12px 0 40px;} .container{padding:0 12px;} header{border-radius:0;margin:0 -12px 12px;padding:20px 16px;} h1{font-size:22px;} .card{padding:14px;margin:0 -12px 12px;} .concept-box{margin:10px -12px;padding:16px 12px;} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P4 Data Analysis › Concept 4.2</div>
+    <h1>Line Graphs</h1>
+    <div class="subtitle">Read values, interpret trends, find totals and differences — with an interactive example.</div>
+    <div class="priority-row">
+      <span class="chip priority-imp">🟡 IMPORTANT</span>
+      <span class="chip">MOE P4 Core</span>
+    </div>
+    <a href="index.html" class="home-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+  </header>
+
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <div class="topic-map-label">Graphs</div>
+      <div class="topic-map-chips">
+        <a href="graphs_tables.html" class="map-chip">Tables</a>
+        <a href="graphs_line.html" class="map-chip active">Line Graphs</a>
+        <a href="graphs_pie.html" class="map-chip">Pie Charts</a>
+      </div>
+    </div>
+    <div class="topic-map-row">
+      <div class="topic-map-label">Other Topics</div>
+      <div class="topic-map-chips">
+        <a href="fractions_add_sub.html" class="map-chip">Fractions</a>
+        <a href="decimals_intro.html" class="map-chip">Decimals</a>
+        <a href="area_perimeter_basics.html" class="map-chip">Area</a>
+        <a href="working_backwards.html" class="map-chip">Working Backwards</a>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-heading">How to Read a Line Graph</h2>
+  <div class="concept-box">
+    <div class="step-row">
+      <span class="step-num">1</span>
+      <div class="step-content"><p><strong>Read the title</strong> — What is being measured? Over what period?</p></div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">2</span>
+      <div class="step-content"><p><strong>Check the axes</strong> — Horizontal (x-axis) usually shows time. Vertical (y-axis) shows the quantity. Note the scale!</p></div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">3</span>
+      <div class="step-content"><p><strong>Locate the point</strong> — Move up from the x-value, across from the y-value. Where they meet is your data point.</p></div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">4</span>
+      <div class="step-content"><p><strong>Interpret trends</strong> — Going up (increase), going down (decrease), flat (no change).</p></div>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Example: Weekly Book Sales</h2>
+  <div class="graph-wrap">
+    <svg viewBox="0 0 640 320" style="max-width:640px;">
+      <!-- Title -->
+      <text x="320" y="22" text-anchor="middle" font-size="15" font-weight="700" fill="#1a2332">Number of Books Sold Per Day</text>
+      <!-- Y-axis -->
+      <line x1="60" y1="40" x2="60" y2="280" stroke="#4a5568" stroke-width="2"/>
+      <text x="28" y="55" text-anchor="middle" font-size="11" fill="#4a5568">80</text>
+      <text x="28" y="95" text-anchor="middle" font-size="11" fill="#4a5568">70</text>
+      <text x="28" y="135" text-anchor="middle" font-size="11" fill="#4a5568">60</text>
+      <text x="28" y="175" text-anchor="middle" font-size="11" fill="#4a5568">50</text>
+      <text x="28" y="215" text-anchor="middle" font-size="11" fill="#4a5568">40</text>
+      <text x="28" y="255" text-anchor="middle" font-size="11" fill="#4a5568">30</text>
+      <text x="18" y="295" text-anchor="middle" font-size="11" fill="#4a5568">Books</text>
+      <!-- X-axis -->
+      <line x1="60" y1="280" x2="600" y2="280" stroke="#4a5568" stroke-width="2"/>
+      <text x="106" y="298" text-anchor="middle" font-size="12" fill="#1a2332">Mon</text>
+      <text x="186" y="298" text-anchor="middle" font-size="12" fill="#1a2332">Tue</text>
+      <text x="266" y="298" text-anchor="middle" font-size="12" fill="#1a2332">Wed</text>
+      <text x="346" y="298" text-anchor="middle" font-size="12" fill="#1a2332">Thu</text>
+      <text x="426" y="298" text-anchor="middle" font-size="12" fill="#1a2332">Fri</text>
+      <text x="506" y="298" text-anchor="middle" font-size="12" fill="#1a2332">Sat</text>
+      <text x="586" y="298" text-anchor="middle" font-size="12" fill="#1a2332">Sun</text>
+      <!-- Grid lines -->
+      <line x1="60" y1="80" x2="600" y2="80" stroke="#e2e8f0" stroke-width="1"/>
+      <line x1="60" y1="120" x2="600" y2="120" stroke="#e2e8f0" stroke-width="1"/>
+      <line x1="60" y1="160" x2="600" y2="160" stroke="#e2e8f0" stroke-width="1"/>
+      <line x1="60" y1="200" x2="600" y2="200" stroke="#e2e8f0" stroke-width="1"/>
+      <line x1="60" y1="240" x2="600" y2="240" stroke="#e2e8f0" stroke-width="1"/>
+      <!-- Data line -->
+      <polyline points="106,160 186,120 266,140 346,80 426,100 506,60 586,160" fill="none" stroke="#1f5fa8" stroke-width="3" stroke-linejoin="round"/>
+      <!-- Data points -->
+      <circle cx="106" cy="160" r="5" fill="#1f5fa8"/><text x="106" y="155" text-anchor="middle" font-size="11" font-weight="700" fill="#1f5fa8">55</text>
+      <circle cx="186" cy="120" r="5" fill="#1f5fa8"/><text x="186" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#1f5fa8">65</text>
+      <circle cx="266" cy="140" r="5" fill="#1f5fa8"/><text x="266" y="135" text-anchor="middle" font-size="11" font-weight="700" fill="#1f5fa8">60</text>
+      <circle cx="346" cy="80" r="5" fill="#1f5fa8"/><text x="346" y="75" text-anchor="middle" font-size="11" font-weight="700" fill="#1f5fa8">75</text>
+      <circle cx="426" cy="100" r="5" fill="#1f5fa8"/><text x="426" y="95" text-anchor="middle" font-size="11" font-weight="700" fill="#1f5fa8">70</text>
+      <circle cx="506" cy="60" r="5" fill="#1f5fa8"/><text x="506" y="55" text-anchor="middle" font-size="11" font-weight="700" fill="#1f5fa8">80</text>
+      <circle cx="586" cy="160" r="5" fill="#1f5fa8"/><text x="586" y="155" text-anchor="middle" font-size="11" font-weight="700" fill="#1f5fa8">55</text>
+      <!-- Y-axis label -->
+      <text x="22" y="175" text-anchor="middle" font-size="10" fill="#4a5568" transform="rotate(-90,22,175)">No. of Books</text>
+    </svg>
+  </div>
+
+  <h2 class="section-heading">Questions &amp; Solutions</h2>
+  <div class="card">
+    <span class="card-label label-tip">Interpretation Questions</span>
+
+    <div class="step-row">
+      <span class="step-num">1</span>
+      <div class="step-content">
+        <p><strong>Q: On which day were the most books sold?</strong></p>
+        <p>A: <strong>Saturday</strong> (80 books) — the highest point on the graph.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">2</span>
+      <div class="step-content">
+        <p><strong>Q: What is the difference between the highest and lowest sales?</strong></p>
+        <p>A: Highest = 80 (Sat), Lowest = 55 (Mon/Sun). Difference = 80 − 55 = <strong>25 books</strong>.</p>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">3</span>
+      <div class="step-content">
+        <p><strong>Q: What is the total number of books sold in the week?</strong></p>
+        <p style="font-family:'Kalam',cursive; font-size:16px;">55 + 65 + 60 + 75 + 70 + 80 + 55 = <strong>460 books</strong></p>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">4</span>
+      <div class="step-content">
+        <p><strong>Q: Describe the trend from Thursday to Sunday.</strong></p>
+        <p>A: Thursday (75) → Friday (70) <strong>decreased slightly</strong>. Friday → Saturday (80) <strong>increased</strong>. Saturday → Sunday (55) <strong>dropped sharply</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-box alert-trap">
+    <h4>⚠️ Common Trap: Misreading the Scale</h4>
+    <p>Always check: does each grid line represent 1, 2, 5, or 10 units? Never assume! In this graph, each horizontal grid line = 10 books. A point halfway between 60 and 70 = 65.</p>
+  </div>
+
+  <div class="alert-box alert-tip">
+    <h4>💡 Exam Tip: Use a Ruler or Straight Edge</h4>
+    <p>In paper exams, use a ruler to trace up from the x-axis and across from the y-axis. For "difference" questions, mark both points first, then count the gap vertically.</p>
+  </div>
+
+  <div class="nav-hint">Press the <strong>chips above</strong> to navigate between graph topics, or <a href="index.html">return to the full topic map</a>.</div>
+
+</div>
+</body>
+</html>

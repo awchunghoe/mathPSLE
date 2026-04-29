@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Introduction to Decimals — P4</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #1a2332; --ink-soft: #4a5568; --bg: #fafaf7; --card: #fff; --accent: #2f5496; --accent-soft: #e1e8f5; --paper: #fffdf5; --ink-red: #c1272d; --ink-green: #2e7d32; --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04); --fill-green: #dcfce7; --fill-amber: #fef3c7; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; padding: 24px 16px 64px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  header { background: linear-gradient(135deg, #1f3864, #2f5496); color: white; padding: 24px 28px; border-radius: 12px; margin-bottom: 16px; box-shadow: var(--shadow); position: relative; }
+  .breadcrumb { font-size: 12px; opacity: .75; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 6px; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; opacity: .85; }
+  .chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.18); }
+  .chip.priority-fund { background: #166534; }
+  .home-btn { position: absolute; top: 16px; right: 20px; color: rgba(255,255,255,0.95); text-decoration: none; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); z-index: 10; }
+  .home-btn:hover { background: rgba(255,255,255,0.3); }
+  .topic-map { background: var(--card); border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .topic-map-row { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .topic-map-row:last-child { margin-bottom: 0; }
+  .topic-map-label { font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .5px; padding-top: 5px; flex-shrink: 0; width: 100px; }
+  .topic-map-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .topic-map-chips a.map-chip { text-decoration: none; cursor: pointer; }
+  .topic-map-chips a.map-chip:hover { background: #e2e8f0; color: var(--ink); border-color: #cbd5e1; }
+  .map-chip { padding: 4px 11px; border-radius: 14px; font-size: 12px; font-weight: 500; background: #f1f5f9; color: var(--ink-soft); border: 1px solid #e2e8f0; }
+  .map-chip.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: 700; }
+  .card { background: var(--card); border-radius: 10px; padding: 18px 22px; margin-bottom: 14px; box-shadow: var(--shadow); }
+  .card-label { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; margin-bottom: 8px; }
+  .label-tip { background: #eff7ec; color: #2e7d32; }
+  h2.section-heading { font-size: 18px; font-weight: 700; margin: 22px 0 10px; display: flex; align-items: center; gap: 8px; }
+  h2.section-heading::before { content: ''; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
+  .concept-box { background: var(--paper); border: 1px solid #e0d8c2; border-radius: 8px; padding: 18px 22px; margin: 10px 0; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+  .example-box { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 6px; margin: 10px 0; }
+  .example-box strong { color: var(--accent); }
+  .step-row { display: flex; gap: 12px; margin: 10px 0; align-items: flex-start; }
+  .step-num { flex-shrink: 0; width: 28px; height: 28px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+  .step-content { flex: 1; }
+  .place-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  .place-table th, .place-table td { border: 1px solid #e2e8f0; padding: 10px 14px; text-align: center; }
+  .place-table th { background: var(--accent-soft); font-weight: 700; }
+  .place-table .highlight { background: var(--fill-amber); font-weight: 700; }
+  .alert-box { border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .alert-trap { background: #fdf4e3; border-left: 4px solid #d97706; }
+  .alert-tip { background: #eff7ec; border-left: 4px solid #2e7d32; }
+  .alert-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .alert-trap h4 { color: #d97706; } .alert-tip h4 { color: #2e7d32; }
+  .alert-box p { font-size: 13.5px; color: var(--ink); margin-bottom: 6px; }
+  .nav-hint { margin-top: 28px; padding: 14px 18px; background: #f0f0e8; border-radius: 8px; font-size: 12px; color: var(--ink-soft); text-align: center; font-style: italic; }
+  .nav-hint a { color: var(--accent); font-weight: 600; }
+  .cross-link { background: #e1e8f5; border-left: 4px solid var(--accent); padding: 14px 18px; border-radius: 8px; margin-top: 20px; font-size: 14px; }
+  .cross-link a { color: var(--accent); font-weight: 700; }
+  @media(max-width:640px) { body { padding: 12px 0 40px; } .container { padding: 0 12px; } header { border-radius: 0; margin: 0 -12px 12px; padding: 20px 16px; } h1 { font-size: 22px; } .card { padding: 14px; margin: 0 -12px 12px; } .concept-box { margin: 10px -12px; padding: 16px 12px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="breadcrumb">P4 Decimals › Concept 2.1</div>
+    <h1>Introduction to Decimals</h1>
+    <div class="subtitle">Tenths, hundredths, thousandths — the bridge between fractions and our number system</div>
+    <div class="priority-row">
+      <span class="chip priority-fund">🟢 FOUNDATIONAL</span>
+      <span class="chip">MOE P4 Core</span>
+    </div>
+    <a href="index.html" class="home-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+  </header>
+
+  <div class="topic-map">
+    <div class="topic-map-row">
+      <span class="topic-map-label">P4 Decimals</span>
+      <div class="topic-map-chips">
+        <a href="decimals_intro.html" class="map-chip active">Intro</a>
+        <a href="decimals_add_sub.html" class="map-chip">Add &amp; Sub</a>
+        <a href="decimals_mul_div.html" class="map-chip">Mul &amp; Div</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label label-tip">What it is</span>
+    <p style="font-size:14.5px;">Decimals are another way to write fractions with denominators of 10, 100, or 1000. 0.3 means 3/10. 0.07 means 7/100. P4 students must fluently convert between fractions and decimals, and understand that each decimal place is 10× smaller than the one to its left. This is the gateway to all decimal operations.</p>
+  </div>
+
+  <h2 class="section-heading">Place Value Table</h2>
+  <div class="concept-box">
+    <table class="place-table">
+      <tr><th>Hundreds</th><th>Tens</th><th>Ones</th><th>.</th><th class="highlight">Tenths</th><th class="highlight">Hundredths</th><th class="highlight">Thousandths</th></tr>
+      <tr><td>0</td><td>0</td><td>3</td><td>.</td><td class="highlight">4</td><td class="highlight">5</td><td class="highlight">6</td></tr>
+    </table>
+    <p style="font-size:14px; color: var(--ink-soft); margin-top:8px;">3.456 = 3 ones + 4 tenths + 5 hundredths + 6 thousandths</p>
+    <div class="example-box">
+      <strong>Read it:</strong> "Three point four five six" — NOT "three point four hundred and fifty-six." Each digit is read separately after the decimal point.
+    </div>
+  </div>
+
+  <h2 class="section-heading">Fraction ↔ Decimal Conversion</h2>
+  <div class="concept-box">
+    <div class="step-row">
+      <span class="step-num">1</span>
+      <div class="step-content">
+        <p style="font-size:14px; font-weight:600;">Fraction → Decimal: Make denominator 10, 100, or 1000</p>
+        <p style="font-size:14px; color: var(--ink-soft);">3/5 = 6/10 = <strong>0.6</strong> &nbsp;&nbsp;|&nbsp;&nbsp; 7/20 = 35/100 = <strong>0.35</strong></p>
+      </div>
+    </div>
+    <div class="step-row">
+      <span class="step-num">2</span>
+      <div class="step-content">
+        <p style="font-size:14px; font-weight:600;">Decimal → Fraction: Read the place value of the last digit</p>
+        <p style="font-size:14px; color: var(--ink-soft);">0.3 = 3/10 &nbsp;&nbsp;|&nbsp;&nbsp; 0.25 = 25/100 = 1/4 &nbsp;&nbsp;|&nbsp;&nbsp; 0.008 = 8/1000</p>
+      </div>
+    </div>
+    <div class="alert-box alert-trap">
+      <h4>⚠️ Common trap</h4>
+      <p>Students write 3/10 = 0.310 (adding a zero at the end). The zero changes the value! 0.310 = 310/1000, not 3/10. Train them: count the decimal places from the right — 3/10 has one zero in denominator → one decimal place → 0.3.</p>
+    </div>
+  </div>
+
+  <h2 class="section-heading">Comparing Decimals</h2>
+  <div class="concept-box">
+    <p style="font-size:14.5px; margin-bottom:12px;"><strong>Rule:</strong> Align decimal points, then compare digit by digit from left to right.</p>
+    <div class="example-box">
+      <strong>Which is bigger: 0.35 or 0.4?</strong><br>
+      Write as: 0.35 vs 0.40 (add zero to match places)<br>
+      Compare: 3 tenths &lt; 4 tenths → <strong>0.35 &lt; 0.4</strong>
+    </div>
+    <div class="alert-box alert-tip">
+      <h4>💡 Teaching tip</h4>
+      <p>Students think "35 is bigger than 4" so 0.35 must be bigger. Use money: $0.35 vs $0.40 — "Which buys more?" The zero placeholder (0.40) is critical.</p>
+    </div>
+  </div>
+
+  <div class="cross-link">
+    ➡️ <strong>Next up:</strong> <a href="decimals_add_sub.html">Addition &amp; Subtraction of Decimals</a> — lining up decimal points and regrouping.
+  </div>
+
+  <div class="nav-hint">
+    Previous: <a href="fraction_of_set.html">Fraction of a Set</a> &nbsp;|&nbsp; Next: <a href="decimals_add_sub.html">Add &amp; Sub Decimals</a>
+  </div>
+
+</div>
+</body>
+</html>

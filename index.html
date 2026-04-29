@@ -16,6 +16,7 @@
     --p5-geo: #dcfce7; --p5-geo-text: #166534;
     --p6-ratio: #fee2e2; --p6-ratio-text: #991b1b;
     --p6-geo: #f3e8ff; --p6-geo-text: #6b21a8;
+    --p4: #e0f2fe; --p4-text: #0c4a6e;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; padding: 0; }
@@ -55,6 +56,7 @@
   .badge-geo { background: var(--p5-geo); color: var(--p5-geo-text); }
   .badge-ratio { background: var(--p6-ratio); color: var(--p6-ratio-text); }
   .badge-geo6 { background: var(--p6-geo); color: var(--p6-geo-text); }
+  .badge-p4 { background: var(--p4); color: var(--p4-text); }
   .section-title { font-size: 20px; font-weight: 700; }
 
   /* Card grid */
@@ -66,6 +68,7 @@
   .topic-card.border-geo { border-left-color: #22c55e; }
   .topic-card.border-ratio { border-left-color: #ef4444; }
   .topic-card.border-geo6 { border-left-color: #a855f7; }
+  .topic-card.border-p4 { border-left-color: #0ea5e9; }
 
   .card-title { font-size: 15px; font-weight: 700; margin-bottom: 5px; color: var(--ink); }
   .card-desc { font-size: 12.5px; color: var(--ink-soft); line-height: 1.45; margin-bottom: 10px; }
@@ -104,10 +107,10 @@
 <div class="hero">
   <div class="container">
     <h1>PSLE Math Heuristics</h1>
-    <p class="tagline">Interactive tutor-style worked examples for P5 & P6 problem sums. Click through step by step, mark by mark.</p>
+    <p class="tagline">Interactive tutor-style worked examples for P4–P6 problem sums. Click through step by step, mark by mark.</p>
     <div class="hero-stats">
-      <div class="stat"><div class="stat-num">20</div><div class="stat-label">Topics</div></div>
-      <div class="stat"><div class="stat-num">P5&ndash;P6</div><div class="stat-label">Level</div></div>
+      <div class="stat"><div class="stat-num">44</div><div class="stat-label">Topics</div></div>
+      <div class="stat"><div class="stat-num">P4&ndash;P6</div><div class="stat-label">Level</div></div>
       <div class="stat"><div class="stat-num">/</div><div class="stat-label">Search</div></div>
     </div>
   </div>
@@ -125,6 +128,7 @@
         <span class="filter-label">Level</span>
         <button class="filter-chip active" data-filter="level" data-value="all">All</button>
         <button class="filter-chip" data-filter="level" data-value="p5">P5</button>
+        <button class="filter-chip" data-filter="level" data-value="p4">P4</button>
         <button class="filter-chip" data-filter="level" data-value="p6">P6</button>
       </div>
 
@@ -143,6 +147,9 @@
         <button class="filter-chip" data-filter="topic" data-value="wn">Whole No.</button>
         <button class="filter-chip" data-filter="topic" data-value="geometry">Geometry</button>
         <button class="filter-chip" data-filter="topic" data-value="ratio">Ratios</button>
+        <button class="filter-chip" data-filter="topic" data-value="decimals">Decimals</button>
+        <button class="filter-chip" data-filter="topic" data-value="measurement">Measure</button>
+        <button class="filter-chip" data-filter="topic" data-value="data">Data</button>
       </div>
 
       <button class="clear-btn" id="clear-btn">Clear</button>
@@ -152,6 +159,320 @@
 </div>
 
 <div class="container">
+
+  <!-- P4 Whole Numbers -->
+  <div class="section" data-section="wn" data-level="p4">
+    <div class="section-header">
+      <span class="section-badge badge-p4">P4 Whole Numbers</span>
+      <span class="section-title">Foundational heuristics for problem sums</span>
+    </div>
+    <div class="card-grid">
+      <a href="before_after.html" class="topic-card border-p4"
+         data-level="p4" data-topic="wn" data-priority="high fund" data-title="before after change start end">
+        <div class="card-title">Before &amp; After</div>
+        <div class="card-desc">Start amount, change, end amount — use the known anchor to find the unknown.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-fund">Foundational</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Bar model</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="part_whole.html" class="topic-card border-p4"
+         data-level="p4" data-topic="wn" data-priority="high fund" data-title="part whole fraction total unitising">
+        <div class="card-title">Part-Whole</div>
+        <div class="card-desc">Fractions as parts of a total — split into denominator parts, find 1 unit first.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-fund">Foundational</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Bar model</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="comparison.html" class="topic-card border-p4"
+         data-level="p4" data-topic="wn" data-priority="high fund" data-title="comparison more than less than gap">
+        <div class="card-title">Comparison</div>
+        <div class="card-desc">More than / less than with whole numbers — draw the gap, identify bigger vs smaller.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-fund">Foundational</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Bar model</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="equal_groups.html" class="topic-card border-p4"
+         data-level="p4" data-topic="wn" data-priority="high fund" data-title="equal groups multiplication division sets">
+        <div class="card-title">Equal Groups</div>
+        <div class="card-desc">Identical groups — groups &times; per group = total. Decide multiply or divide.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-fund">Foundational</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Bar model</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="excess_shortage.html" class="topic-card border-p4"
+         data-level="p4" data-topic="wn" data-priority="high" data-title="excess shortage surplus deficit distribute">
+        <div class="card-title">Excess &amp; Shortage</div>
+        <div class="card-desc">Two distribution plans — one leaves extras, one falls short. Compare to find recipients.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Classic P4</span>
+          <span class="meta-chip chip-bar">Bar model</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="working_backwards.html" class="topic-card border-p4"
+         data-level="p4" data-topic="wn" data-priority="high" data-title="working backwards reverse operations undo">
+        <div class="card-title">Working Backwards</div>
+        <div class="card-desc">Undo operations from the end: add becomes subtract, multiply becomes divide.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Classic P4</span>
+          <span class="meta-chip chip-bar">Flow chart</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="assumption.html" class="topic-card border-p4"
+         data-level="p4" data-topic="wn" data-priority="high" data-title="assumption guess check chicken rabbit legs">
+        <div class="card-title">Assumption (Guess &amp; Check)</div>
+        <div class="card-desc">Assume all are one type, find the gap, then swap to close the gap systematically.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Classic P4</span>
+          <span class="meta-chip chip-bar">Table</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- P4 Fractions -->
+  <div class="section" data-section="fractions" data-level="p4">
+    <div class="section-header">
+      <span class="section-badge badge-p4">P4 Fractions</span>
+      <span class="section-title">Addition, subtraction & fraction of a set</span>
+    </div>
+    <div class="card-grid">
+      <a href="fractions_add_sub.html" class="topic-card border-p4"
+         data-level="p4" data-topic="fractions" data-priority="high fund" data-title="fractions add subtract same different denominator mixed number">
+        <div class="card-title">Add &amp; Subtract Fractions</div>
+        <div class="card-desc">Same denominator, different denominators, mixed numbers — with simplification checklist.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-fund">Foundational</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Visual</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="fraction_of_set.html" class="topic-card border-p4"
+         data-level="p4" data-topic="fractions" data-priority="high fund" data-title="fraction of a set group total part">
+        <div class="card-title">Fraction of a Set</div>
+        <div class="card-desc">Total ÷ denominator × numerator. Interactive step-through with visual grouping.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-fund">Foundational</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Interactive</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- P4 Decimals -->
+  <div class="section" data-section="decimals" data-level="p4">
+    <div class="section-header">
+      <span class="section-badge badge-p4">P4 Decimals</span>
+      <span class="section-title">Place value, operations & decimal heuristics</span>
+    </div>
+    <div class="card-grid">
+      <a href="decimals_intro.html" class="topic-card border-p4"
+         data-level="p4" data-topic="decimals" data-priority="high fund" data-title="decimals introduction place value tenths hundredths compare">
+        <div class="card-title">Decimals Introduction</div>
+        <div class="card-desc">Place value table, fraction↔decimal conversion, comparing with zero placeholder.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-fund">Foundational</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Place value</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="decimals_add_sub.html" class="topic-card border-p4"
+         data-level="p4" data-topic="decimals" data-priority="high fund" data-title="decimals add subtract align columns regroup">
+        <div class="card-title">Add &amp; Subtract Decimals</div>
+        <div class="card-desc">Aligned columns, zero placeholders, regrouping, estimation check.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-fund">Foundational</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Column method</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="decimals_mul_div.html" class="topic-card border-p4"
+         data-level="p4" data-topic="decimals" data-priority="high fund" data-title="decimals multiply divide whole number advanced">
+        <div class="card-title">Multiply &amp; Divide Decimals</div>
+        <div class="card-desc">By 1-digit whole numbers with estimation. Includes advanced ÷ by decimal tab.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-fund">Foundational</span>
+          <span class="meta-chip chip-high">+ Advanced tab</span>
+          <span class="meta-chip chip-bar">2-in-1</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="more_than_less_than_decimals.html" class="topic-card border-p4"
+         data-level="p4" data-topic="decimals" data-priority="high" data-title="more than less than decimals comparison model">
+        <div class="card-title">More Than / Less Than (Decimals)</div>
+        <div class="card-desc">Comparison model with decimal values. Watch the decimal alignment!</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Heuristic</span>
+          <span class="meta-chip chip-bar">Bar model</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="repeated_items_decimals.html" class="topic-card border-p4"
+         data-level="p4" data-topic="decimals" data-priority="high" data-title="repeated items decimals multiply divide">
+        <div class="card-title">Repeated Items (Decimals)</div>
+        <div class="card-desc">Each item same decimal value — multiply. Given total, find number — divide.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Heuristic</span>
+          <span class="meta-chip chip-bar">Qty × Value</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="quantity_value_decimals.html" class="topic-card border-p4"
+         data-level="p4" data-topic="decimals" data-priority="high" data-title="quantity value decimals money mass capacity">
+        <div class="card-title">Quantity × Value (Decimals)</div>
+        <div class="card-desc">Money, mass, capacity problems — set up the Qty×Value table with decimals.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Heuristic</span>
+          <span class="meta-chip chip-bar">Table method</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="assumption_decimals.html" class="topic-card border-p4"
+         data-level="p4" data-topic="decimals" data-priority="high" data-title="assumption method decimals stamps coins">
+        <div class="card-title">Assumption Method (Decimals)</div>
+        <div class="card-desc">Assume all are cheaper, swap to close the gap. Works with decimal prices!</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Advanced</span>
+          <span class="meta-chip chip-bar">Heuristic</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- P4 Measurement -->
+  <div class="section" data-section="measurement" data-level="p4">
+    <div class="section-header">
+      <span class="section-badge badge-p4">P4 Measurement</span>
+      <span class="section-title">Area, perimeter & composite figures</span>
+    </div>
+    <div class="card-grid">
+      <a href="area_perimeter_basics.html" class="topic-card border-p4"
+         data-level="p4" data-topic="measurement" data-priority="high fund" data-title="area perimeter basics rectangle square formula">
+        <div class="card-title">Area &amp; Perimeter Basics</div>
+        <div class="card-desc">Rectangle and square formulas, unit conversion, finding side from area.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-fund">Foundational</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Formulas</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="area_perimeter_composite.html" class="topic-card border-p4"
+         data-level="p4" data-topic="measurement" data-priority="high" data-title="composite figures area perimeter decompose subtract">
+        <div class="card-title">Composite Figures</div>
+        <div class="card-desc">L-shapes, T-shapes — decompose into rectangles or complete-and-subtract method.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Decompose</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="area_perimeter_reverse.html" class="topic-card border-p4"
+         data-level="p4" data-topic="measurement" data-priority="high" data-title="find sides area perimeter working backwards">
+        <div class="card-title">Finding Sides from Area/Perimeter</div>
+        <div class="card-desc">Given area find length. Given perimeter find dimensions. Working backwards.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Reverse</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="area_perimeter_proportional.html" class="topic-card border-p4"
+         data-level="p4" data-topic="measurement" data-priority="high" data-title="proportional sides dimension changes scale area">
+        <div class="card-title">Proportional Sides &amp; Dimension Changes</div>
+        <div class="card-desc">When one dimension is a multiple, or both scale — area scales by n².</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Ratio</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="assumption_area_perimeter.html" class="topic-card border-p4"
+         data-level="p4" data-topic="measurement" data-priority="high" data-title="assumption area perimeter squares rectangles">
+        <div class="card-title">Assumption with Area &amp; Perimeter</div>
+        <div class="card-desc">Squares vs rectangles: assume all one type, use area difference to find dimensions.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Advanced</span>
+          <span class="meta-chip chip-bar">Heuristic</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- P4 Data Analysis -->
+  <div class="section" data-section="data" data-level="p4">
+    <div class="section-header">
+      <span class="section-badge badge-p4">P4 Data Analysis</span>
+      <span class="section-title">Tables, line graphs & pie charts</span>
+    </div>
+    <div class="card-grid">
+      <a href="graphs_tables.html" class="topic-card border-p4"
+         data-level="p4" data-topic="data" data-priority="high fund" data-title="tables reading data extract complete row column">
+        <div class="card-title">Reading Tables</div>
+        <div class="card-desc">Read tables, find totals, compare values, complete missing cells row and column.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-fund">Foundational</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Data</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="graphs_line.html" class="topic-card border-p4"
+         data-level="p4" data-topic="data" data-priority="high" data-title="line graphs read interpret trend plot">
+        <div class="card-title">Line Graphs</div>
+        <div class="card-desc">Read values, interpret trends, find totals and differences. Check the scale!</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Trends</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+      <a href="graphs_pie.html" class="topic-card border-p4"
+         data-level="p4" data-topic="data" data-priority="high" data-title="pie charts fractions angles sector total">
+        <div class="card-title">Pie Charts</div>
+        <div class="card-desc">A full circle = 360°. Convert between fractions, amounts, and sector angles.</div>
+        <div class="card-meta">
+          <span class="meta-chip chip-high">High prep</span>
+          <span class="meta-chip chip-psle">Core P4</span>
+          <span class="meta-chip chip-bar">Fractions</span>
+        </div>
+        <span class="card-arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
 
   <!-- P5 Fractions -->
   <div class="section" data-section="fractions" data-level="p5">

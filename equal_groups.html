@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Difference Unchanged (Fractional) — P5 Heuristic</title>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<title>Equal Groups — P4 Heuristic</title>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --ink: #1a2332; --ink-soft: #4a5568; --bg: #fafaf7; --card: #ffffff;
     --accent: #2f5496; --accent-soft: #e1e8f5; --pencil: #2d3142; --pencil-soft: #5a6478;
     --paper: #fffdf5; --ink-red: #c1272d; --ink-blue: #1f5fa8; --ink-green: #2e7d32;
     --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
-    --fill-choc: #fee2e2; --fill-blue: #dbeafe; --fill-green: #dcfce7; --fill-amber: #fef3c7; --fill-ink: #1f3864;
+    --fill-green: #dcfce7; --fill-blue: #dbeafe;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; padding: 24px 16px 64px; }
@@ -21,7 +21,7 @@
   .subtitle { font-size: 14px; opacity: .85; }
   .priority-row { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
   .chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,.18); }
-  .chip.priority-high { background: #9a3412; }
+  .chip.priority-fund { background: #166534; }
   .topic-map { background: var(--card); border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; box-shadow: var(--shadow); }
   .topic-map-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
   .topic-map-row:last-child { margin-bottom: 0; }
@@ -45,7 +45,7 @@
   .signal-list li::before { content: '💬'; position: absolute; left: 0; top: 5px; font-size: 13px; }
   .question-box { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 14px 16px; border-radius: 6px; margin-bottom: 18px; font-size: 14px; }
   .question-box strong { color: var(--accent); }
-  .working-pad { background: var(--paper); border: 1px solid #e0d8c2; border-radius: 8px; padding: 24px 28px; margin: 12px 0; min-height: 480px; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
+  .working-pad { background: var(--paper); border: 1px solid #e0d8c2; border-radius: 8px; padding: 24px 28px; margin: 12px 0; min-height: 460px; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
   .pad-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
   .step-counter { font-size: 12px; color: var(--ink-soft); font-weight: 600; margin-left: auto; }
   .btn { padding: 8px 16px; border-radius: 8px; border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
@@ -57,19 +57,15 @@
   .hw-blue { fill: var(--ink-blue); } .hw-red { fill: var(--ink-red); } .hw-green { fill: var(--ink-green); }
   .pencil-stroke { stroke: var(--pencil); stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-width: 2; }
   .red-stroke { stroke: var(--ink-red); stroke-linecap: round; fill: none; stroke-width: 2; }
-  .blue-stroke { stroke: var(--ink-blue); stroke-linecap: round; fill: none; stroke-width: 2; }
   .green-stroke { stroke: var(--ink-green); stroke-linecap: round; fill: none; stroke-width: 2; }
   rect[fill]:not([fill="none"]) { rx: 4; }
-  rect.bar-fill, rect.node-fill { filter: drop-shadow(0 1px 2px rgba(0,0,0,.08)); transition: opacity 0.4s ease; }
+  rect.bar-fill { filter: drop-shadow(0 1px 2px rgba(0,0,0,.08)); transition: opacity 0.4s ease; }
   rect.answer-box { fill: #f0fdf4; rx: 6; }
-  .bar-fill.ghost, .node-fill.ghost { opacity: 0.3; }
+  .bar-fill.ghost { opacity: 0.3; }
   .step-elem { opacity: 0; transition: opacity 0.5s ease; } .step-elem.visible { opacity: 1; }
   .draw-path { stroke-dasharray: 1000; stroke-dashoffset: 1000; }
   .step-elem.visible .draw-path { animation: drawIn 0.8s ease forwards; }
   @keyframes drawIn { to { stroke-dashoffset: 0; } }
-  .strike-line { stroke-dasharray: 200; stroke-dashoffset: 200; }
-  .step-elem.visible .strike-line { animation: strike 0.5s ease forwards; }
-  @keyframes strike { to { stroke-dashoffset: 0; } }
   .alert-box { border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
   .alert-trap { background: #fdf4e3; border-left: 4px solid #d97706; } .alert-tip { background: #eff7ec; border-left: 4px solid #2e7d32; }
   .alert-box h4 { font-size: 13px; font-weight: 700; margin-bottom: 6px; } .alert-trap h4 { color: #d97706; } .alert-tip h4 { color: #2e7d32; }
@@ -94,12 +90,12 @@
 <div class="container">
 
   <header>
-    <div class="breadcrumb">P5 Fractions › Heuristic 2.7</div>
-    <h1>Difference Unchanged (Fractional)</h1>
-    <div class="subtitle">Both quantities change by the same fraction — the gap scales proportionally</div>
+    <div class="breadcrumb">P4 Whole Numbers › Heuristic 0.4</div>
+    <h1>Equal Groups</h1>
+    <div class="subtitle">Multiplication and division with identical sets — total, number of groups, or items per group</div>
     <div class="priority-row">
-      <span class="chip priority-high">🟠 HIGH PREP</span>
-      <span class="chip">⭐ PSLE pattern</span>
+      <span class="chip priority-fund">🟢 FOUNDATIONAL</span>
+      <span class="chip">⭐ Core P4 pattern</span>
       <span class="chip">Bar model</span>
     </div>
       <a href="index.html" style="position:absolute;top:24px;right:28px;color:white;text-decoration:none;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;opacity:0.85;">
@@ -114,56 +110,53 @@
 
   <div class="topic-map">
     <div class="topic-map-row">
-      <span class="topic-map-label">Subtopics in P5 Fractions</span>
+      <span class="topic-map-label">Subtopics in P4</span>
       <div class="topic-map-chips">
-        <a href="branching_direct.html" class="map-chip">Branching (Direct)</a>
-        <a href="branching_direct.html" class="map-chip">Branching (Working Backwards)</a>
-        <a href="branching_additional.html" class="map-chip">Branching (With Additional)</a>
-        <a href="repeated_items_frac.html" class="map-chip">Repeated Items (Fractional)</a>
-        <a href="one_item_unchanged_frac.html" class="map-chip">One Item Unchanged (Fractional)</a>
-        <a href="total_unchanged_frac.html" class="map-chip">Total Unchanged (Fractional)</a>
-        <span class="map-chip active">Difference Unchanged (Fractional)</span>
-        <a href="numerators_same.html" class="map-chip">Numerators the Same</a>
-        <a href="more_than_less_than.html" class="map-chip">More Than / Less Than</a>
-        <a href="quantity_value_frac.html" class="map-chip">Quantity &amp;times; Value (Fractional)</a>
+        <a href="before_after.html" class="map-chip">Before &amp; After</a>
+        <a href="part_whole.html" class="map-chip">Part-Whole</a>
+        <a href="comparison.html" class="map-chip">Comparison</a>
+        <span class="map-chip active">Equal Groups</span>
+        <a href="excess_shortage.html" class="map-chip">Excess &amp; Shortage</a>
+        <a href="working_backwards.html" class="map-chip">Working Backwards</a>
+        <a href="assumption.html" class="map-chip">Assumption</a>
       </div>
     </div>
     <div class="topic-map-row">
       <span class="topic-map-label">Heuristics used</span>
       <div class="topic-map-chips">
         <span class="map-chip heuristic-chip active">Bar model</span>
-        <span class="map-chip heuristic-chip active">Difference unchanged</span>
-        <span class="map-chip heuristic-chip">Proportional scaling</span>
+        <span class="map-chip heuristic-chip active">Unitising</span>
+        <span class="map-chip heuristic-chip">Multiplication/Division</span>
       </div>
     </div>
   </div>
 
   <div class="card">
     <span class="card-label label-tip">What it is</span>
-    <p style="font-size:14.5px;">Both quantities change by the <strong>same fraction</strong> (e.g., both spend 1/4, or both gain 1/5). The difference between them <strong>scales by the same factor</strong> they kept. If they each keep 3/4, the gap also becomes 3/4 of the original gap. Students use the scaled gap as the anchor.</p>
+    <p style="font-size:14.5px;">Items are arranged in <strong>identical groups</strong> (boxes, bags, teams). The problem gives two of three things: number of groups, items per group, or total items. Students draw equal-length bars for each group, label one group, and use multiplication or division to find the missing quantity. This is the foundation for P5 Repeated Items.</p>
   </div>
 
   <h2 class="section-heading">Signal phrases — train students to spot</h2>
   <div class="card">
     <ul class="signal-list">
-      <li>"Ali and Baba <em>each spent 1/4</em> of their money"</li>
-      <li>"Both of them <em>gave away 1/5</em> of their marbles"</li>
-      <li>"The difference between them was <strong>$30 before</strong> and the same fraction applied to both"</li>
-      <li>Both change by the <strong>same fraction</strong> — the gap scales proportionally</li>
+      <li>"There are <em>6 boxes</em>. Each box has <em>12 apples</em>"</li>
+      <li>"<em>48 pupils</em> are divided equally into <em>8 groups</em>"</li>
+      <li>"She packed the books into bags of 5. There were 9 bags"</li>
+      <li>Two of three known: <strong>groups × per group = total</strong></li>
     </ul>
   </div>
 
   <h2 class="section-heading">Worked example — click through each step</h2>
   <div class="card">
     <div class="question-box">
-      <strong>Question:</strong> Ali and Baba had some money. Ali had <strong>3 times as much</strong> as Baba. After they <strong>each spent 1/4</strong> of their money, Ali had <strong>$30 more</strong> than Baba. How much did <strong>Baba have at first</strong>?
+      <strong>Question:</strong> A teacher packed <strong>72 pencils</strong> equally into <strong>8 boxes</strong>. How many <strong>pencils</strong> were there in each box?
     </div>
 
     <div class="pad-controls">
       <button class="btn btn-primary" id="prev-btn" disabled>&#8592; Previous</button>
       <button class="btn btn-primary" id="next-btn">Next step &#8594;</button>
       <button class="btn btn-secondary" id="reset-btn">Reset</button>
-      <span class="step-counter" id="step-counter">Step 0 / 6</span>
+      <span class="step-counter" id="step-counter">Step 0 / 5</span>
     </div>
 
     <div class="step-narration" id="narration">
@@ -171,81 +164,65 @@
     </div>
 
     <div class="working-pad">
-      <svg id="svg" viewBox="0 0 920 850" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
+      <svg id="svg" viewBox="0 0 920 650" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;">
 
-        <!-- ===== ZONE 1: Diagram y=30-380 ===== -->
+        <!-- ===== ZONE 1: Draw groups y=30-250 ===== -->
 
-        <!-- Step 1: Draw Before bars -->
+        <!-- Step 1: Draw 8 equal boxes -->
         <g class="step-elem" data-step="1">
-          <text x="20" y="45" class="pencil-text" font-size="22" font-weight="700">Before: Ali = 3u, Baba = 1u (Ali has 3x)</text>
-          <!-- Ali bar -->
-          <rect x="120" y="75" width="360" height="50" fill="var(--fill-green)" opacity="0.7" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
-          <line x1="240" y1="75" x2="240" y2="125" class="pencil-stroke draw-path"/>
-          <line x1="360" y1="75" x2="360" y2="125" class="pencil-stroke draw-path"/>
-          <line x1="480" y1="75" x2="480" y2="125" class="pencil-stroke draw-path"/>
-          <text x="180" y="68" class="pencil-text hw-green" font-size="15" font-weight="700" text-anchor="middle">1u</text>
-          <text x="300" y="68" class="pencil-text hw-green" font-size="15" font-weight="700" text-anchor="middle">1u</text>
-          <text x="420" y="68" class="pencil-text hw-green" font-size="15" font-weight="700" text-anchor="middle">1u</text>
-          <text x="60" y="108" class="pencil-text" font-size="18" font-weight="700">Ali</text>
-          <!-- Baba bar -->
-          <rect x="120" y="155" width="120" height="50" fill="var(--fill-blue)" opacity="0.6" stroke="var(--ink-blue)" stroke-width="2" class="bar-fill"/>
-          <line x1="240" y1="155" x2="240" y2="205" class="pencil-stroke draw-path"/>
-          <text x="180" y="148" class="pencil-text hw-blue" font-size="15" font-weight="700" text-anchor="middle">1u</text>
-          <text x="60" y="188" class="pencil-text" font-size="18" font-weight="700">Baba</text>
-          <!-- Difference bracket -->
-          <path d="M 125 225 Q 120 225 120 230 L 120 250 Q 120 255 125 255" class="red-stroke draw-path"/>
-          <line x1="120" y1="240" x2="480" y2="240" class="red-stroke draw-path"/>
-          <path d="M 475 225 Q 480 225 480 230 L 480 250 Q 480 255 485 255" class="red-stroke draw-path"/>
-          <text x="300" y="268" class="pencil-text hw-red" font-size="16" font-weight="700" text-anchor="middle">Diff = 2u ($30 before)</text>
+          <text x="20" y="45" class="pencil-text" font-size="22" font-weight="700">8 boxes, each has the same number</text>
+          <!-- Box 1 -->
+          <rect x="80" y="70" width="70" height="50" fill="var(--fill-green)" opacity="0.7" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
+          <text x="115" y="100" class="pencil-text hw-green" font-size="14" font-weight="700" text-anchor="middle">?</text>
+          <!-- Box 2 -->
+          <rect x="155" y="70" width="70" height="50" fill="var(--fill-green)" opacity="0.7" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
+          <text x="190" y="100" class="pencil-text hw-green" font-size="14" font-weight="700" text-anchor="middle">?</text>
+          <!-- Box 3 -->
+          <rect x="230" y="70" width="70" height="50" fill="var(--fill-green)" opacity="0.7" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
+          <text x="265" y="100" class="pencil-text hw-green" font-size="14" font-weight="700" text-anchor="middle">?</text>
+          <!-- Box 4 -->
+          <rect x="305" y="70" width="70" height="50" fill="var(--fill-green)" opacity="0.7" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
+          <text x="340" y="100" class="pencil-text hw-green" font-size="14" font-weight="700" text-anchor="middle">?</text>
+          <!-- Dots -->
+          <text x="395" y="100" class="pencil-text" font-size="18" font-weight="700">...</text>
+          <!-- Box 8 -->
+          <rect x="440" y="70" width="70" height="50" fill="var(--fill-green)" opacity="0.7" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
+          <text x="475" y="100" class="pencil-text hw-green" font-size="14" font-weight="700" text-anchor="middle">?</text>
+          <text x="60" y="150" class="pencil-text" font-size="14" font-weight="700">8 boxes</text>
         </g>
 
-        <!-- Step 2: Show spent 1/4 -->
+        <!-- Step 2: Total given -->
         <g class="step-elem" data-step="2">
-          <text x="20" y="315" class="pencil-text" font-size="20" font-weight="700">Each spent 1/4 &#8594; each keeps 3/4</text>
-          <text x="40" y="350" class="pencil-text" fill="var(--pencil-soft)" font-size="16">Both bars shrink by the same proportion</text>
-          <text x="40" y="380" class="pencil-text hw-red" font-size="16" font-weight="700">&#9889; Key: the gap also shrinks to 3/4 of original!</text>
+          <text x="20" y="190" class="pencil-text" font-size="20" font-weight="700">Total pencils = 72</text>
+          <!-- Total bracket -->
+          <path d="M 75 125 Q 70 125 70 130 L 70 145 Q 70 150 75 150" class="blue-stroke draw-path"/>
+          <line x1="70" y1="137" x2="510" y2="137" class="blue-stroke draw-path"/>
+          <path d="M 505 125 Q 510 125 510 130 L 510 145 Q 510 150 515 150" class="blue-stroke draw-path"/>
+          <text x="290" y="175" class="pencil-text hw-blue" font-size="16" font-weight="700" text-anchor="middle">72 pencils altogether</text>
         </g>
 
-        <!-- ===== ZONE 2: After diagram y=420-650 ===== -->
+        <!-- ===== ZONE 2: Working y=230-400 ===== -->
 
-        <!-- Step 3: Draw After bars -->
+        <!-- Step 3: Divide -->
         <g class="step-elem" data-step="3">
-          <text x="20" y="440" class="pencil-text" font-size="22" font-weight="700">After: both keep 3/4 of their money</text>
-          <!-- Ali after bar: 3u x 3/4 = 9u/4 = 2.25u -->
-          <rect x="120" y="470" width="270" height="50" fill="var(--fill-green)" opacity="0.5" stroke="var(--ink-green)" stroke-width="2" class="bar-fill"/>
-          <text x="60" y="503" class="pencil-text" font-size="18" font-weight="700">Ali</text>
-          <text x="255" y="520" class="pencil-text hw-green" font-size="15" font-weight="700" text-anchor="middle">9u/4 (= 2.25u)</text>
-          <!-- Baba after bar: 1u x 3/4 = 3u/4 -->
-          <rect x="120" y="550" width="90" height="50" fill="var(--fill-blue)" opacity="0.4" stroke="var(--ink-blue)" stroke-width="2" class="bar-fill"/>
-          <text x="60" y="583" class="pencil-text" font-size="18" font-weight="700">Baba</text>
-          <text x="165" y="600" class="pencil-text hw-blue" font-size="15" font-weight="700" text-anchor="middle">3u/4</text>
-          <!-- Difference bracket after -->
-          <path d="M 125 620 Q 120 620 120 625 L 120 640 Q 120 645 125 645" class="red-stroke draw-path"/>
-          <line x1="120" y1="632" x2="390" y2="632" class="red-stroke draw-path"/>
-          <path d="M 385 620 Q 390 620 390 625 L 390 640 Q 390 645 395 645" class="red-stroke draw-path"/>
-          <text x="255" y="660" class="pencil-text hw-red" font-size="16" font-weight="700" text-anchor="middle">Diff after = 6u/4 = 3u/2</text>
+          <text x="20" y="250" class="pencil-text hw-red" font-size="22" font-weight="700">&#9889; Pencils per box = 72 &divide; 8</text>
+          <text x="40" y="300" class="pencil-text hw-green" font-size="24" font-weight="700">= 9 pencils per box</text>
+          <line x1="40" y1="315" x2="320" y2="315" class="green-stroke draw-path"/>
         </g>
 
-        <!-- Step 4: Use given diff-after = $30 -->
+        <!-- ===== ZONE 3: Verify + Answer y=360+ ===== -->
+
+        <!-- Step 4: Verify -->
         <g class="step-elem" data-step="4">
-          <text x="20" y="700" class="pencil-text hw-red" font-size="22" font-weight="700">Given: Diff after = $30</text>
-          <text x="40" y="740" class="pencil-text" font-size="20" font-weight="700">3u/2 = $30</text>
-          <text x="40" y="780" class="pencil-text" font-size="20" font-weight="700">1u = $30 &#215; 2/3 = $20</text>
-          <line x1="20" y1="795" x2="320" y2="795" class="green-stroke draw-path"/>
+          <text x="20" y="370" class="pencil-text" font-size="18" font-weight="700">Verify: 8 &times; 9 = 72 &#10003;</text>
+          <text x="20" y="410" class="pencil-text" font-size="18" font-weight="700">8 boxes &times; 9 pencils = 72 pencils &#10003;</text>
         </g>
 
-        <!-- ===== ZONE 3: Answer y=820-920 ===== -->
-
-        <!-- Step 5: Find Baba before -->
+        <!-- Step 5: Answer -->
         <g class="step-elem" data-step="5">
-          <text x="20" y="835" class="pencil-text" font-size="20" font-weight="700">Baba at first = 1u = $20</text>
-        </g>
-
-        <!-- Step 6: Answer box -->
-        <g class="step-elem" data-step="6">
-          <rect x="15" y="855" width="380" height="55" fill="#f0fdf4" stroke="var(--ink-green)" stroke-width="2" rx="6" class="answer-box"/>
-          <text x="35" y="885" class="pencil-text" font-size="20" font-weight="700">Baba had $20 at first</text>
-          <text x="35" y="910" class="pencil-text" fill="var(--pencil-soft)" font-size="14">Check: Ali $60, Baba $20 &#8594; after: Ali $45, Baba $15, diff=$30 &#10003;</text>
+          <rect x="15" y="450" width="340" height="55" fill="#f0fdf4" stroke="var(--ink-green)" stroke-width="2" rx="6" class="answer-box"/>
+          <text x="35" y="480" class="pencil-text" font-size="20" font-weight="700">9 pencils in each box</text>
+          <text x="35" y="505" class="pencil-text" fill="var(--pencil-soft)" font-size="14">8 \u00d7 9 = 72 \u2713</text>
         </g>
 
       </svg>
@@ -254,27 +231,25 @@
     <div style="margin-top:14px;">
       <div class="alert-box alert-trap">
         <h4>&#128293; Common trap</h4>
-        <p>Students think "difference unchanged" means the gap stays exactly the same number. It doesn't! If both spend 1/4, the gap also shrinks to 3/4 of the original. Train them to see: <strong>same fraction change &#8594; gap scales by the kept fraction</strong>.</p>
+        <p>Students see "72" and "8" and multiply: 72 &times; 8 = 576. They didn't decide which operation to use. Train them to ask: "Am I putting things together (multiply) or splitting apart (divide)?" Total known + groups known → find per group → divide.</p>
       </div>
       <div class="alert-box alert-tip">
         <h4>&#127793; Teaching tip</h4>
-        <p>Draw the "before" and "after" bars side by side. Ask: "Did the gap get bigger, smaller, or stay the same?" Visually they can see both bars shrank, so the gap shrank too. Then ask: "By what factor?"</p>
+        <p>Use the triangle frame: put <strong>Total</strong> at the top, <strong>Groups</strong> and <strong>Per Group</strong> at the bottom corners. Cover the unknown — if the top is covered, multiply; if a bottom is covered, divide. This visual aid helps students choose the right operation.</p>
       </div>
     </div>
 
     <details>
-      <summary>&#128161; Show full mark scheme (4 marks)</summary>
+      <summary>&#128161; Show full mark scheme (2 marks)</summary>
       <div style="padding:10px 0; font-size:13px; color:var(--ink-soft);">
-        <p><strong>M1:</strong> Identify Ali = 3u, Baba = 1u, difference = 2u</p>
-        <p><strong>M1:</strong> Show both keep 3/4, difference after = 3/4 &#215; 2u = 3u/2 (or 6u/4)</p>
-        <p><strong>M1:</strong> 3u/2 = 30 &#8594; u = 20</p>
-        <p><strong>A1:</strong> Baba at first = $20</p>
+        <p><strong>M1:</strong> Correct method: 72 &divide; 8 (or equivalent)</p>
+        <p><strong>A1:</strong> 9 pencils</p>
       </div>
     </details>
   </div>
 
   <div class="nav-hint">
-    Next: <a href="all_items_changed.html" style="color:var(--accent); font-weight:600;">All Items Changed (P6)</a> — the hardest "changed" type where both items change by different amounts.
+    Next: <a href="excess_shortage.html" style="color:var(--accent); font-weight:600;">Excess &amp; Shortage</a> — when distributing items leaves some over or short.
   </div>
 
 </div>
@@ -289,24 +264,23 @@
     const resetBtn = document.getElementById(`reset-btn${suffix ? '-' + suffix : ''}`);
     function render() {
       svgEl.querySelectorAll('.step-elem').forEach(el => { const stepNum = parseInt(el.dataset.step); el.classList.toggle('visible', stepNum <= currentStep); });
-      svgEl.querySelectorAll('.bar-fill, .node-fill').forEach(fill => { const parentStep = parseInt(fill.closest('.step-elem').dataset.step); fill.classList.toggle('ghost', parentStep < currentStep); });
+      svgEl.querySelectorAll('.bar-fill').forEach(fill => { const parentStep = parseInt(fill.closest('.step-elem').dataset.step); fill.classList.toggle('ghost', parentStep < currentStep); });
       narrationEl.innerHTML = narrations[currentStep]; counterEl.textContent = `Step ${currentStep} / ${totalSteps}`;
       prevBtn.disabled = currentStep === 0; nextBtn.disabled = currentStep === totalSteps;
-      nextBtn.textContent = currentStep === totalSteps ? 'Done &#10003;' : 'Next step &#8594;';
+      nextBtn.textContent = currentStep === totalSteps ? 'Done \u2713' : 'Next step \u2192';
     }
     nextBtn.addEventListener('click', () => { if (currentStep < totalSteps) { currentStep++; render(); } });
     prevBtn.addEventListener('click', () => { if (currentStep > 0) { currentStep--; render(); } });
     resetBtn.addEventListener('click', () => { currentStep = 0; render(); });
     render(); return { next: () => nextBtn.click(), prev: () => prevBtn.click() };
   }
-  const ctrl = makeStepController('', 6, {
+  const ctrl = makeStepController('', 5, {
     0: 'Click <strong>"Next step"</strong> to see how a tutor would work this on paper, mark by mark.',
-    1: 'Step 1 — Before: Ali = 3 units, Baba = 1 unit. The difference is 2 units.',
-    2: 'Step 2 — Each spent 1/4, so each keeps 3/4. The gap shrinks proportionally too.',
-    3: 'Step 3 — After: Ali has 9u/4, Baba has 3u/4. Diff after = 6u/4 = 3u/2.',
-    4: 'Step 4 — Given: diff after = $30. So 3u/2 = 30, which means u = $20.',
-    5: 'Step 5 — Baba at first = 1u = $20.',
-    6: 'Step 6 — Check: Ali $60, Baba $20. After spending 1/4: Ali $45, Baba $15. Diff = $30 &#10003;'
+    1: 'Step 1 — 8 boxes. Each has the same number of pencils.',
+    2: 'Step 2 — Total pencils = 72.',
+    3: 'Step 3 — Pencils per box = 72 &divide; 8 = 9.',
+    4: 'Step 4 — Verify: 8 &times; 9 = 72 \u2713',
+    5: 'Step 5 — 9 pencils in each box.'
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); ctrl.next(); } if (e.key === 'ArrowLeft') { e.preventDefault(); ctrl.prev(); } });
 </script>
